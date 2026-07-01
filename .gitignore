@@ -1,0 +1,23 @@
+# Environment variables
+.env
+.env.*
+
+# Python cache / compiled
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+.mypy_cache/
+
+# IDEs
+.vscode/
+.idea/
+
+# Database
+*.db
+*.sqlite
