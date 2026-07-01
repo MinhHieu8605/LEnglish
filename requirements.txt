@@ -1,0 +1,43 @@
+# Web framework
+fastapi
+uvicorn[standard]
+python-multipart
+
+# Validation
+pydantic[email]
+pydantic-settings
+pyhumps
+
+# Database
+sqlmodel
+sqlalchemy
+alembic
+
+# PostgreSQL
+asyncpg
+psycopg2-binary
+
+# MySQL
+PyMySQL       # sync driver (Alembic migrations)
+asyncmy       # async driver (FastAPI requests)
+
+# Auth
+python-jose[cryptography]
+passlib[bcrypt]
+
+# HTTP
+httpx
+
+# Data
+pandas
+openpyxl
+
+# Utilities
+python-dotenv
+loguru
+cachetools
+gunicorn
+
+# Testing
+pytest
+pytest-asyncio

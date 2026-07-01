@@ -1,0 +1,1 @@
+"""Dictionary lookup and word search feature."""

@@ -1,0 +1,553 @@
+// ============================================================
+// Learn English MVP schema
+// Target database: PostgreSQL
+//
+// Design goals:
+// - Keep the model small enough for an MVP.
+// - Keep users and user_roles close to the original design.
+// - Every table has a single `id` primary key for simple ORM/API work.
+// - Use unique indexes for business rules instead of composite primary keys.
+// ============================================================
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+Enum role {
+  admin
+  user
+}
+
+Enum subtitle_display {
+  en
+  vi
+  both
+  hidden
+}
+
+Enum difficulty_level {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
+Enum content_status {
+  draft
+  published
+  archived
+}
+
+Enum tag_type {
+  topic
+  skill
+  accent
+  source
+  grammar
+}
+
+Enum practice_mode {
+  dictation
+  listening
+  shadowing
+  quiz
+}
+
+Enum practice_status {
+  started
+  completed
+  abandoned
+}
+
+Enum word_type {
+  noun
+  verb
+  adjective
+  adverb
+  phrase
+  idiom
+  other
+}
+
+Enum word_status {
+  learning
+  reviewing
+  mastered
+  ignored
+}
+
+Enum review_rating {
+  again
+  hard
+  good
+  easy
+}
+
+Enum conversation_type {
+  free
+  scenario
+  lesson
+}
+
+Enum message_role {
+  user
+  assistant
+  system
+}
+
+Enum activity_type {
+  lesson_viewed
+  lesson_completed
+  practice_completed
+  word_saved
+  word_reviewed
+  ai_chat
+  lookup
+}
+
+Enum notification_type {
+  streak_reminder
+  review_due
+  achievement
+  system
+}
+
+Enum lookup_type {
+  dictionary
+  translate
+}
+
+// ============================================================
+// USERS AND AUTH
+// ============================================================
+
+Table users {
+  id integer [pk, increment]
+  email varchar(255) [not null, unique]
+  password varchar(255) [not null]
+  full_name varchar(100) [not null]
+  avatar_url varchar(500)
+  deleted boolean [not null, default: false]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    email [unique, name: 'uq_users_email']
+  }
+}
+
+Table user_roles {
+  id integer [pk, increment]
+  email varchar(255) [not null, ref: > users.email]
+  role role [not null, default: 'user']
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (email, role) [unique, name: 'uq_user_roles_user_role']
+  }
+}
+
+Table tokens {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  token text [not null]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+}
+
+Table user_preferences {
+  id integer [pk, increment]
+  user_id integer [not null, unique, ref: > users.id]
+  subtitle_display subtitle_display [not null, default: 'both']
+  daily_goal_minutes int [not null, default: 15]
+  daily_new_words int [not null, default: 5]
+  reminder_enabled boolean [not null, default: true]
+  reminder_time time
+  timezone varchar(64) [not null, default: 'Asia/Ho_Chi_Minh']
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+}
+
+Table streaks {
+  id integer [pk, increment]
+  user_id integer [not null, unique, ref: > users.id]
+  current_streak int [not null, default: 0]
+  longest_streak int [not null, default: 0]
+  last_active_date date
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+}
+
+// ============================================================
+// LESSON CONTENT
+// ============================================================
+
+Table categories {
+  id integer [pk, increment]
+  parent_id integer [ref: > categories.id]
+  name varchar(100) [not null]
+  slug varchar(120) [not null, unique]
+  description text
+  display_order int [not null, default: 0]
+  is_active boolean [not null, default: true]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    parent_id [name: 'idx_categories_parent_id']
+  }
+}
+
+Table tags {
+  id integer [pk, increment]
+  name varchar(80) [not null]
+  slug varchar(100) [not null, unique]
+  type tag_type [not null, default: 'topic']
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+}
+
+Table lessons {
+  id integer [pk, increment]
+  category_id integer [ref: > categories.id]
+  title varchar(255) [not null]
+  slug varchar(255) [not null, unique]
+  description text
+  video_provider varchar(50) [not null, default: 'youtube']
+  video_id varchar(120) [not null]
+  video_url varchar(1000)
+  thumbnail_url varchar(1000)
+  duration_seconds int [not null, default: 0]
+  difficulty difficulty_level [not null]
+  status content_status [not null, default: 'draft']
+  views_count bigint [not null, default: 0]
+  published_at timestamptz
+  created_by integer [ref: > users.id]
+  updated_by integer [ref: > users.id]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (video_provider, video_id) [unique, name: 'uq_lessons_video']
+    (status, published_at) [name: 'idx_lessons_status_published_at']
+    (category_id, difficulty) [name: 'idx_lessons_category_difficulty']
+  }
+}
+
+Table lesson_tags {
+  id integer [pk, increment]
+  lesson_id integer [not null, ref: > lessons.id]
+  tag_id integer [not null, ref: > tags.id]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (lesson_id, tag_id) [unique, name: 'uq_lesson_tags_lesson_tag']
+    tag_id [name: 'idx_lesson_tags_tag_id']
+  }
+}
+
+Table subtitles {
+  id integer [pk, increment]
+  lesson_id integer [not null, ref: > lessons.id]
+  sequence int [not null]
+  start_ms int [not null]
+  end_ms int [not null]
+  content_en text [not null]
+  translation_vi text
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (lesson_id, sequence) [unique, name: 'uq_subtitles_lesson_sequence']
+    (lesson_id, start_ms) [name: 'idx_subtitles_lesson_start']
+  }
+}
+
+// ============================================================
+// LEARNING PROGRESS AND PRACTICE
+// ============================================================
+
+Table learning_progress {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  lesson_id integer [not null, ref: > lessons.id]
+  last_position_seconds int [not null, default: 0]
+  completion_percent numeric(5,2) [not null, default: 0]
+  completed_at timestamptz
+  last_watched_at timestamptz
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, lesson_id) [unique, name: 'uq_learning_progress_user_lesson']
+    (user_id, last_watched_at) [name: 'idx_learning_progress_recent']
+  }
+}
+
+Table practice_sessions {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  lesson_id integer [not null, ref: > lessons.id]
+  mode practice_mode [not null, default: 'dictation']
+  status practice_status [not null, default: 'started']
+  score numeric(5,2)
+  correct_count int [not null, default: 0]
+  total_count int [not null, default: 0]
+  duration_seconds int [not null, default: 0]
+  started_at timestamptz [not null, default: `now()`]
+  completed_at timestamptz
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, lesson_id, completed_at) [name: 'idx_practice_sessions_user_lesson']
+  }
+}
+
+Table practice_answers {
+  id integer [pk, increment]
+  session_id integer [not null, ref: > practice_sessions.id]
+  subtitle_id integer [not null, ref: > subtitles.id]
+  user_input text [not null]
+  accuracy_score numeric(5,2)
+  is_correct boolean [not null, default: false]
+  attempt_count int [not null, default: 1]
+  answered_at timestamptz [not null, default: `now()`]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    session_id [name: 'idx_practice_answers_session_id']
+  }
+}
+
+// ============================================================
+// VOCABULARY AND SPACED REPETITION
+// ============================================================
+
+Table vocabularies {
+  id integer [pk, increment]
+  word varchar(120) [not null]
+  normalized_word varchar(120) [not null]
+  word_type word_type [not null, default: 'other']
+  ipa varchar(120)
+  audio_url varchar(1000)
+  image_url varchar(1000)
+  definition_vi text [not null]
+  definition_en text
+  example_sentence text
+  example_translation_vi text
+  source_subtitle_id integer [ref: > subtitles.id]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (normalized_word, word_type) [unique, name: 'uq_vocabularies_word_type']
+    normalized_word [name: 'idx_vocabularies_normalized_word']
+  }
+}
+
+Table notebooks {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  name varchar(100) [not null]
+  description varchar(255)
+  is_default boolean [not null, default: false]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, name) [unique, name: 'uq_notebooks_user_name']
+  }
+}
+
+Table notebook_entries {
+  id integer [pk, increment]
+  notebook_id integer [not null, ref: > notebooks.id]
+  vocabulary_id integer [not null, ref: > vocabularies.id]
+  context_sentence text
+  note text
+  added_at timestamptz [not null, default: `now()`]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (notebook_id, vocabulary_id) [unique, name: 'uq_notebook_entries_notebook_word']
+  }
+}
+
+Table vocabulary_progress {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  vocabulary_id integer [not null, ref: > vocabularies.id]
+  status word_status [not null, default: 'learning']
+  ease_factor numeric(4,2) [not null, default: 2.50]
+  repetition_count int [not null, default: 0]
+  interval_days int [not null, default: 0]
+  next_review_at timestamptz
+  last_reviewed_at timestamptz
+  personal_note text
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, vocabulary_id) [unique, name: 'uq_vocabulary_progress_user_vocabulary']
+    (user_id, status, next_review_at) [name: 'idx_vocabulary_progress_review']
+  }
+}
+
+Table vocabulary_review_logs {
+  id integer [pk, increment]
+  vocabulary_progress_id integer [not null, ref: > vocabulary_progress.id]
+  rating review_rating [not null]
+  response_ms int
+  reviewed_at timestamptz [not null, default: `now()`]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (vocabulary_progress_id, reviewed_at) [name: 'idx_vocabulary_review_logs_progress']
+  }
+}
+
+// ============================================================
+// AI CONVERSATION
+// ============================================================
+
+Table scenarios {
+  id integer [pk, increment]
+  title varchar(255) [not null]
+  slug varchar(180) [not null, unique]
+  description text
+  difficulty difficulty_level [not null]
+  character_name varchar(120)
+  system_prompt text [not null]
+  initial_message text
+  image_url varchar(1000)
+  status content_status [not null, default: 'draft']
+  display_order int [not null, default: 0]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+}
+
+Table conversations {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  type conversation_type [not null, default: 'free']
+  scenario_id integer [ref: > scenarios.id]
+  lesson_id integer [ref: > lessons.id]
+  title varchar(255)
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, type, updated_time) [name: 'idx_conversations_user_type']
+  }
+}
+
+Table messages {
+  id integer [pk, increment]
+  conversation_id integer [not null, ref: > conversations.id]
+  role message_role [not null]
+  content text [not null]
+  translation_vi text
+  suggestions jsonb
+  correction jsonb
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (conversation_id, created_time) [name: 'idx_messages_conversation_created']
+  }
+}
+
+// ============================================================
+// ENGAGEMENT, NOTIFICATIONS, LOOKUP
+// ============================================================
+
+Table activity_events {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  type activity_type [not null]
+  lesson_id integer [ref: > lessons.id]
+  vocabulary_id integer [ref: > vocabularies.id]
+  practice_session_id integer [ref: > practice_sessions.id]
+  conversation_id integer [ref: > conversations.id]
+  duration_seconds int [not null, default: 0]
+  xp_earned int [not null, default: 0]
+  metadata jsonb
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, created_time) [name: 'idx_activity_events_user_date']
+    (user_id, type) [name: 'idx_activity_events_user_type']
+  }
+}
+
+Table achievements {
+  id integer [pk, increment]
+  code varchar(80) [not null, unique]
+  name varchar(120) [not null]
+  description text
+  icon_url varchar(1000)
+  condition_type varchar(80) [not null]
+  condition_value int [not null, default: 1]
+  xp_reward int [not null, default: 0]
+  display_order int [not null, default: 0]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+}
+
+Table achievement_unlocks {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  achievement_id integer [not null, ref: > achievements.id]
+  earned_at timestamptz [not null, default: `now()`]
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, achievement_id) [unique, name: 'uq_achievement_unlocks_user_achievement']
+  }
+}
+
+Table notifications {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  type notification_type [not null]
+  title varchar(255) [not null]
+  body text
+  action_url varchar(1000)
+  metadata jsonb
+  is_read boolean [not null, default: false]
+  read_at timestamptz
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, is_read, created_time) [name: 'idx_notifications_user_unread']
+  }
+}
+
+Table dictionary_lookups {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  word varchar(120) [not null]
+  normalized_word varchar(120) [not null]
+  type lookup_type [not null]
+  source_url varchar(1000)
+  context_sentence text
+  result jsonb
+  created_time timestamptz [not null, default: `now()`]
+  updated_time timestamptz [not null, default: `now()`]
+
+  Indexes {
+    (user_id, created_time) [name: 'idx_dictionary_lookups_user_date']
+    (user_id, normalized_word) [name: 'idx_dictionary_lookups_user_word']
+  }
+}

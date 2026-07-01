@@ -1,0 +1,90 @@
+"""
+Command Line Interface (CLI) for the LearnEnglish Application.
+
+This module provides a CLI for managing the LearnEnglish application,
+including database operations. The CLI is built using Click and supports:
+
+- Database initialization and schema creation
+
+Usage examples:
+    # Initialize the database (create DB + all tables)
+    $ python cli.py database init
+
+For detailed help on each command, use:
+    $ python cli.py [command] --help
+"""
+
+import psycopg2
+import click
+
+from app.config.settings import Database
+from app.database.async_db import get_engine
+from app.database.model import Base
+
+db = Database()
+
+
+@click.group()
+def learn_english_cli():
+    """Command-line interface for LearnEnglish."""
+    pass
+
+
+@learn_english_cli.group("database")
+def learn_english_database():
+    """Commands for managing the LearnEnglish database."""
+    click.secho(
+        f"Connecting to database '{db.db_name}' at {db.db_host}:{db.db_port}...",
+        fg="yellow",
+    )
+
+
+@learn_english_database.command("init")
+def init_database():
+    """Creates the database and initializes all tables."""
+    # Step 1: Create the database if it doesn't exist
+    try:
+        conn = psycopg2.connect(
+            host=db.db_host,
+            user=db.db_user,
+            password=db.db_password,
+            port=int(db.db_port or 5432),
+            database="postgres",
+        )
+        conn.autocommit = True
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s;", (db.db_name,))
+            exists = cursor.fetchone()
+            if not exists:
+                cursor.execute(f'CREATE DATABASE "{db.db_name}";')
+                click.secho(f"Database '{db.db_name}' created.", fg="green")
+            else:
+                click.secho(f"Database '{db.db_name}' already exists.", fg="green")
+        conn.close()
+        click.secho(f"Database '{db.db_name}' is ready.", fg="green")
+    except Exception as e:
+        click.secho(f"ERROR creating database: {e}", fg="red", bold=True)
+        return
+
+    # Step 2: Create all tables from the model metadata
+    try:
+        engine = get_engine()
+        Base.metadata.create_all(bind=engine)
+        click.secho("All tables created successfully.", fg="green")
+    except Exception as e:
+        click.secho(f"ERROR creating tables: {e}", fg="red", bold=True)
+        return
+
+    click.secho("Database initialization completed!", fg="green", bold=True)
+
+
+def entrypoint():
+    """The entry point that the CLI is executed from."""
+    try:
+        learn_english_cli()
+    except Exception as e:
+        click.secho(f"ERROR: {e}", bold=True, fg="red")
+
+
+if __name__ == "__main__":
+    entrypoint()
