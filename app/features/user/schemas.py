@@ -1,3 +1,5 @@
+from typing import Literal
+from typing import Dict
 from datetime import datetime
 from typing import List, Optional
 
@@ -142,3 +144,150 @@ class UserResponse(BaseModel):
     deleted: bool
     created_time: Optional[datetime]
     updated_time: Optional[datetime]
+
+
+class Login(BaseModel):
+    """
+    Schema for user login authentication.
+
+    Attributes:
+        email (Optional[str]): User's email address (for credentials login).
+        password (Optional[str]): User's password (for credentials login).
+        token_google (Optional[str]): Google OAuth 2.0 access token (for Google login).
+    """
+    email: Optional[str] = None
+    password: Optional[str] = None
+    token_google: Optional[str] = None
+
+
+class Register(BaseModel):
+    """
+    Schema for new user registration.
+
+    Attributes:
+        email (str): User's email address.
+        full_name (str): User's full name.
+        password (str): User's password.
+        role (Role): User's role (admin or user).
+    """
+    email: str
+    full_name: str
+    password: str
+    role: Role
+
+    @field_validator("email", mode="before")
+    @classmethod
+    def normalize_email(cls, email):
+        if isinstance(email, list):
+            if len(email) > 0:
+                email = email[0]
+            else:
+                raise ValueError("Email list cannot be empty")
+        if not isinstance(email, str):
+            raise ValueError("Email must be a string or a list containing a string")
+        return email.lower()
+
+    @field_validator("full_name", mode="before")
+    @classmethod
+    def normalize_fullname(cls, full_name):
+        if isinstance(full_name, list):
+            if len(full_name) > 0:
+                full_name = full_name[0]
+            else:
+                raise ValueError("Full name list cannot be empty")
+        if not isinstance(full_name, str):
+            raise ValueError("Full name must be a string or a list containing a string")
+        return full_name
+
+
+class DefaultFilterModel(BaseModel):
+    """
+    Base model for filtering user data in API requests.
+
+    Attributes:
+        page (int): Page number for pagination. Defaults to 1.
+        page_size (int): Number of items per page. Defaults to 10.
+    """
+    page: int = 1
+    page_size: int = 10
+
+
+class UserPaginationFilter(DefaultFilterModel):
+    """
+    Model for filtering and paginating user data.
+
+    Attributes:
+        role (Optional[str]): Filter by user's role.
+        status (Optional[bool]): Filter by user's status.
+        sorted_by (Optional[str]): Field to sort by.
+        keyword (Optional[str]): Search keyword.
+        sorted_order (Optional[str]): Order of sorting.
+    """
+    role: Optional[Role] = None
+    status: Optional[bool] = None
+    sorted_by: Optional[str] = None
+    keyword: Optional[str] = Field(default=None, description="Search keyword", max_length=100)
+    sorted_order: Optional[Literal["ascend", "descend"]] = "ascend"
+
+
+class UserStatisticSummaryResponse(BaseModel):
+    """
+    Represents a paginated response for user data with statistical summary.
+    """
+    total_user: int
+    user_by_role: Dict[str, int]
+    number_active: int
+    number_inactive: int
+
+
+class ManagementResponseMetadata(BaseModel):
+    """
+    Metadata for user management response.
+    
+    Attributes:
+        total (int): Total number of users.
+        page (int): Current page number.
+        page_size (int): Number of items per page.
+        pages (int): Total number of pages.
+    """
+    total: int
+    page: int
+    page_size: int
+    pages: int
+
+
+class UserManagementItemResponse(BaseModel):
+    """
+    Represents a user in the user management response.
+    
+    Attributes:
+        id (int): Unique identifier of the user.
+        email (str): Email address of the user.
+        full_name (str): Full name of the user.
+        role: Role of the user.
+        active (bool): Whether the user is active.
+        created_time (Optional[datetime]): Timestamp when the user was created.
+        lastest_login (Optional[datetime]): Timestamp of the user's last login.
+        lastest_request (Optional[datetime]): Timestamp of the user's last request.
+    """
+    id: int
+    email: str
+    full_name: str
+    role: str
+    active: bool
+    created_time: Optional[datetime] = None
+    lastest_login: Optional[datetime] = None
+    lastest_request: Optional[datetime] = None
+
+
+class PaginatedUserListResponse(BaseModel):
+    """
+    Response model for paginated user list.
+    
+    Attributes:
+        meta (ManagementResponseMetadata): Metadata for user management.
+        data (List[UserManagementItemResponse]): List of user data.
+    """
+    data: List[UserManagementItemResponse]
+    statistic_summary: UserStatisticSummaryResponse
+    metadata: ManagementResponseMetadata

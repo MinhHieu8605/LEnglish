@@ -16,6 +16,8 @@ class User(Base, TimeStampMixin):
         password (str): The hashed password of the user.
         full_name (str): The full name of the user.
         avatar_url (str): The avatar URL of the user.
+        lastest_login (datetime): The timestamp of the user's last login.
+        lastest_request (datetime): The timestamp of the user's last request.
         deleted (bool): Indicates whether the user has been deleted.
     """
     __tablename__ = "users"
@@ -25,6 +27,7 @@ class User(Base, TimeStampMixin):
     full_name = Column(String)
     avatar_url = Column(String)
     lastest_login = Column(DateTime(timezone=True), nullable=True, default=None)
+    lastest_request = Column(DateTime(timezone=True), nullable=True, default=None)
     deleted = Column(Boolean, nullable=False, default=False)
 
     def check_password(self, password: str):

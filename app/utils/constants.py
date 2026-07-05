@@ -1,3 +1,4 @@
+from email.policy import default
 from enum import Enum, unique
 
 
@@ -12,6 +13,19 @@ class Role(Enum):
     """
     ADMIN = "admin"
     USER = "user"
+
+
+@unique
+class UserStatus(str, Enum):
+    """
+    Defines the available user statuses.
+
+    Attributes:
+        ACTIVE (str): The user is active.
+        INACTIVE (str): The user is inactive.
+    """
+    ACTIVE = "active"
+    INACTIVE = "inactive"
 
 
 @unique
@@ -156,6 +170,10 @@ class Message(object):
 
     # Logout
     MSG_LOGOUT_SUCCESS = "You have been successfully logged out."
+
+    # Register
+    MSG_REGISTER_EMAIL_EXIST = "This email is already registered. Please use a different email."
+    MSG_REGISTER_SUCCESS = "You have been successfully registered."
 
     # NOT FOUND
     MSG_NOT_FOUND = "Not found."

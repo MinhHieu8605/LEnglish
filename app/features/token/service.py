@@ -1,4 +1,4 @@
-from app.database.async_db import async_create_record, async_get_one_record_by
+from app.database.async_db import async_create_record, async_get_one_record_by, async_update_one_record
 from app.features.token.model import Token
 from app.features.token.schemas import AccessTokenPayload
 from app.features.user.model import UserRole
@@ -72,7 +72,7 @@ async def generate_tokens(
         if not valid_token:
             # refresh token is expired or invalid, generate a new one
             refresh_token = create_refresh_token(uid, email)
-            await async_create_record(
+            await async_update_one_record(
                 Token, token.id, {"token": refresh_token}, session
             )
     
