@@ -91,14 +91,34 @@ class PracticeStatus(Enum):
 
 
 @unique
+class VocabularyBookCategory(str, Enum):
+    """
+    Category tags for vocabulary books.
+
+    Attributes:
+        TOEIC (str): TOEIC test preparation vocabulary.
+        IELTS (str): IELTS test preparation vocabulary.
+        OXFORD (str): Oxford word lists (e.g. Oxford 5000).
+        ACADEMIC (str): Academic / university-level vocabulary.
+    """
+    TOEIC = "toeic"
+    IELTS = "ielts"
+    OXFORD = "oxford"
+    ACADEMIC = "academic"
+
+
+@unique
 class WordType(Enum):
     NOUN = "noun"
     VERB = "verb"
     ADJECTIVE = "adjective"
     ADVERB = "adverb"
-    PHRASE = "phrase"
-    IDIOM = "idiom"
-    OTHER = "other"
+    PREPOSITION = "preposition"
+    CONJUNCTION = "conjunction"
+    PRONOUN = "pronoun"
+    INTERJECTION = "interjection"
+    DETERMINER = "determiner"
+    EXCLAMATION = "exclamation"
 
 
 @unique
@@ -111,10 +131,8 @@ class WordStatus(Enum):
 
 @unique
 class ReviewRating(Enum):
-    AGAIN = "again"
-    HARD = "hard"
-    GOOD = "good"
-    EASY = "easy"
+    CORRECT = "correct"
+    WRONG = "wrong"
 
 
 @unique

@@ -21,3 +21,7 @@ venv/
 # Database
 *.db
 *.sqlite
+
+CLAUDE.md
+
+scripts/

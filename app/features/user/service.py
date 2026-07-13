@@ -1,3 +1,4 @@
+from app.database.async_db import transactional
 from app.utils.common import page_size_to_offset_limit
 from sqlmodel import asc
 from sqlmodel import desc
@@ -105,6 +106,7 @@ def _active_user_threshold() -> datetime:
 
 class UserService(object):
     @classmethod
+    @transactional()
     async def create_new_user_info(
         cls,
         user_in: Register,
@@ -142,8 +144,8 @@ class UserService(object):
                 session
             )
 
-            # Assign role to the new user
-            role_value = user_in.role.value if user_in.role else Role.USER.value
+            # Assign default role to the new user
+            role_value = Role.USER.value
             await _sync_user_role(user, role_value, session)
 
             await session.refresh(user_create)
@@ -170,6 +172,7 @@ class UserService(object):
             )
 
     @staticmethod
+    @transactional()
     async def create_user(
         data: UserCreate,
         session: AsyncSession,
@@ -386,7 +389,6 @@ class UserService(object):
                     email=email,
                     full_name=email.split("@")[0],
                     password=secrets.token_hex(16),
-                    role=Role.USER,
                 ),
                 session,
             )
@@ -471,8 +473,8 @@ class UserService(object):
             
             # create user
             dbuser = await cls.create_new_user_info(user_in, session)
-            
-            return dbuser
+
+            return await _build_user_response(dbuser, session)
         
         except SQLAlchemyError as db_error:
             raise HTTPException(
@@ -816,6 +818,7 @@ class UserService(object):
         return await _build_user_response(user, session)
 
     @staticmethod
+    @transactional()
     async def update_user(user_id: int, data: UserUpdate, session: AsyncSession) -> UserResponse:
         """
         Update a user's information.
@@ -865,6 +868,7 @@ class UserService(object):
         return await _build_user_response(user, session)
 
     @staticmethod
+    @transactional()
     async def delete_user(
         user_id: int, 
         session: AsyncSession, 

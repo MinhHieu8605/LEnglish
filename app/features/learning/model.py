@@ -25,7 +25,7 @@ class LearningProgress(Base, TimeStampMixin):
         Index("ix_learning_progress_user_id_last_watched_at", "user_id", "last_watched_at"),
     )
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
     last_position_seconds = Column(Integer, nullable=False, default=0)
@@ -55,7 +55,7 @@ class PracticeSession(Base, TimeStampMixin):
         completed_at (datetime): When the session completed.
     """
     __tablename__ = "practice_sessions"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
     mode = Column(String, nullable=False, default=PracticeMode.DICTATION.value)
@@ -89,7 +89,7 @@ class PracticeAnswer(Base, TimeStampMixin):
     __tablename__ = "practice_answers"
     __table_args__ = (UniqueConstraint("session_id", "subtitle_id", name="uq_practice_answers_session_id_subtitle_id"),)
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     session_id = Column(Integer, ForeignKey("practice_sessions.id", ondelete="CASCADE"), nullable=False)
     subtitle_id = Column(Integer, ForeignKey("subtitles.id", ondelete="CASCADE"), nullable=False)
     user_input = Column(Text, nullable=False)

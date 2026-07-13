@@ -20,7 +20,7 @@ class UserPreferences(Base, TimeStampMixin):
         timezone (str): User's timezone.
     """
     __tablename__ = "user_preferences"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
     subtitle_display = Column(String, nullable=False, default=SubtitleDisplay.BOTH.value)
     daily_goal_minutes = Column(Integer, nullable=False, default=15)

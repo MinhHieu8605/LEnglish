@@ -97,3 +97,23 @@ class JWT(BaseSingleton):
         self.jwt_alg = config.get("JWT-ALG", "HS256")
         self.jwt_secret_key = config.get("JWT-SECRET-KEY", "secret key for project")
         self.refresh_token_expire_minutes = config.get("REFRESH-TOKEN-EXPIRE", 1440)
+
+
+class AI(BaseSingleton):
+    """
+    AI API Configuration Class.
+
+    Attributes:
+        api_key: The AI API key.
+        model: The model name to use for completions.
+        api_url: The AI API endpoint URL.
+    """
+
+    api_key: Union[str, None]
+    model: Union[str, None]
+    api_url: Union[str, None]
+
+    def __init__(self) -> None:
+        self.api_key = config.get("AI_API_KEY") or config.get("NVIDIA_API_KEY", "")
+        self.model = config.get("AI_MODEL", "stepfun/step-3.7-flash-free")
+        self.api_url = config.get("AI_API_URL", "https://zenmux.ai/api/v1/chat/completions")

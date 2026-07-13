@@ -14,7 +14,6 @@ class DictionaryLookup(Base, TimeStampMixin):
         id (int): The unique identifier of the lookup event.
         user_id (int): The user identifier.
         word (str): The word that was looked up.
-        normalized_word (str): Normalized form for searching.
         type (str): Lookup type (dictionary, translate).
         source_url (str): URL where the lookup occurred.
         context_sentence (str): Context sentence for the lookup.
@@ -23,10 +22,9 @@ class DictionaryLookup(Base, TimeStampMixin):
     __tablename__ = "dictionary_lookups"
     __table_args__ = (Index("ix_dictionary_lookups_user_id_created_time", "user_id", "created_time"),)
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     word = Column(String, nullable=False)
-    normalized_word = Column(String, nullable=False, index=True)
     type = Column(String, nullable=False, default=LookupType.DICTIONARY.value)
     source_url = Column(String)
     context_sentence = Column(Text)

@@ -16,9 +16,9 @@ class Token(Base, TimeStampMixin):
     """
     __tablename__ = "tokens"
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    token = Column(UnicodeText, nullable=False, unique=True, index=True)
+    token = Column(UnicodeText, nullable=False, unique=True)
     token_type = Column(Integer, nullable=False, default=TokenType.REFRESH.value)
 
     user = relationship("User", back_populates="tokens")

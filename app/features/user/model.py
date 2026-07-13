@@ -21,8 +21,8 @@ class User(Base, TimeStampMixin):
         deleted (bool): Indicates whether the user has been deleted.
     """
     __tablename__ = "users"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
-    email = Column(UnicodeText, nullable=False, unique=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    email = Column(UnicodeText, nullable=False, unique=True)
     password = Column(String, default="")
     full_name = Column(String)
     avatar_url = Column(String)
@@ -73,7 +73,7 @@ class UserRole(Base, TimeStampMixin):
     """
     __tablename__ = "user_roles"
     __table_args__ = (UniqueConstraint("email", "role", name="uq_user_roles_email_role"),)
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     email = Column(UnicodeText, ForeignKey("users.email", ondelete="CASCADE"), nullable=False, index=True)
     role = Column(String, nullable=False, default=Role.USER.value)
 

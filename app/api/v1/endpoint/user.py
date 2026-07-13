@@ -21,8 +21,8 @@ user_router = APIRouter()
 
 @public_router.post("/login")
 async def login(
-    request: Request,
     user_in: Login = None,
+    token_google: Optional[str] = Header(None),
     session: AsyncSession = Depends(get_session),
 ):
     """
@@ -55,8 +55,7 @@ async def login(
 
         user = await UserService.handle_login_process(
             user_in,
-            user_in.token_google,
-            request,
+            token_google,
             session,
             email=email
         )
@@ -80,7 +79,7 @@ async def logout():
     return {"message": Message.MSG_LOGOUT_SUCCESS}
 
 
-@public_router.post("/register")
+@public_router.post("/register", response_model=UserResponse)
 async def register(
     user_in: Register,
     session: AsyncSession = Depends(get_session)

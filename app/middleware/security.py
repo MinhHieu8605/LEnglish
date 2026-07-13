@@ -139,14 +139,20 @@ def validate_token(token: str) -> tuple[bool, dict]:
     Raises:
         HTTPException: If the token is invalid or cannot be decoded.
     """
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authorization token",
+        )
+
     rt = int(time.time())
     token_raw = None
     try:
         token_raw = verify_token(token)
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
         )
     tk_rt = token_raw["rt"]
     tk_ex = token_raw["expire_after"]

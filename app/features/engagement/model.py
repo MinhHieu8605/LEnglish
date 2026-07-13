@@ -27,7 +27,7 @@ class ActivityEvent(Base, TimeStampMixin):
         Index("ix_activity_events_user_id_type_created_time", "user_id", "type", "created_time"),
     )
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False)
     lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="SET NULL"), nullable=True)
@@ -61,7 +61,7 @@ class Achievement(Base, TimeStampMixin):
         display_order (int): Display order for sorting.
     """
     __tablename__ = "achievements"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     code = Column(String, nullable=False, unique=True)
     name = Column(String, nullable=False)
     description = Column(Text)
@@ -85,7 +85,7 @@ class AchievementUnlock(Base, TimeStampMixin):
     __tablename__ = "achievement_unlocks"
     __table_args__ = (UniqueConstraint("user_id", "achievement_id", name="uq_achievement_unlocks_user_id_achievement_id"),)
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     achievement_id = Column(Integer, ForeignKey("achievements.id", ondelete="CASCADE"), nullable=False)
     earned_at = Column(DateTime(timezone=True), nullable=False)
@@ -106,7 +106,7 @@ class Streak(Base, TimeStampMixin):
         last_active_date (date): Last date user was active.
     """
     __tablename__ = "streaks"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
     current_streak = Column(Integer, nullable=False, default=0)
     longest_streak = Column(Integer, nullable=False, default=0)

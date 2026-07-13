@@ -19,7 +19,7 @@ class Category(Base, TimeStampMixin):
         is_active (bool): Whether the category is active.
     """
     __tablename__ = "categories"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     parent_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
     name = Column(String, nullable=False)
     slug = Column(String, nullable=False, unique=True)
@@ -43,7 +43,7 @@ class Tag(Base, TimeStampMixin):
         type (str): The tag type (topic, skill, accent, source, grammar).
     """
     __tablename__ = "tags"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String, nullable=False)
     slug = Column(String, nullable=False, unique=True)
     type = Column(String, nullable=False, default=TagType.TOPIC.value)
@@ -82,7 +82,7 @@ class Lesson(Base, TimeStampMixin):
         Index("ix_lessons_difficulty_status", "difficulty", "status"),
     )
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     category_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
     title = Column(String, nullable=False)
     slug = Column(String, nullable=False, unique=True)
@@ -120,7 +120,7 @@ class LessonTag(Base, TimeStampMixin):
     __tablename__ = "lesson_tags"
     __table_args__ = (UniqueConstraint("lesson_id", "tag_id", name="uq_lesson_tags_lesson_id_tag_id"),)
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
     tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), nullable=False)
 
@@ -149,7 +149,7 @@ class Subtitle(Base, TimeStampMixin):
         Index("ix_subtitles_lesson_id_start_ms", "lesson_id", "start_ms"),
     )
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
     sequence = Column(Integer, nullable=False)
     start_ms = Column(Integer, nullable=False)

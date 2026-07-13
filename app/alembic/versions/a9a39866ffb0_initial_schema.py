@@ -1,8 +1,8 @@
-"""init database
+"""initial_schema
 
-Revision ID: 294e8f216608
+Revision ID: a9a39866ffb0
 Revises: 
-Create Date: 2026-06-26 22:50:08.522171
+Create Date: 2026-07-12 00:10:01.776598
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '294e8f216608'
+revision: str = 'a9a39866ffb0'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -36,7 +36,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_achievements')),
     sa.UniqueConstraint('code', name=op.f('uq_achievements_code'))
     )
-    op.create_index(op.f('ix_achievements_id'), 'achievements', ['id'], unique=False)
     op.create_table('categories',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('parent_id', sa.Integer(), nullable=True),
@@ -51,7 +50,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_categories')),
     sa.UniqueConstraint('slug', name=op.f('uq_categories_slug'))
     )
-    op.create_index(op.f('ix_categories_id'), 'categories', ['id'], unique=False)
     op.create_table('scenarios',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('title', sa.String(), nullable=False),
@@ -69,7 +67,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_scenarios')),
     sa.UniqueConstraint('slug', name=op.f('uq_scenarios_slug'))
     )
-    op.create_index(op.f('ix_scenarios_id'), 'scenarios', ['id'], unique=False)
     op.create_table('tags',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(), nullable=False),
@@ -80,7 +77,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_tags')),
     sa.UniqueConstraint('slug', name=op.f('uq_tags_slug'))
     )
-    op.create_index(op.f('ix_tags_id'), 'tags', ['id'], unique=False)
     op.create_table('users',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('email', sa.UnicodeText(), nullable=False),
@@ -88,13 +84,26 @@ def upgrade() -> None:
     sa.Column('full_name', sa.String(), nullable=True),
     sa.Column('avatar_url', sa.String(), nullable=True),
     sa.Column('lastest_login', sa.DateTime(timezone=True), nullable=True),
+    sa.Column('lastest_request', sa.DateTime(timezone=True), nullable=True),
     sa.Column('deleted', sa.Boolean(), nullable=False),
     sa.Column('created_time', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_time', sa.DateTime(timezone=True), nullable=False),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_users'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_users')),
+    sa.UniqueConstraint('email', name=op.f('uq_users_email'))
     )
-    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
-    op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_table('vocabulary_books',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('slug', sa.String(), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('category', sa.String(), nullable=False),
+    sa.Column('image_url', sa.String(), nullable=True),
+    sa.Column('deleted', sa.Boolean(), nullable=False),
+    sa.Column('created_time', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_time', sa.DateTime(timezone=True), nullable=False),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_vocabulary_books')),
+    sa.UniqueConstraint('slug', name='uq_vocabulary_books_slug')
+    )
     op.create_table('achievement_unlocks',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -107,12 +116,10 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_achievement_unlocks')),
     sa.UniqueConstraint('user_id', 'achievement_id', name='uq_achievement_unlocks_user_id_achievement_id')
     )
-    op.create_index(op.f('ix_achievement_unlocks_id'), 'achievement_unlocks', ['id'], unique=False)
     op.create_table('dictionary_lookups',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('word', sa.String(), nullable=False),
-    sa.Column('normalized_word', sa.String(), nullable=False),
     sa.Column('type', sa.String(), nullable=False),
     sa.Column('source_url', sa.String(), nullable=True),
     sa.Column('context_sentence', sa.Text(), nullable=True),
@@ -122,8 +129,6 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_dictionary_lookups_user_id_users'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_dictionary_lookups'))
     )
-    op.create_index(op.f('ix_dictionary_lookups_id'), 'dictionary_lookups', ['id'], unique=False)
-    op.create_index(op.f('ix_dictionary_lookups_normalized_word'), 'dictionary_lookups', ['normalized_word'], unique=False)
     op.create_index('ix_dictionary_lookups_user_id_created_time', 'dictionary_lookups', ['user_id', 'created_time'], unique=False)
     op.create_table('lessons',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -153,22 +158,18 @@ def upgrade() -> None:
     )
     op.create_index('ix_lessons_category_id_status', 'lessons', ['category_id', 'status'], unique=False)
     op.create_index('ix_lessons_difficulty_status', 'lessons', ['difficulty', 'status'], unique=False)
-    op.create_index(op.f('ix_lessons_id'), 'lessons', ['id'], unique=False)
     op.create_index('ix_lessons_status_published_at', 'lessons', ['status', 'published_at'], unique=False)
     op.create_table('notebooks',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
-    sa.Column('is_default', sa.Boolean(), nullable=False),
     sa.Column('created_time', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_time', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_notebooks_user_id_users'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_notebooks')),
     sa.UniqueConstraint('user_id', 'name', name='uq_notebooks_user_id_name')
     )
-    op.create_index(op.f('ix_notebooks_id'), 'notebooks', ['id'], unique=False)
-    op.create_index('ix_notebooks_one_default_per_user', 'notebooks', ['user_id'], unique=True, postgresql_where=sa.text('is_default = true'))
     op.create_table('notifications',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -184,7 +185,6 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_notifications_user_id_users'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_notifications'))
     )
-    op.create_index(op.f('ix_notifications_id'), 'notifications', ['id'], unique=False)
     op.create_index('ix_notifications_user_id_is_read_created_time', 'notifications', ['user_id', 'is_read', 'created_time'], unique=False)
     op.create_table('streaks',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -198,7 +198,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_streaks')),
     sa.UniqueConstraint('user_id', name=op.f('uq_streaks_user_id'))
     )
-    op.create_index(op.f('ix_streaks_id'), 'streaks', ['id'], unique=False)
     op.create_table('tokens',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -207,10 +206,9 @@ def upgrade() -> None:
     sa.Column('created_time', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_time', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_tokens_user_id_users'), ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_tokens'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_tokens')),
+    sa.UniqueConstraint('token', name=op.f('uq_tokens_token'))
     )
-    op.create_index(op.f('ix_tokens_id'), 'tokens', ['id'], unique=False)
-    op.create_index(op.f('ix_tokens_token'), 'tokens', ['token'], unique=True)
     op.create_table('user_preferences',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -226,7 +224,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_user_preferences')),
     sa.UniqueConstraint('user_id', name=op.f('uq_user_preferences_user_id'))
     )
-    op.create_index(op.f('ix_user_preferences_id'), 'user_preferences', ['id'], unique=False)
     op.create_table('user_roles',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('email', sa.UnicodeText(), nullable=False),
@@ -238,7 +235,19 @@ def upgrade() -> None:
     sa.UniqueConstraint('email', 'role', name='uq_user_roles_email_role')
     )
     op.create_index(op.f('ix_user_roles_email'), 'user_roles', ['email'], unique=False)
-    op.create_index(op.f('ix_user_roles_id'), 'user_roles', ['id'], unique=False)
+    op.create_table('vocabulary_topics',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('book_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('slug', sa.String(), nullable=False),
+    sa.Column('order_num', sa.Integer(), nullable=False),
+    sa.Column('word_count', sa.Integer(), nullable=False),
+    sa.Column('created_time', sa.DateTime(timezone=True), nullable=False),
+    sa.Column('updated_time', sa.DateTime(timezone=True), nullable=False),
+    sa.ForeignKeyConstraint(['book_id'], ['vocabulary_books.id'], name=op.f('fk_vocabulary_topics_book_id_vocabulary_books'), ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_vocabulary_topics')),
+    sa.UniqueConstraint('book_id', 'slug', name='uq_vocabulary_topics_book_id_slug')
+    )
     op.create_table('conversations',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -253,7 +262,6 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_conversations_user_id_users'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_conversations'))
     )
-    op.create_index(op.f('ix_conversations_id'), 'conversations', ['id'], unique=False)
     op.create_table('learning_progress',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -270,7 +278,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_learning_progress')),
     sa.UniqueConstraint('user_id', 'lesson_id', name='uq_learning_progress_user_id_lesson_id')
     )
-    op.create_index(op.f('ix_learning_progress_id'), 'learning_progress', ['id'], unique=False)
     op.create_index('ix_learning_progress_user_id_last_watched_at', 'learning_progress', ['user_id', 'last_watched_at'], unique=False)
     op.create_table('lesson_tags',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -283,7 +290,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_lesson_tags')),
     sa.UniqueConstraint('lesson_id', 'tag_id', name='uq_lesson_tags_lesson_id_tag_id')
     )
-    op.create_index(op.f('ix_lesson_tags_id'), 'lesson_tags', ['id'], unique=False)
     op.create_table('practice_sessions',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -302,7 +308,6 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_practice_sessions_user_id_users'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_practice_sessions'))
     )
-    op.create_index(op.f('ix_practice_sessions_id'), 'practice_sessions', ['id'], unique=False)
     op.create_table('subtitles',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('lesson_id', sa.Integer(), nullable=False),
@@ -319,7 +324,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_subtitles')),
     sa.UniqueConstraint('lesson_id', 'sequence', name='uq_subtitles_lesson_id_sequence')
     )
-    op.create_index(op.f('ix_subtitles_id'), 'subtitles', ['id'], unique=False)
     op.create_index('ix_subtitles_lesson_id_start_ms', 'subtitles', ['lesson_id', 'start_ms'], unique=False)
     op.create_table('messages',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -335,7 +339,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_messages'))
     )
     op.create_index('ix_messages_conversation_id_created_time', 'messages', ['conversation_id', 'created_time'], unique=False)
-    op.create_index(op.f('ix_messages_id'), 'messages', ['id'], unique=False)
     op.create_table('practice_answers',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('session_id', sa.Integer(), nullable=False),
@@ -352,16 +355,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_practice_answers')),
     sa.UniqueConstraint('session_id', 'subtitle_id', name='uq_practice_answers_session_id_subtitle_id')
     )
-    op.create_index(op.f('ix_practice_answers_id'), 'practice_answers', ['id'], unique=False)
     op.create_table('vocabularies',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('word', sa.String(), nullable=False),
-    sa.Column('normalized_word', sa.String(), nullable=False),
-    sa.Column('word_type', sa.String(), nullable=False),
+    sa.Column('word_type', sa.String(), nullable=True),
     sa.Column('ipa', sa.String(), nullable=True),
     sa.Column('audio_url', sa.String(), nullable=True),
     sa.Column('image_url', sa.String(), nullable=True),
-    sa.Column('definition_vi', sa.Text(), nullable=False),
+    sa.Column('definition_vi', sa.Text(), nullable=True),
     sa.Column('definition_en', sa.Text(), nullable=True),
     sa.Column('example_sentence', sa.Text(), nullable=True),
     sa.Column('example_translation_vi', sa.Text(), nullable=True),
@@ -369,11 +370,10 @@ def upgrade() -> None:
     sa.Column('created_time', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_time', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['source_subtitle_id'], ['subtitles.id'], name=op.f('fk_vocabularies_source_subtitle_id_subtitles'), ondelete='SET NULL'),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_vocabularies')),
-    sa.UniqueConstraint('normalized_word', 'word_type', name='uq_vocabularies_normalized_word_word_type')
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_vocabularies'))
     )
-    op.create_index(op.f('ix_vocabularies_id'), 'vocabularies', ['id'], unique=False)
-    op.create_index(op.f('ix_vocabularies_normalized_word'), 'vocabularies', ['normalized_word'], unique=False)
+    op.create_index('ix_vocabularies_word', 'vocabularies', ['word'], unique=False)
+    op.create_index('uq_vocabularies_word_word_type', 'vocabularies', [sa.literal_column('lower(word)'), 'word_type'], unique=True)
     op.create_table('activity_events',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -394,24 +394,21 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['vocabulary_id'], ['vocabularies.id'], name=op.f('fk_activity_events_vocabulary_id_vocabularies'), ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_activity_events'))
     )
-    op.create_index(op.f('ix_activity_events_id'), 'activity_events', ['id'], unique=False)
     op.create_index('ix_activity_events_user_id_created_time', 'activity_events', ['user_id', 'created_time'], unique=False)
     op.create_index('ix_activity_events_user_id_type_created_time', 'activity_events', ['user_id', 'type', 'created_time'], unique=False)
-    op.create_table('notebook_entries',
+    op.create_table('notebook_items',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('notebook_id', sa.Integer(), nullable=False),
     sa.Column('vocabulary_id', sa.Integer(), nullable=False),
     sa.Column('context_sentence', sa.Text(), nullable=True),
     sa.Column('note', sa.Text(), nullable=True),
-    sa.Column('added_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('created_time', sa.DateTime(timezone=True), nullable=False),
     sa.Column('updated_time', sa.DateTime(timezone=True), nullable=False),
-    sa.ForeignKeyConstraint(['notebook_id'], ['notebooks.id'], name=op.f('fk_notebook_entries_notebook_id_notebooks'), ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['vocabulary_id'], ['vocabularies.id'], name=op.f('fk_notebook_entries_vocabulary_id_vocabularies'), ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_notebook_entries')),
-    sa.UniqueConstraint('notebook_id', 'vocabulary_id', name='uq_notebook_entries_notebook_id_vocabulary_id')
+    sa.ForeignKeyConstraint(['notebook_id'], ['notebooks.id'], name=op.f('fk_notebook_items_notebook_id_notebooks'), ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['vocabulary_id'], ['vocabularies.id'], name=op.f('fk_notebook_items_vocabulary_id_vocabularies'), ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_notebook_items')),
+    sa.UniqueConstraint('notebook_id', 'vocabulary_id', name='uq_notebook_items_notebook_id_vocabulary_id')
     )
-    op.create_index(op.f('ix_notebook_entries_id'), 'notebook_entries', ['id'], unique=False)
     op.create_table('vocabulary_progress',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -430,8 +427,17 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_vocabulary_progress')),
     sa.UniqueConstraint('user_id', 'vocabulary_id', name='uq_vocabulary_progress_user_id_vocabulary_id')
     )
-    op.create_index(op.f('ix_vocabulary_progress_id'), 'vocabulary_progress', ['id'], unique=False)
     op.create_index('ix_vocabulary_progress_user_id_status_next_review_at', 'vocabulary_progress', ['user_id', 'status', 'next_review_at'], unique=False)
+    op.create_table('vocabulary_topic_words',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('topic_id', sa.Integer(), nullable=False),
+    sa.Column('vocabulary_id', sa.Integer(), nullable=False),
+    sa.Column('order_num', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['topic_id'], ['vocabulary_topics.id'], name=op.f('fk_vocabulary_topic_words_topic_id_vocabulary_topics'), ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['vocabulary_id'], ['vocabularies.id'], name=op.f('fk_vocabulary_topic_words_vocabulary_id_vocabularies'), ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_vocabulary_topic_words')),
+    sa.UniqueConstraint('topic_id', 'vocabulary_id', name='uq_vocabulary_topic_words_topic_id_vocabulary_id')
+    )
     op.create_table('vocabulary_review_logs',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('vocabulary_progress_id', sa.Integer(), nullable=False),
@@ -443,80 +449,53 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['vocabulary_progress_id'], ['vocabulary_progress.id'], name=op.f('fk_vocabulary_review_logs_vocabulary_progress_id_vocabulary_progress'), ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_vocabulary_review_logs'))
     )
-    op.create_index(op.f('ix_vocabulary_review_logs_id'), 'vocabulary_review_logs', ['id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_index(op.f('ix_vocabulary_review_logs_id'), table_name='vocabulary_review_logs')
     op.drop_table('vocabulary_review_logs')
+    op.drop_table('vocabulary_topic_words')
     op.drop_index('ix_vocabulary_progress_user_id_status_next_review_at', table_name='vocabulary_progress')
-    op.drop_index(op.f('ix_vocabulary_progress_id'), table_name='vocabulary_progress')
     op.drop_table('vocabulary_progress')
-    op.drop_index(op.f('ix_notebook_entries_id'), table_name='notebook_entries')
-    op.drop_table('notebook_entries')
+    op.drop_table('notebook_items')
     op.drop_index('ix_activity_events_user_id_type_created_time', table_name='activity_events')
     op.drop_index('ix_activity_events_user_id_created_time', table_name='activity_events')
-    op.drop_index(op.f('ix_activity_events_id'), table_name='activity_events')
     op.drop_table('activity_events')
-    op.drop_index(op.f('ix_vocabularies_normalized_word'), table_name='vocabularies')
-    op.drop_index(op.f('ix_vocabularies_id'), table_name='vocabularies')
+    op.drop_index('uq_vocabularies_word_word_type', table_name='vocabularies')
+    op.drop_index('ix_vocabularies_word', table_name='vocabularies')
     op.drop_table('vocabularies')
-    op.drop_index(op.f('ix_practice_answers_id'), table_name='practice_answers')
     op.drop_table('practice_answers')
-    op.drop_index(op.f('ix_messages_id'), table_name='messages')
     op.drop_index('ix_messages_conversation_id_created_time', table_name='messages')
     op.drop_table('messages')
     op.drop_index('ix_subtitles_lesson_id_start_ms', table_name='subtitles')
-    op.drop_index(op.f('ix_subtitles_id'), table_name='subtitles')
     op.drop_table('subtitles')
-    op.drop_index(op.f('ix_practice_sessions_id'), table_name='practice_sessions')
     op.drop_table('practice_sessions')
-    op.drop_index(op.f('ix_lesson_tags_id'), table_name='lesson_tags')
     op.drop_table('lesson_tags')
     op.drop_index('ix_learning_progress_user_id_last_watched_at', table_name='learning_progress')
-    op.drop_index(op.f('ix_learning_progress_id'), table_name='learning_progress')
     op.drop_table('learning_progress')
-    op.drop_index(op.f('ix_conversations_id'), table_name='conversations')
     op.drop_table('conversations')
-    op.drop_index(op.f('ix_user_roles_id'), table_name='user_roles')
+    op.drop_table('vocabulary_topics')
     op.drop_index(op.f('ix_user_roles_email'), table_name='user_roles')
     op.drop_table('user_roles')
-    op.drop_index(op.f('ix_user_preferences_id'), table_name='user_preferences')
     op.drop_table('user_preferences')
-    op.drop_index(op.f('ix_tokens_token'), table_name='tokens')
-    op.drop_index(op.f('ix_tokens_id'), table_name='tokens')
     op.drop_table('tokens')
-    op.drop_index(op.f('ix_streaks_id'), table_name='streaks')
     op.drop_table('streaks')
     op.drop_index('ix_notifications_user_id_is_read_created_time', table_name='notifications')
-    op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
-    op.drop_index('ix_notebooks_one_default_per_user', table_name='notebooks', postgresql_where=sa.text('is_default = true'))
-    op.drop_index(op.f('ix_notebooks_id'), table_name='notebooks')
     op.drop_table('notebooks')
     op.drop_index('ix_lessons_status_published_at', table_name='lessons')
-    op.drop_index(op.f('ix_lessons_id'), table_name='lessons')
     op.drop_index('ix_lessons_difficulty_status', table_name='lessons')
     op.drop_index('ix_lessons_category_id_status', table_name='lessons')
     op.drop_table('lessons')
     op.drop_index('ix_dictionary_lookups_user_id_created_time', table_name='dictionary_lookups')
-    op.drop_index(op.f('ix_dictionary_lookups_normalized_word'), table_name='dictionary_lookups')
-    op.drop_index(op.f('ix_dictionary_lookups_id'), table_name='dictionary_lookups')
     op.drop_table('dictionary_lookups')
-    op.drop_index(op.f('ix_achievement_unlocks_id'), table_name='achievement_unlocks')
     op.drop_table('achievement_unlocks')
-    op.drop_index(op.f('ix_users_id'), table_name='users')
-    op.drop_index(op.f('ix_users_email'), table_name='users')
+    op.drop_table('vocabulary_books')
     op.drop_table('users')
-    op.drop_index(op.f('ix_tags_id'), table_name='tags')
     op.drop_table('tags')
-    op.drop_index(op.f('ix_scenarios_id'), table_name='scenarios')
     op.drop_table('scenarios')
-    op.drop_index(op.f('ix_categories_id'), table_name='categories')
     op.drop_table('categories')
-    op.drop_index(op.f('ix_achievements_id'), table_name='achievements')
     op.drop_table('achievements')
     # ### end Alembic commands ###

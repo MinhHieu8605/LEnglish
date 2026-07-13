@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.database.model import Base, TimeStampMixin
-from app.utils.constants import ContentStatus, ConversationType, DifficultyLevel, MessageRole
+from app.utils.constants import ContentStatus, ConversationType, MessageRole
 
 
 class Scenario(Base, TimeStampMixin):
@@ -24,7 +24,7 @@ class Scenario(Base, TimeStampMixin):
         display_order (int): Display order for sorting.
     """
     __tablename__ = "scenarios"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     title = Column(String, nullable=False)
     slug = Column(String, nullable=False, unique=True)
     description = Column(Text)
@@ -52,7 +52,7 @@ class Conversation(Base, TimeStampMixin):
         title (str): The conversation title.
     """
     __tablename__ = "conversations"
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False, default=ConversationType.FREE.value)
     scenario_id = Column(Integer, ForeignKey("scenarios.id", ondelete="SET NULL"), nullable=True)
@@ -81,7 +81,7 @@ class Message(Base, TimeStampMixin):
     __tablename__ = "messages"
     __table_args__ = (Index("ix_messages_conversation_id_created_time", "conversation_id", "created_time"),)
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False)
     role = Column(String, nullable=False, default=MessageRole.USER.value)
     content = Column(Text, nullable=False)

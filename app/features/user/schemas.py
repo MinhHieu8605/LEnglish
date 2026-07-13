@@ -153,11 +153,9 @@ class Login(BaseModel):
     Attributes:
         email (Optional[str]): User's email address (for credentials login).
         password (Optional[str]): User's password (for credentials login).
-        token_google (Optional[str]): Google OAuth 2.0 access token (for Google login).
     """
     email: Optional[str] = None
     password: Optional[str] = None
-    token_google: Optional[str] = None
 
 
 class Register(BaseModel):
@@ -168,12 +166,10 @@ class Register(BaseModel):
         email (str): User's email address.
         full_name (str): User's full name.
         password (str): User's password.
-        role (Role): User's role (admin or user).
     """
     email: str
     full_name: str
     password: str
-    role: Role
 
     @field_validator("email", mode="before")
     @classmethod

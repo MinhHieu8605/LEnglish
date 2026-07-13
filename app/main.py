@@ -1,6 +1,18 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.api.v1.router import api_router
+from app.backgrounds.vocabulary_enricher import get_enricher
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup & shutdown: background workers."""
+    get_enricher().start()
+    yield
+    await get_enricher().stop()
+
 
 app = FastAPI(
     title="LearnEnglish API",
@@ -8,6 +20,7 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/api/v1/docs",
     openapi_url="/api/v1/openapi.json",
+    lifespan=lifespan,
 )
 
 app.include_router(api_router)

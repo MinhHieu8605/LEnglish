@@ -1,0 +1,121 @@
+from datetime import datetime, timezone
+from types import SimpleNamespace
+
+import pytest
+from fastapi import HTTPException
+from pydantic import ValidationError
+
+from app.features.dictionary.service import DictionaryService
+from app.features.vocabulary.schemas import VocabularyListFilter, VocabularySaveRequest
+from app.features.vocabulary.service import (
+    _build_notebook_vocabulary_response,
+    _build_topic_word_response,
+    _build_vocabulary_response,
+)
+
+
+def test_save_request_strips_word_and_rejects_blank_word():
+    assert VocabularySaveRequest(word="  take off  ").word == "take off"
+
+    with pytest.raises(ValidationError):
+        VocabularySaveRequest(word="   ")
+
+
+def test_list_filter_ignores_blank_keyword():
+    assert VocabularyListFilter(keyword="   ").keyword is None
+
+
+def test_dictionary_response_uses_requested_word_and_validates_meanings():
+    response = DictionaryService._build_response(
+        "take off",
+        {
+            "word": "incorrect word",
+            "meanings": [
+                {
+                    "part_of_speech": "phrasal verb",
+                    "definitions": [{"definition_vi": "cởi ra"}],
+                }
+            ],
+        },
+        [],
+        ["ai-dictionary"],
+    )
+
+    assert response.word == "take off"
+    assert response.meanings[0].definitions[0].definition_vi == "cởi ra"
+
+    with pytest.raises(HTTPException) as error:
+        DictionaryService._build_response(
+            "take off",
+            {"meanings": [{"part_of_speech": "verb", "definitions": []}]},
+            [],
+            ["ai-dictionary"],
+        )
+
+    assert error.value.status_code == 502
+
+
+def test_dictionary_prompt_escapes_word_for_json_template():
+    prompt = DictionaryService._build_prompt('say "hello"')
+
+    assert '"word": "say \\"hello\\""' in prompt
+
+
+def test_vocabulary_response_uses_user_saved_time_not_global_word_time():
+    vocabulary_created_at = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    saved_at = datetime(2026, 7, 1, tzinfo=timezone.utc)
+    vocab = SimpleNamespace(
+        id=1,
+        word="take off",
+        word_type="verb",
+        ipa=None,
+        audio_url=None,
+        image_url=None,
+        definition_vi="cởi ra",
+        example_sentence=None,
+        example_translation_vi=None,
+        created_time=vocabulary_created_at,
+    )
+    progress = SimpleNamespace(
+        status="learning",
+        repetition_count=0,
+        interval_days=0,
+        next_review_at=None,
+        last_reviewed_at=None,
+        personal_note="remember this",
+        created_time=saved_at,
+    )
+    item = SimpleNamespace(
+        id=9,
+        notebook_id=3,
+        context_sentence="Take off your coat.",
+        note="from lesson 1",
+    )
+
+    response = _build_vocabulary_response(vocab, progress)
+    notebook_response = _build_notebook_vocabulary_response(vocab, progress, item)
+
+    assert response.created_time == saved_at
+    assert "context_sentence" not in response.model_dump()
+    assert notebook_response.notebook_item_id == 9
+    assert notebook_response.context_sentence == "Take off your coat."
+    assert notebook_response.note == "from lesson 1"
+
+
+def test_topic_word_response_uses_defaults_only_when_progress_is_missing():
+    vocab = SimpleNamespace(
+        id=1,
+        word="take off",
+        word_type="verb",
+        ipa=None,
+        audio_url=None,
+        image_url=None,
+        definition_vi="cởi ra",
+        example_sentence=None,
+        example_translation_vi=None,
+    )
+
+    response = _build_topic_word_response(vocab, order_num=1)
+
+    assert response.status is None
+    assert response.repetition_count == 0

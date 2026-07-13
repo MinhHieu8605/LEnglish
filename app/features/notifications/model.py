@@ -23,7 +23,7 @@ class Notification(Base, TimeStampMixin):
     __tablename__ = "notifications"
     __table_args__ = (Index("ix_notifications_user_id_is_read_created_time", "user_id", "is_read", "created_time"),)
 
-    id = Column(Integer, autoincrement=True, primary_key=True, index=True)
+    id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False)
     title = Column(String, nullable=False)

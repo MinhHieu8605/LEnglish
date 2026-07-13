@@ -32,15 +32,15 @@ async def generate_access_token(
 
     # build access token payload and generate access token
     payload, role = await _build_token_payload(
-        token_raw["user_id"],
-        token_raw["user_email"],
+        token_raw["uid"],
+        token_raw["email"],
         refresh_token,
         session=session
     )
     access_token = create_access_token(data=payload.model_dump())
 
     return AccessTokenResponse(
-        id=token_raw["user_id"],
+        id=token_raw["uid"],
         email=token_raw["email"],
         refresh_token=refresh_token,
         access_token=access_token,

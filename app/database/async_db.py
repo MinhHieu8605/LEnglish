@@ -1,3 +1,12 @@
+import asyncio
+
+from dataclasses import dataclass
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import DBAPIError
+from functools import wraps
+from typing import Coroutine
+from typing import Callable
+from typing import Type
 from app.config.settings import Database
 import gc
 
@@ -15,6 +24,32 @@ from sqlmodel import select, update
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.utils.common import raise_bad_request, raise_not_found
+
+# ============================================================================
+# DATA CLASSES
+# ============================================================================
+
+
+@dataclass
+class RetryConfig(object):
+    """Configuration for retry behavior with exponential backoff"""
+
+    max_retries: int = 0
+    delay: float = 0.5
+    backoff: float = 2.0
+    exception_types: tuple = ()
+
+
+@dataclass
+class ExecutionContext(object):
+    """Configuration for function execution"""
+    
+    session: AsyncSession
+    func: Callable[..., Coroutine[Any, Any, Any]]
+    args: tuple
+    kwargs: Dict[str, Any]
+    commit: bool = True
+    timeout: Optional[float] = None
 
 
 # ============================================================================
@@ -186,6 +221,339 @@ def _is_managed_by_transactional(session: AsyncSession) -> bool:
     return hasattr(session, "_is_managed_by_transactional") and getattr(
         session, "_is_managed_by_transactional"
     )
+
+
+def _get_or_create_session(
+    args: tuple, kwargs: Dict[str, Any]
+) -> tuple[AsyncSession, bool]:
+    """
+    Helper function to get an existing session or create a new one.
+
+    Args:
+        args: Positional arguments that might contain a session
+        kwargs: Keyword arguments that might contain a session
+
+    Returns:
+        tuple: (session, session_created_internally)
+    """
+    # First check in kwargs
+    session = kwargs.get("session", None) or kwargs.get("db_session", None)
+    session_created_internally = False
+    source = None
+
+    if session is not None:
+        source = "kwargs"
+    # If not found in kwargs, search in args
+    elif arg_session := next(
+        (arg for arg in args if isinstance(arg, AsyncSession)), None
+    ):
+        session = arg_session
+        source = "args"
+    # If still no session, create one
+    else:
+        async_session_factory = get_async_session_factory()
+        session = async_session_factory()
+        session_created_internally = True
+        kwargs["session"] = session
+        source = "new"
+
+    logger.debug(
+        f"Session {id(session)}: {source} "
+        f"{'(created)' if session_created_internally else ''}"
+    )
+
+    # Ensure the session is of the correct type
+    if not isinstance(session, AsyncSession):
+        raise TypeError("The provided session must be an instance of AsyncSession.")
+
+    # Add a flag to indicate this session is managed by the transactional
+    # decorator
+    setattr(session, "_is_managed_by_transactional", True)
+
+    return session, session_created_internally
+
+
+def _validate_retry_exceptions(
+    retry_exceptions: Optional[List[Type[Exception]]], max_retries: int
+) -> tuple:
+    """
+    Validate and prepare retry exception types.
+
+    Args:
+        retry_exceptions: List of exception types to retry on
+        max_retries: Maximum number of retries
+
+    Returns:
+        tuple: Tuple of validated exception types
+    """
+    if retry_exceptions is None and max_retries > 0:
+        retry_exceptions = [OperationalError, DBAPIError, TimeoutError]
+
+    if max_retries > 0 and retry_exceptions:
+        # Validate that all items in retry_exceptions are Exception subclasses
+        for exc_type in retry_exceptions:
+            if not isinstance(exc_type, type) or not issubclass(exc_type, Exception):
+                raise TypeError(f"Expected Exception subclass, got {exc_type}")
+        return tuple(retry_exceptions)
+
+    return ()
+
+
+async def _execute_transaction(
+    session: AsyncSession,
+    func: Callable[..., Coroutine[Any, Any, Any]],
+    args: tuple,
+    kwargs: Dict[str, Any],
+    commit: bool = True,
+) -> Any:
+    """Helper function to execute a transaction with proper error handling."""
+    func_name = getattr(func, "__name__", "unknown_function")
+    session_id = _get_session_id(session)
+    logger.debug(
+        f"TX start: {func_name}@{session_id} " f"(in_tx: {session.in_transaction()})"
+    )
+
+    try:
+        # Use a context manager to handle transaction boundaries
+        async with (
+            session.begin_nested() if session.in_transaction() else session.begin()
+        ):
+            result = await func(*args, **kwargs)
+
+        # Commit the transaction if required
+        if commit and session.in_transaction():
+            await session.commit()
+            logger.info(f"TX commit: {func_name}@{session_id}")
+            # Reset the flag after commit
+            setattr(session, "_is_managed_by_transactional", False)
+
+        return result
+    except Exception as e:
+        error_type = type(e).__name__
+        logger.error(f"TX failed: {func_name}@{session_id} - {error_type}: {str(e)}")
+        # Rollback the transaction in case of an error
+        if session.in_transaction():
+            await session.rollback()
+            logger.info(f"TX rollback: {func_name}@{session_id}")
+        raise
+
+
+async def _execute_with_timeout(
+    session: AsyncSession,
+    func: Callable[..., Coroutine[Any, Any, Any]],
+    args: tuple,
+    kwargs: Dict[str, Any],
+    commit: bool,
+    timeout: Optional[float],
+) -> Any:
+    """
+    Execute transaction with optional timeout.
+
+    Args:
+        session: Database session
+        func: Function to execute
+        args: Function arguments
+        kwargs: Function keyword arguments
+        commit: Whether to commit transaction
+        timeout: Timeout in seconds
+
+    Returns:
+        Function result
+    """
+    if timeout is not None:
+        transaction_task = asyncio.create_task(
+            _execute_transaction(session, func, args, kwargs, commit)
+        )
+
+        try:
+            return await asyncio.wait_for(transaction_task, timeout=timeout)
+        except asyncio.TimeoutError as exc:
+            transaction_task.cancel()
+            logger.error(f"Transaction timed out after {timeout} seconds")
+            raise TimeoutError(
+                f"Transaction timed out after {timeout} seconds"
+            ) from exc
+    else:
+        return await _execute_transaction(session, func, args, kwargs, commit)
+
+
+async def _execute_with_retry_backoff(
+    context: ExecutionContext, retry_config: RetryConfig
+) -> Any:
+    """
+    Execute function with retry mechanism and exponential backoff.
+
+    Attempts to execute the given function with configurable retry behavior,
+    applying exponential backoff between retry attempts for transient errors.
+
+    Args:
+        context: Execution context containing session, function, and parameters
+        retry_config: Retry configuration with backoff settings
+
+    Returns:
+        Function result
+
+    Raises:
+        Exception: Re-raises the last retry exception or non-retryable
+            exceptions
+    """
+    if retry_config.max_retries == 0:
+        # No retries, execute once
+        return await _execute_with_timeout(
+            context.session,
+            context.func,
+            context.args,
+            context.kwargs,
+            context.commit,
+            context.timeout,
+        )
+
+    last_exception = None
+    current_delay = retry_config.delay
+
+    # +1 to include initial attempt
+    for attempt in range(retry_config.max_retries + 1):
+        try:
+            return await _execute_with_timeout(
+                context.session,
+                context.func,
+                context.args,
+                context.kwargs,
+                context.commit,
+                context.timeout,
+            )
+        except retry_config.exception_types as e:
+            last_exception = e
+
+            # Check if we have more attempts left
+            if attempt < retry_config.max_retries:
+                logger.warning(
+                    f"Transient error on attempt {attempt + 1}/"
+                    f"{retry_config.max_retries + 1}: {str(e)}. "
+                    f"Retrying in {current_delay:.2f}s"
+                )
+                await asyncio.sleep(current_delay)
+                current_delay *= retry_config.backoff
+            else:
+                logger.error(
+                    f"Transaction failed after {retry_config.max_retries + 1} "
+                    f"attempts: {str(e)}"
+                )
+                break
+        except Exception as e:
+            # Non-retryable exception - fail immediately
+            logger.exception(f"Non-retryable error in transaction: {str(e)}")
+            raise
+
+    # If we get here, all retry attempts failed
+    if last_exception:
+        raise last_exception
+
+
+# ============================================================================
+# TRANSACTION DECORATORS
+# ============================================================================
+
+
+def db_transaction(
+    commit: bool = True,
+    max_retries: int = 0,
+    retry_delay: float = 0.5,
+    retry_backoff: float = 2.0,
+    retry_exceptions: List[Type[Exception]] = None,
+    timeout: Optional[float] = None,
+):
+    """
+    Unified database transaction decorator with optional retry and timeout
+    capabilities.
+
+    This decorator wraps a function in a database transaction, handling session
+    management, transaction boundaries, retries for transient failures, and
+    optional timeout.
+
+    Args:
+        commit (bool): Whether to commit the transaction after execution.
+            Defaults to True.
+        max_retries (int): Maximum number of retry attempts for transient
+            failures. 0 means no retries. Defaults to 0.
+        retry_delay (float): Initial delay between retries in seconds.
+            Defaults to 0.5.
+        retry_backoff (float): Multiplier for the delay between retries.
+            Defaults to 2.0.
+        retry_exceptions (List[Type[Exception]]): List of exception types to
+            retry on. Defaults to common transient database errors.
+        timeout (Optional[float]): Transaction timeout in seconds.
+            None means no timeout.
+
+    Returns:
+        Callable: A wrapped function that automatically manages database
+            transactions.
+
+    Raises:
+        Exception: Any exception raised by the wrapped function will be
+                  re-raised after the transaction is rolled back.
+
+    Example:
+        # Basic transaction with no retries or timeout
+        @db_transaction()
+        async def create_user(session, user_data):
+            new_user = User(**user_data)
+            session.add(new_user)
+
+        # Transaction with retries for transient errors
+        @db_transaction(max_retries=3, retry_delay=1.0)
+        async def update_user(session, user_id, data):
+            user = await session.get(User, user_id)
+            for key, value in data.items():
+                setattr(user, key, value)
+            session.add(user)
+    """
+    retry_exception_types = _validate_retry_exceptions(retry_exceptions, max_retries)
+
+    def decorator(func: Callable[..., Coroutine[Any, Any, Any]]):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            session, session_created_internally = _get_or_create_session(args, kwargs)
+
+            try:
+                context = ExecutionContext(
+                    session=session,
+                    func=func,
+                    args=args,
+                    kwargs=kwargs,
+                    commit=commit,
+                    timeout=timeout,
+                )
+                retry_config = RetryConfig(
+                    max_retries=max_retries,
+                    delay=retry_delay,
+                    backoff=retry_backoff,
+                    exception_types=retry_exception_types,
+                )
+                return await _execute_with_retry_backoff(context, retry_config)
+            finally:
+                if session_created_internally:
+                    await session.close()
+                    logger.debug("db_transaction: Closed internally created session")
+
+        return wrapper
+
+    return decorator
+
+
+def transactional(commit: bool = True):
+    """
+    Backward-compatible alias for db_transaction with no retries or timeout.
+
+    Args:
+        commit (bool): Whether to commit the transaction after execution.
+            Defaults to True.
+
+    Returns:
+        Callable: A wrapped function that automatically manages database
+            transactions.
+    """
+    return db_transaction(commit=commit)
 
 
 def _get_session_id(session: AsyncSession) -> int:
