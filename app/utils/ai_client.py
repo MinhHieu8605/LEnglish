@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 from loguru import logger
 
 from app.config.settings import AI
+from app.utils.constants import MessageRole
 
 ai_config = AI()
 
@@ -33,9 +34,12 @@ async def call_ai(
             detail=f"AI {service_name} service not configured",
         )
 
-    messages = [{"role": "user", "content": prompt}]
+    messages = [{"role": MessageRole.USER.value, "content": prompt}]
     if system_prompt:
-        messages.insert(0, {"role": "system", "content": system_prompt})
+        messages.insert(
+            0,
+            {"role": MessageRole.SYSTEM.value, "content": system_prompt},
+        )
 
     try:
         async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=10.0)) as client:

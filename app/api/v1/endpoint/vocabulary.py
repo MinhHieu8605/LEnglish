@@ -18,14 +18,13 @@ from app.features.vocabulary.schemas import (
 )
 from app.features.vocabulary.service import VocabularyService
 from app.utils.common import get_user_id_from_request
-from app.backgrounds.vocabulary_enricher import get_enricher
 
 router = APIRouter()
 
 
 @router.post(
     "/save/{notebook_id}",
-    response_model=NotebookVocabularyItemResponse,
+    response_model=List[NotebookVocabularyItemResponse],
     status_code=201,
     summary="Save a word to a notebook",
 )
@@ -38,14 +37,14 @@ async def save_word(
     """
     Save a word to a specific vocabulary notebook.
 
-    If the word already exists globally, it is reused.
-    Creates a notebook item and initialises spaced-repetition progress.
+    If the word already has multiple global entries, all of them are reused.
+    Otherwise, entries are created from the dictionary meanings in the request.
+    Creates notebook items and initialises spaced-repetition progress.
+    When source_subtitle_id is provided, the stored subtitle text is used as
+    the trusted context sentence.
     """
     user_id = get_user_id_from_request(request)
     result = await VocabularyService.save_word(user_id, notebook_id, data, session)
-    # New vocab has null word_type → enrich in background
-    if result.word_type is None:
-        get_enricher().enqueue(result.id)
     return result
 
 

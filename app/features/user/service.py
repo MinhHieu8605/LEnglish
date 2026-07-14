@@ -398,19 +398,23 @@ class UserService(object):
     @staticmethod
     async def _prepare_login_response(user, session: AsyncSession):
         """Prepare login response with token."""
-        user_response = jsonable_encoder(user)
         access_token, refresh_token, role = await generate_tokens(
             session=session,
             uid=user.id,
             email=user.email
         )
-        user_response["access_token"] = access_token
-        user_response["refresh_token"] = refresh_token
-        user_response["role"] = role
-
-        del user_response["password"]  # Remove password from response for security
-
-        return user_response
+        return {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "avatar_url": user.avatar_url,
+            "deleted": user.deleted,
+            "role": role,
+            "refresh_token": refresh_token,
+            "access_token": access_token,
+            "lastest_request": user.lastest_request,
+            "lastest_login": user.lastest_login,
+        }
 
     @staticmethod
     async def request_event(session: AsyncSession, email: str, last_login=None):

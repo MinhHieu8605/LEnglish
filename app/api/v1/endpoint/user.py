@@ -79,11 +79,11 @@ async def logout():
     return {"message": Message.MSG_LOGOUT_SUCCESS}
 
 
-@public_router.post("/register", response_model=UserResponse)
+@public_router.post("/register")
 async def register(
     user_in: Register,
     session: AsyncSession = Depends(get_session)
-):
+) -> UserResponse:
     """
     Register a new user in the system.
     """

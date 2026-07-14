@@ -123,8 +123,20 @@ class WordType(Enum):
 
 @unique
 class WordStatus(Enum):
+    """
+    Learning stage of a word in a user's spaced-repetition progress.
+
+    Attributes:
+        NEW: Saved but not reviewed yet.
+        LEARNING: In the initial learning reviews.
+        REVIEWING: Learned and following the regular review schedule.
+        MASTERED: Considered retained after meeting the mastery threshold.
+        IGNORED: Excluded from learning and review queues.
+    """
+
+    NEW = "new"
     LEARNING = "learning"
-    REVIEWING = "reviewing"
+    REVIEW = "review"
     MASTERED = "mastered"
     IGNORED = "ignored"
 

@@ -27,6 +27,7 @@ passlib[bcrypt]
 
 # HTTP
 httpx
+youtube-transcript-api==1.2.4
 
 # Data
 pandas

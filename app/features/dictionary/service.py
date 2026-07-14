@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 from urllib.parse import quote
 
 import httpx
@@ -24,6 +25,11 @@ FREE_DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
 _SOURCE_DB = "local-database"
 _SOURCE_AI = "ai-dictionary"
 
+
+def _normalize_ipa(value: str | None) -> str:
+    return re.sub(r"[\s./]", "", value or "")
+
+
 _AI_DICTIONARY_SYSTEM_PROMPT = (
     "You are a professional English-Vietnamese dictionary. "
     "You provide complete, accurate dictionary entries for any English word "
@@ -35,8 +41,12 @@ _AI_DICTIONARY_SYSTEM_PROMPT = (
     "words unless the English word itself is highly formal or technical. Max 2 alternatives separated by a comma.\n"
     "2. example: A natural English sentence using the word in this specific context.\n"
     "3. example_vi: Accurate Vietnamese translation of the example sentence.\n"
-    "4. Every definition block MUST have all 4 fields filled (never null).\n"
-    "5. Always respond with valid JSON only. Do not wrap inside markdown blocks."
+    "4. ipa: IPA pronunciation for this specific part of speech.\n"
+    "5. audio_url: Use null unless a real pronunciation URL is provided; never invent a URL.\n"
+    "6. Every definition block MUST have all fields filled (never null).\n"
+    "7. If the input is not a real English word or recognized phrase, return an "
+    "empty meanings array and do not invent a definition.\n"
+    "8. Always respond with valid JSON only. Do not wrap inside markdown blocks."
 )
 
 class DictionaryService(object):
@@ -72,10 +82,10 @@ class DictionaryService(object):
             data = response.json()[0]
             phonetics = []
             for item in data.get("phonetics") or []:
-                text = item.get("text")
+                ipa = item.get("text")  # text = ipa
                 audio = item.get("audio")
-                if text or audio:
-                    phonetics.append(PhoneticItem(text=text, audio=audio))
+                if ipa or audio:
+                    phonetics.append(PhoneticItem(ipa=ipa, audio=audio))
             return phonetics
 
         except Exception as e:
@@ -90,15 +100,11 @@ class DictionaryService(object):
             f"Return a JSON object matching this exact structure:\n"
             f'{{\n'
             f'  "word": {json.dumps(word, ensure_ascii=False)},\n'
-            f'  "phonetics": [\n'
-            f'    {{\n'
-            f'      "text": "IPA transcription (e.g. /həˈloʊ/)",\n'
-            f'      "audio": ""\n'
-            f'    }}\n'
-            f'  ],\n'
             f'  "meanings": [\n'
             f'    {{\n'
             f'      "part_of_speech": "noun/verb/adjective/etc.",\n'
+            f'      "ipa": "IPA for this part of speech",\n'
+            f'      "audio_url": null,\n'
             f'      "definitions": [\n'
             f'        {{\n'
             f'          "definition_vi": "Vietnamese translation",\n'
@@ -109,6 +115,8 @@ class DictionaryService(object):
             f'    }}\n'
             f'  ]\n'
             f'}}\n\n'
+            f"For an invalid or misspelled input, return an empty meanings array. "
+            f"Never invent a definition or suggest a replacement word.\n"
             f"Include all common parts of speech. For each part of speech, include "
             f"its most common distinct meanings/senses. Return ONLY valid JSON."
         )
@@ -181,6 +189,8 @@ class DictionaryService(object):
                 continue
             meanings.append({
                 "part_of_speech": item.word_type,
+                "ipa": item.ipa,
+                "audio_url": item.audio_url,
                 "definitions": [{
                     "definition_vi": item.definition_vi,
                     "example": item.example_sentence,
@@ -198,39 +208,57 @@ class DictionaryService(object):
 
     @classmethod
     def _build_response(
-        cls, word: str, data: dict, free_phonetics: list, sources: list[str]
+        cls,
+        word: str,
+        data: dict,
+        free_phonetics: list,
+        sources: list[str]
     ) -> DictionaryLookupResponse:
-        """Build response from dictionary data + phonetics.
+        """
+        Build a response with pronunciation attached to each meaning.
 
-        Dedup phonetics: if multiple entries share the same text,
-        keep only the one with audio.
+        Args:
+            word (str): The looked-up word.
+            data (dict): Dictionary data from AI or DB.
+            free_phonetics (list): Phonetic data from Free Dictionary API.
+            sources (list[str]): Data sources used to build the entry.
+
+        Returns:
+            DictionaryLookupResponse: Complete dictionary data including
         """
         try:
-            phonetics = free_phonetics or []
-            if not phonetics and data.get("phonetics"):
-                phonetics = [
-                    PhoneticItem.model_validate({"text": item.get("text")})
-                    for item in data["phonetics"]
-                    if isinstance(item, dict) and item.get("text")
-                ]
-            else:
-                seen = {}
-                for phonetic in phonetics:
-                    key = phonetic.text or ""
-                    if key not in seen or (phonetic.audio and not seen[key].audio):
-                        seen[key] = phonetic
-                phonetics = list(seen.values())
-
             meanings = [
                 MeaningItem.model_validate(
                     {
                         "part_of_speech": meaning.get("part_of_speech", "unknown"),
+                        "ipa": meaning.get("ipa"),
+                        "audio_url": meaning.get("audio_url"),
                         "definitions": [DefinitionItem.model_validate(definition) for definition in meaning.get("definitions") or []],
                     }
                 )
                 for meaning in data.get("meanings") or []
                 if isinstance(meaning, dict)
             ]
+
+            if len(meanings) == 1:
+                phonetic = next(
+                    (item for item in free_phonetics if item.audio), None
+                )
+                if phonetic is None:
+                    phonetic = next(iter(free_phonetics), None)
+                if phonetic:
+                    meanings[0].ipa = meanings[0].ipa or phonetic.ipa
+                    meanings[0].audio_url = meanings[0].audio_url or phonetic.audio
+            elif meanings:
+                phonetics_by_ipa = {
+                    _normalize_ipa(item.ipa): item
+                    for item in free_phonetics
+                    if item.ipa
+                }
+                for meaning in meanings:
+                    phonetic = phonetics_by_ipa.get(_normalize_ipa(meaning.ipa))
+                    if phonetic:
+                        meaning.audio_url = meaning.audio_url or phonetic.audio
         except (TypeError, ValidationError, ValueError) as error:
             logger.error(f"Invalid dictionary response: {error}")
             raise HTTPException(
@@ -240,13 +268,12 @@ class DictionaryService(object):
 
         if not any(meaning.definitions for meaning in meanings):
             raise HTTPException(
-                status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="Dictionary returned no definitions",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Word or phrase not found",
             )
 
         return DictionaryLookupResponse(
             word=word,
-            phonetics=phonetics,
             meanings=meanings,
             sources=sources,
         )

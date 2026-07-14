@@ -23,5 +23,6 @@ venv/
 *.sqlite
 
 CLAUDE.md
+AGENTS.md
 
 scripts/

@@ -114,6 +114,6 @@ class AI(BaseSingleton):
     api_url: Union[str, None]
 
     def __init__(self) -> None:
-        self.api_key = config.get("AI_API_KEY") or config.get("NVIDIA_API_KEY", "")
-        self.model = config.get("AI_MODEL", "stepfun/step-3.7-flash-free")
-        self.api_url = config.get("AI_API_URL", "https://zenmux.ai/api/v1/chat/completions")
+        self.api_key = config.get("AI_API_KEY")
+        self.model = config.get("AI_MODEL")
+        self.api_url = config.get("AI_API_URL")

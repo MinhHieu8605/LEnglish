@@ -76,6 +76,7 @@ class NotebookItem(Base, TimeStampMixin):
         id (int): The unique identifier.
         notebook_id (int): The notebook identifier.
         vocabulary_id (int): The vocabulary identifier.
+        source_subtitle_id (int): Subtitle where the user saved this word.
         context_sentence (str): Sentence context where the word was found.
         note (str): User's personal note.
     """
@@ -85,6 +86,7 @@ class NotebookItem(Base, TimeStampMixin):
     id = Column(Integer, autoincrement=True, primary_key=True)
     notebook_id = Column(Integer, ForeignKey("notebooks.id", ondelete="CASCADE"), nullable=False)
     vocabulary_id = Column(Integer, ForeignKey("vocabularies.id", ondelete="CASCADE"), nullable=False)
+    source_subtitle_id = Column(Integer, ForeignKey("subtitles.id", ondelete="SET NULL"), nullable=True)
     context_sentence = Column(Text)
     note = Column(Text)
 
@@ -117,7 +119,7 @@ class VocabularyProgress(Base, TimeStampMixin):
     id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     vocabulary_id = Column(Integer, ForeignKey("vocabularies.id", ondelete="CASCADE"), nullable=False)
-    status = Column(String, nullable=False, default=WordStatus.LEARNING.value)
+    status = Column(String, nullable=False, default=WordStatus.NEW.value)
     ease_factor = Column(Numeric(4, 2), nullable=False, default=2.50)
     repetition_count = Column(Integer, nullable=False, default=0)
     interval_days = Column(Integer, nullable=False, default=0)

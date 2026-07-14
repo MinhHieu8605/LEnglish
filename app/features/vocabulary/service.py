@@ -8,12 +8,14 @@ from sqlmodel import or_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import (
+    async_create_bulk_records,
     async_create_record,
     async_get_many_records_by,
     async_get_one_record_by,
     async_update_one_record,
     transactional,
 )
+from app.features.lesson.model import Subtitle
 from app.features.vocabulary.model import (
     Notebook,
     NotebookItem,
@@ -58,11 +60,11 @@ def _next_interval(repetition_count: int) -> int:
 # ========================
 
 
-async def _sync_vocabulary(
-    word: str, session: AsyncSession
-) -> Vocabulary:
-    """Find an existing vocabulary entry or create a new one."""
-    normalized = word.strip().lower()
+async def _get_or_create_vocabularies(
+    data: VocabularySaveRequest, session: AsyncSession
+) -> List[Vocabulary]:
+    """Return stored entries or create them from the submitted dictionary result."""
+    normalized = data.word.strip().lower()
     vocabularies = await async_get_many_records_by(
         Vocabulary,
         [func.lower(Vocabulary.word) == normalized],
@@ -70,13 +72,38 @@ async def _sync_vocabulary(
         raise_if_not_found=False,
     )
     if vocabularies:
-        return next(
-            (vocab for vocab in vocabularies if vocab.word_type is None),
-            min(vocabularies, key=lambda vocab: vocab.created_time),
+        return vocabularies
+
+    meanings_by_type = {}
+    for meaning in data.meanings:
+        word_type = meaning.part_of_speech
+        if word_type and meaning.definitions:
+            if word_type not in meanings_by_type:
+                meanings_by_type[word_type] = meaning
+
+    vocabulary_data = []
+    for word_type, meaning in meanings_by_type.items():
+        definition = meaning.definitions[0]
+        vocabulary_data.append(
+            {
+                "word": normalized,
+                "word_type": word_type,
+                "ipa": meaning.ipa,
+                "audio_url": meaning.audio_url,
+                "definition_vi": definition.definition_vi,
+                "example_sentence": definition.example,
+                "example_translation_vi": definition.example_vi,
+            }
         )
-    return await async_create_record(
+
+    if not vocabulary_data:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Dictionary meanings are required for a new word.",
+        )
+    return await async_create_bulk_records(
         Vocabulary,
-        {"word": normalized, "word_type": None, "definition_vi": None},
+        vocabulary_data,
         session,
     )
 
@@ -133,6 +160,7 @@ def _build_notebook_vocabulary_response(
         **_build_vocabulary_response(vocab, progress).model_dump(),
         notebook_item_id=item.id,
         notebook_id=item.notebook_id,
+        source_subtitle_id=item.source_subtitle_id,
         context_sentence=item.context_sentence,
         note=item.note,
     )
@@ -197,17 +225,28 @@ class VocabularyService:
         notebook_id: int,
         data: VocabularySaveRequest,
         session: AsyncSession,
-    ) -> NotebookVocabularyItemResponse:
+    ) -> List[NotebookVocabularyItemResponse]:
         """Save a word to the user's vocabulary notebook.
 
         Creates the vocabulary record if it doesn't exist globally,
         adds it to the specified notebook, and initializes
         a progress tracker for spaced repetition.
         """
-        try:
-            vocab = await _sync_vocabulary(data.word, session)
-            notebook = await _get_user_notebook(notebook_id, user_id, session)
+        vocabularies = await _get_or_create_vocabularies(data, session)
+        notebook = await _get_user_notebook(notebook_id, user_id, session)
+        context_sentence = data.context_sentence
+        if data.source_subtitle_id is not None:
+            subtitle = await async_get_one_record_by(
+                Subtitle,
+                [Subtitle.id == data.source_subtitle_id],
+                session,
+                raise_if_not_found=True,
+                not_found_msg="Subtitle not found",
+            )
+            context_sentence = subtitle.content_en
 
+        responses = []
+        for vocab in vocabularies:
             item = await async_get_one_record_by(
                 NotebookItem,
                 [
@@ -223,15 +262,23 @@ class VocabularyService:
                     {
                         "notebook_id": notebook.id,
                         "vocabulary_id": vocab.id,
-                        "context_sentence": data.context_sentence,
+                        "source_subtitle_id": data.source_subtitle_id,
+                        "context_sentence": context_sentence,
                         "note": data.note,
                     },
                     session,
                 )
-            elif data.context_sentence is not None or data.note is not None:
+            elif (
+                data.source_subtitle_id is not None
+                or data.context_sentence is not None
+                or data.note is not None
+            ):
                 update = {}
-                if data.context_sentence is not None:
-                    update["context_sentence"] = data.context_sentence
+                if data.source_subtitle_id is not None:
+                    update["source_subtitle_id"] = data.source_subtitle_id
+                    update["context_sentence"] = context_sentence
+                elif data.context_sentence is not None:
+                    update["context_sentence"] = context_sentence
                 if data.note is not None:
                     update["note"] = data.note
                 item = await async_update_one_record(
@@ -257,11 +304,11 @@ class VocabularyService:
                     session,
                 )
 
-            return _build_notebook_vocabulary_response(vocab, progress, item)
+            responses.append(
+                _build_notebook_vocabulary_response(vocab, progress, item)
+            )
 
-        except Exception:
-            await session.rollback()
-            raise
+        return responses
 
     @staticmethod
     async def list_words(
@@ -373,7 +420,7 @@ class VocabularyService:
             elif rep_count >= _LEARNING_REVIEWS_THRESHOLD:
                 new_status = WordStatus.REVIEWING.value
             else:
-                new_status = progress.status
+                new_status = WordStatus.LEARNING.value
 
         try:
             progress = await async_update_one_record(

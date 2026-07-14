@@ -6,16 +6,39 @@ from pydantic import BaseModel, Field, field_validator
 from app.utils.constants import ReviewRating, WordStatus
 
 
+class VocabularyDefinitionInput(BaseModel):
+    """One dictionary definition submitted when saving a new word."""
+
+    definition_vi: str
+    example: Optional[str] = None
+    example_vi: Optional[str] = None
+
+
+class VocabularyMeaningInput(BaseModel):
+    """One part-of-speech entry submitted when saving a new word."""
+
+    part_of_speech: str
+    ipa: Optional[str] = None
+    audio_url: Optional[str] = None
+    definitions: List[VocabularyDefinitionInput]
+
+
 class VocabularySaveRequest(BaseModel):
     """
     Request schema for saving a word to a vocabulary notebook.
 
     Attributes:
         word (str): The word or phrase to save.
+        source_subtitle_id (Optional[int]): Subtitle where the word was clicked.
         context_sentence (Optional[str]): The sentence context where the word was encountered.
         note (Optional[str]): A note for this word in the selected notebook.
     """
     word: str = Field(..., min_length=1, max_length=100, description="The word to save")
+    meanings: List[VocabularyMeaningInput] = Field(
+        default_factory=list,
+        description="Dictionary meanings returned by lookup when the word is not in the database",
+    )
+    source_subtitle_id: Optional[int] = Field(default=None, ge=1)
     context_sentence: Optional[str] = Field(default=None, description="Context sentence where the word was found")
     note: Optional[str] = Field(default=None, description="Note for this notebook entry")
 
@@ -67,6 +90,7 @@ class NotebookVocabularyItemResponse(VocabularyItemResponse):
     """A saved vocabulary item with data specific to one notebook."""
     notebook_item_id: int
     notebook_id: int
+    source_subtitle_id: Optional[int]
     context_sentence: Optional[str]
     note: Optional[str]
 
