@@ -18,10 +18,9 @@ from app.features.learning.model import LearningProgress, PracticeSession, Pract
 from app.features.conversation.model import Scenario, Conversation, Message
 from app.features.engagement.model import ActivityEvent, Achievement, AchievementUnlock, Streak
 from app.features.dictionary.model import DictionaryLookup
+from app.features.wordlist.model import Notebook, NotebookItem
 from app.features.vocabulary.model import (
-    Vocabulary, 
-    Notebook,
-    NotebookItem,
+    Vocabulary,
     VocabularyProgress, 
     VocabularyReviewLog, 
     VocabularyTopicWord, 

@@ -129,7 +129,7 @@ class WordStatus(Enum):
     Attributes:
         NEW: Saved but not reviewed yet.
         LEARNING: In the initial learning reviews.
-        REVIEWING: Learned and following the regular review schedule.
+        REVIEW: Learned and following the regular review schedule.
         MASTERED: Considered retained after meeting the mastery threshold.
         IGNORED: Excluded from learning and review queues.
     """
@@ -143,8 +143,12 @@ class WordStatus(Enum):
 
 @unique
 class ReviewRating(Enum):
-    CORRECT = "correct"
-    WRONG = "wrong"
+    """Recall quality used to calculate the next SRS review time."""
+
+    AGAIN = "again"
+    HARD = "hard"
+    GOOD = "good"
+    EASY = "easy"
 
 
 @unique

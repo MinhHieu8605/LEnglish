@@ -1,1 +1,1 @@
-"""Vocabulary notebook and review feature."""
+"""Curated vocabulary collections and learning progress feature."""

@@ -44,55 +44,6 @@ class Vocabulary(Base, TimeStampMixin):
     progress_entries = relationship("VocabularyProgress", back_populates="vocabulary", cascade="all, delete-orphan")
     topic_entries = relationship("VocabularyTopicWord", back_populates="vocabulary", cascade="all, delete-orphan")
 
-class Notebook(Base, TimeStampMixin):
-    """
-    Represents a user's vocabulary notebook collection.
-
-    Attributes:
-        id (int): The unique identifier of the notebook.
-        user_id (int): The user identifier.
-        name (str): The notebook name.
-        description (str): The notebook description.
-    """
-    __tablename__ = "notebooks"
-    __table_args__ = (
-        UniqueConstraint("user_id", "name", name="uq_notebooks_user_id_name"),
-    )
-
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    name = Column(String, nullable=False)
-    description = Column(String)
-
-    user = relationship("User", back_populates="notebooks")
-    items = relationship("NotebookItem", back_populates="notebook", cascade="all, delete-orphan")
-
-
-class NotebookItem(Base, TimeStampMixin):
-    """
-    Represents a vocabulary item in a notebook.
-
-    Attributes:
-        id (int): The unique identifier.
-        notebook_id (int): The notebook identifier.
-        vocabulary_id (int): The vocabulary identifier.
-        source_subtitle_id (int): Subtitle where the user saved this word.
-        context_sentence (str): Sentence context where the word was found.
-        note (str): User's personal note.
-    """
-    __tablename__ = "notebook_items"
-    __table_args__ = (UniqueConstraint("notebook_id", "vocabulary_id", name="uq_notebook_items_notebook_id_vocabulary_id"),)
-
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    notebook_id = Column(Integer, ForeignKey("notebooks.id", ondelete="CASCADE"), nullable=False)
-    vocabulary_id = Column(Integer, ForeignKey("vocabularies.id", ondelete="CASCADE"), nullable=False)
-    source_subtitle_id = Column(Integer, ForeignKey("subtitles.id", ondelete="SET NULL"), nullable=True)
-    context_sentence = Column(Text)
-    note = Column(Text)
-
-    notebook = relationship("Notebook", back_populates="items")
-    vocabulary = relationship("Vocabulary", back_populates="notebook_items")
-
 
 class VocabularyProgress(Base, TimeStampMixin):
     """
@@ -102,7 +53,7 @@ class VocabularyProgress(Base, TimeStampMixin):
         id (int): The unique identifier of the vocabulary progress.
         user_id (int): The user identifier.
         vocabulary_id (int): The vocabulary identifier.
-        status (str): Learning status (learning, reviewing, mastered, ignored).
+        status (str): Learning status (new, learning, review, mastered, ignored).
         ease_factor (Decimal): Spaced repetition ease factor.
         repetition_count (int): Number of times reviewed.
         interval_days (int): Days until next review.
