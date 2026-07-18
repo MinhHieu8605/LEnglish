@@ -21,19 +21,19 @@ class ActivityEvent(Base, TimeStampMixin):
         xp_earned (int): Experience points earned.
         metadata (dict): Additional metadata in JSON format.
     """
-    __tablename__ = "activity_events"
+    __tablename__ = "ActivityEvent"
     __table_args__ = (
-        Index("ix_activity_events_user_id_created_time", "user_id", "created_time"),
-        Index("ix_activity_events_user_id_type_created_time", "user_id", "type", "created_time"),
+        Index("activity_events_idx", "user_id", "created_time"),
+        Index("activity_events_type_idx", "user_id", "type", "created_time"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False)
-    lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="SET NULL"), nullable=True)
-    vocabulary_id = Column(Integer, ForeignKey("vocabularies.id", ondelete="SET NULL"), nullable=True)
-    practice_session_id = Column(Integer, ForeignKey("practice_sessions.id", ondelete="SET NULL"), nullable=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="SET NULL"), nullable=True)
+    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="SET NULL"), nullable=True)
+    vocabulary_id = Column(Integer, ForeignKey("Vocabulary.id", ondelete="SET NULL"), nullable=True)
+    practice_session_id = Column(Integer, ForeignKey("PracticeSession.id", ondelete="SET NULL"), nullable=True)
+    conversation_id = Column(Integer, ForeignKey("Conversation.id", ondelete="SET NULL"), nullable=True)
     duration_seconds = Column(Integer, nullable=False, default=0)
     xp_earned = Column(Integer, nullable=False, default=0)
     event_metadata = Column("metadata", JSONB)
@@ -60,7 +60,7 @@ class Achievement(Base, TimeStampMixin):
         xp_reward (int): Experience points reward.
         display_order (int): Display order for sorting.
     """
-    __tablename__ = "achievements"
+    __tablename__ = "Achievement"
     id = Column(Integer, autoincrement=True, primary_key=True)
     code = Column(String, nullable=False, unique=True)
     name = Column(String, nullable=False)
@@ -82,12 +82,12 @@ class AchievementUnlock(Base, TimeStampMixin):
         achievement_id (int): The achievement identifier.
         earned_at (datetime): When the achievement was earned.
     """
-    __tablename__ = "achievement_unlocks"
+    __tablename__ = "AchievementUnlock"
     __table_args__ = (UniqueConstraint("user_id", "achievement_id", name="uq_achievement_unlocks_user_id_achievement_id"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    achievement_id = Column(Integer, ForeignKey("achievements.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    achievement_id = Column(Integer, ForeignKey("Achievement.id", ondelete="CASCADE"), nullable=False)
     earned_at = Column(DateTime(timezone=True), nullable=False)
 
     user = relationship("User")
@@ -105,9 +105,9 @@ class Streak(Base, TimeStampMixin):
         longest_streak (int): Longest streak ever achieved.
         last_active_date (date): Last date user was active.
     """
-    __tablename__ = "streaks"
+    __tablename__ = "Streak"
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False, unique=True)
     current_streak = Column(Integer, nullable=False, default=0)
     longest_streak = Column(Integer, nullable=False, default=0)
     last_active_date = Column(Date)

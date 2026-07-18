@@ -20,11 +20,11 @@ class Notification(Base, TimeStampMixin):
         is_read (bool): Whether the notification has been read.
         read_at (datetime): When the notification was read.
     """
-    __tablename__ = "notifications"
-    __table_args__ = (Index("ix_notifications_user_id_is_read_created_time", "user_id", "is_read", "created_time"),)
+    __tablename__ = "Notification"
+    __table_args__ = (Index("notifications_idx", "user_id", "is_read", "created_time"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False)
     title = Column(String, nullable=False)
     body = Column(Text)

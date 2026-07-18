@@ -19,11 +19,11 @@ class DictionaryLookup(Base, TimeStampMixin):
         context_sentence (str): Context sentence for the lookup.
         result (dict): Lookup result data in JSON format.
     """
-    __tablename__ = "dictionary_lookups"
-    __table_args__ = (Index("ix_dictionary_lookups_user_id_created_time", "user_id", "created_time"),)
+    __tablename__ = "DictionaryLookup"
+    __table_args__ = (Index("dictionary_lookups_idx", "user_id", "created_time"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     word = Column(String, nullable=False)
     type = Column(String, nullable=False, default=LookupType.DICTIONARY.value)
     source_url = Column(String)

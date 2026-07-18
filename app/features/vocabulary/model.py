@@ -22,10 +22,10 @@ class Vocabulary(Base, TimeStampMixin):
         example_translation_vi (str): Vietnamese translation of example.
         source_subtitle_id (int): Source subtitle where word was found.
     """
-    __tablename__ = "vocabularies"
+    __tablename__ = "Vocabulary"
     __table_args__ = (
-        Index("uq_vocabularies_word_word_type", sa.literal_column("lower(word)"), "word_type", unique=True),
-        Index("ix_vocabularies_word", "word"),
+        Index("vocabularies_idx", sa.literal_column("lower(word)"), "word_type", unique=True),
+        Index("vocabularies_word_idx", "word"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -37,7 +37,7 @@ class Vocabulary(Base, TimeStampMixin):
     definition_vi = Column(Text, nullable=True)
     example_sentence = Column(Text)
     example_translation_vi = Column(Text)
-    source_subtitle_id = Column(Integer, ForeignKey("subtitles.id", ondelete="SET NULL"), nullable=True)
+    source_subtitle_id = Column(Integer, ForeignKey("Subtitle.id", ondelete="SET NULL"), nullable=True)
 
     source_subtitle = relationship("Subtitle", back_populates="vocabulary_items")
     notebook_items = relationship("NotebookItem", back_populates="vocabulary", cascade="all, delete-orphan")
@@ -61,15 +61,15 @@ class VocabularyProgress(Base, TimeStampMixin):
         last_reviewed_at (datetime): Last review time.
         personal_note (str): User's personal note.
     """
-    __tablename__ = "vocabulary_progress"
+    __tablename__ = "VocabularyProgress"
     __table_args__ = (
         UniqueConstraint("user_id", "vocabulary_id", name="uq_vocabulary_progress_user_id_vocabulary_id"),
-        Index("ix_vocabulary_progress_user_id_status_next_review_at", "user_id", "status", "next_review_at"),
+        Index("vocabulary_progress_idx", "user_id", "status", "next_review_at"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    vocabulary_id = Column(Integer, ForeignKey("vocabularies.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    vocabulary_id = Column(Integer, ForeignKey("Vocabulary.id", ondelete="CASCADE"), nullable=False)
     status = Column(String, nullable=False, default=WordStatus.NEW.value)
     ease_factor = Column(Numeric(4, 2), nullable=False, default=2.50)
     repetition_count = Column(Integer, nullable=False, default=0)
@@ -94,9 +94,9 @@ class VocabularyReviewLog(Base, TimeStampMixin):
         response_ms (int): Response time in milliseconds.
         reviewed_at (datetime): When the review happened.
     """
-    __tablename__ = "vocabulary_review_logs"
+    __tablename__ = "VocabularyReviewLog"
     id = Column(Integer, autoincrement=True, primary_key=True)
-    vocabulary_progress_id = Column(Integer, ForeignKey("vocabulary_progress.id", ondelete="CASCADE"), nullable=False)
+    vocabulary_progress_id = Column(Integer, ForeignKey("VocabularyProgress.id", ondelete="CASCADE"), nullable=False)
     rating = Column(String, nullable=False)
     response_ms = Column(Integer)
     reviewed_at = Column(DateTime(timezone=True), nullable=False)
@@ -117,7 +117,7 @@ class VocabularyBook(Base, TimeStampMixin):
         image_url (str): URL to the book cover image shown on the listing page.
         deleted (bool): Soft-delete flag; deleted books are hidden from users.
     """
-    __tablename__ = "vocabulary_books"
+    __tablename__ = "VocabularyBook"
     __table_args__ = (UniqueConstraint("slug", name="uq_vocabulary_books_slug"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -143,13 +143,13 @@ class VocabularyTopic(Base, TimeStampMixin):
         order_num (int): Sequential position within the book.
         word_count (int): Cached count of words; updated after import or word changes.
     """
-    __tablename__ = "vocabulary_topics"
+    __tablename__ = "VocabularyTopic"
     __table_args__ = (
         UniqueConstraint("book_id", "slug", name="uq_vocabulary_topics_book_id_slug"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    book_id = Column(Integer, ForeignKey("vocabulary_books.id", ondelete="CASCADE"), nullable=False)
+    book_id = Column(Integer, ForeignKey("VocabularyBook.id", ondelete="CASCADE"), nullable=False)
     name = Column(String, nullable=False)
     slug = Column(String, nullable=False)
     order_num = Column(Integer, nullable=False, default=0)
@@ -172,14 +172,14 @@ class VocabularyTopicWord(Base):
         vocabulary_id (int): The vocabulary word.
         order_num (int): Controls display order of the word within the topic.
     """
-    __tablename__ = "vocabulary_topic_words"
+    __tablename__ = "VocabularyTopicWord"
     __table_args__ = (
         UniqueConstraint("topic_id", "vocabulary_id", name="uq_vocabulary_topic_words_topic_id_vocabulary_id"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    topic_id = Column(Integer, ForeignKey("vocabulary_topics.id", ondelete="CASCADE"), nullable=False)
-    vocabulary_id = Column(Integer, ForeignKey("vocabularies.id", ondelete="CASCADE"), nullable=False)
+    topic_id = Column(Integer, ForeignKey("VocabularyTopic.id", ondelete="CASCADE"), nullable=False)
+    vocabulary_id = Column(Integer, ForeignKey("Vocabulary.id", ondelete="CASCADE"), nullable=False)
     order_num = Column(Integer, nullable=False, default=0)
 
     topic = relationship("VocabularyTopic", back_populates="topic_words")

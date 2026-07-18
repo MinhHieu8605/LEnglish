@@ -23,7 +23,7 @@ class Scenario(Base, TimeStampMixin):
         status (str): Content status (draft, published, archived).
         display_order (int): Display order for sorting.
     """
-    __tablename__ = "scenarios"
+    __tablename__ = "Scenario"
     id = Column(Integer, autoincrement=True, primary_key=True)
     title = Column(String, nullable=False)
     slug = Column(String, nullable=False, unique=True)
@@ -51,12 +51,12 @@ class Conversation(Base, TimeStampMixin):
         lesson_id (int): The lesson identifier (if type is lesson).
         title (str): The conversation title.
     """
-    __tablename__ = "conversations"
+    __tablename__ = "Conversation"
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False, default=ConversationType.FREE.value)
-    scenario_id = Column(Integer, ForeignKey("scenarios.id", ondelete="SET NULL"), nullable=True)
-    lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="SET NULL"), nullable=True)
+    scenario_id = Column(Integer, ForeignKey("Scenario.id", ondelete="SET NULL"), nullable=True)
+    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="SET NULL"), nullable=True)
     title = Column(String)
 
     user = relationship("User", back_populates="conversations")
@@ -78,11 +78,11 @@ class Message(Base, TimeStampMixin):
         suggestions (dict): Suggestions data in JSON format.
         correction (dict): Correction data in JSON format.
     """
-    __tablename__ = "messages"
-    __table_args__ = (Index("ix_messages_conversation_id_created_time", "conversation_id", "created_time"),)
+    __tablename__ = "Message"
+    __table_args__ = (Index("messages_idx", "conversation_id", "created_time"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    conversation_id = Column(Integer, ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False)
+    conversation_id = Column(Integer, ForeignKey("Conversation.id", ondelete="CASCADE"), nullable=False)
     role = Column(String, nullable=False, default=MessageRole.USER.value)
     content = Column(Text, nullable=False)
     translation_vi = Column(Text)

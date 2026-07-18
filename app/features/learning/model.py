@@ -18,16 +18,16 @@ class LearningProgress(Base, TimeStampMixin):
         completed_at (datetime): When the lesson was completed.
         last_watched_at (datetime): Last time the lesson was watched.
     """
-    __tablename__ = "learning_progress"
+    __tablename__ = "LearningProgress"
     __table_args__ = (
         UniqueConstraint("user_id", "lesson_id", name="uq_learning_progress_user_id_lesson_id"),
         CheckConstraint("completion_percent >= 0 AND completion_percent <= 100", name="completion_percent_range"),
-        Index("ix_learning_progress_user_id_last_watched_at", "user_id", "last_watched_at"),
+        Index("learning_progress_idx", "user_id", "last_watched_at"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="CASCADE"), nullable=False)
     last_position_seconds = Column(Integer, nullable=False, default=0)
     completion_percent = Column(Numeric(5, 2), nullable=False, default=0)
     completed_at = Column(DateTime(timezone=True))
@@ -54,10 +54,10 @@ class PracticeSession(Base, TimeStampMixin):
         started_at (datetime): When the session started.
         completed_at (datetime): When the session completed.
     """
-    __tablename__ = "practice_sessions"
+    __tablename__ = "PracticeSession"
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
-    lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="CASCADE"), nullable=False)
     mode = Column(String, nullable=False, default=PracticeMode.DICTATION.value)
     status = Column(String, nullable=False, default=PracticeStatus.STARTED.value)
     score = Column(Numeric(5, 2))
@@ -86,12 +86,12 @@ class PracticeAnswer(Base, TimeStampMixin):
         attempt_count (int): Number of attempts for this question.
         answered_at (datetime): When the answer was submitted.
     """
-    __tablename__ = "practice_answers"
+    __tablename__ = "PracticeAnswer"
     __table_args__ = (UniqueConstraint("session_id", "subtitle_id", name="uq_practice_answers_session_id_subtitle_id"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    session_id = Column(Integer, ForeignKey("practice_sessions.id", ondelete="CASCADE"), nullable=False)
-    subtitle_id = Column(Integer, ForeignKey("subtitles.id", ondelete="CASCADE"), nullable=False)
+    session_id = Column(Integer, ForeignKey("PracticeSession.id", ondelete="CASCADE"), nullable=False)
+    subtitle_id = Column(Integer, ForeignKey("Subtitle.id", ondelete="CASCADE"), nullable=False)
     user_input = Column(Text, nullable=False)
     accuracy_score = Column(Numeric(5, 2))
     is_correct = Column(Boolean, nullable=False, default=False)

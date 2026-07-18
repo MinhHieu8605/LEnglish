@@ -118,7 +118,7 @@ def test_saved_word_list_queries_notebook_items(monkeypatch):
     assert total == 0
     assert pages == 0
     assert len(session.statements) == 2
-    assert all("notebook_items" in statement for statement in session.statements)
+    assert all('"NotebookItem"' in statement for statement in session.statements)
     assert all("vocabulary_progress" not in statement for statement in session.statements)
 
 

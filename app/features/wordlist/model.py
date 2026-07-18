@@ -7,13 +7,13 @@ from app.database.model import Base, TimeStampMixin
 class Notebook(Base, TimeStampMixin):
     """Represents a user's word-list collection."""
 
-    __tablename__ = "notebooks"
+    __tablename__ = "Notebook"
     __table_args__ = (
         UniqueConstraint("user_id", "name", name="uq_notebooks_user_id_name"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     name = Column(String, nullable=False)
     description = Column(String)
 
@@ -26,7 +26,7 @@ class Notebook(Base, TimeStampMixin):
 class NotebookItem(Base, TimeStampMixin):
     """Represents a vocabulary entry saved in a user's word list."""
 
-    __tablename__ = "notebook_items"
+    __tablename__ = "NotebookItem"
     __table_args__ = (
         UniqueConstraint(
             "notebook_id",
@@ -37,13 +37,13 @@ class NotebookItem(Base, TimeStampMixin):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     notebook_id = Column(
-        Integer, ForeignKey("notebooks.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("Notebook.id", ondelete="CASCADE"), nullable=False
     )
     vocabulary_id = Column(
-        Integer, ForeignKey("vocabularies.id", ondelete="CASCADE"), nullable=False
+        Integer, ForeignKey("Vocabulary.id", ondelete="CASCADE"), nullable=False
     )
     source_subtitle_id = Column(
-        Integer, ForeignKey("subtitles.id", ondelete="SET NULL"), nullable=True
+        Integer, ForeignKey("Subtitle.id", ondelete="SET NULL"), nullable=True
     )
     context_sentence = Column(Text)
     note = Column(Text)

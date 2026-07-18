@@ -18,9 +18,9 @@ class Category(Base, TimeStampMixin):
         display_order (int): The display order for sorting.
         is_active (bool): Whether the category is active.
     """
-    __tablename__ = "categories"
+    __tablename__ = "Category"
     id = Column(Integer, autoincrement=True, primary_key=True)
-    parent_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
+    parent_id = Column(Integer, ForeignKey("Category.id", ondelete="SET NULL"), nullable=True)
     name = Column(String, nullable=False)
     slug = Column(String, nullable=False, unique=True)
     description = Column(Text)
@@ -42,14 +42,14 @@ class Tag(Base, TimeStampMixin):
         slug (str): The URL-friendly slug.
         type (str): The tag type (topic, skill, accent, source, grammar).
     """
-    __tablename__ = "tags"
+    __tablename__ = "Tag"
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String, nullable=False)
     slug = Column(String, nullable=False, unique=True)
     type = Column(String, nullable=False, default=TagType.TOPIC.value)
 
     lesson_tags = relationship("LessonTag", back_populates="tag", cascade="all, delete-orphan")
-    lessons = relationship("Lesson", secondary="lesson_tags", back_populates="tags", viewonly=True)
+    lessons = relationship("Lesson", secondary=lambda: LessonTag.__table__, back_populates="tags", viewonly=True)
 
 
 class Lesson(Base, TimeStampMixin):
@@ -74,16 +74,16 @@ class Lesson(Base, TimeStampMixin):
         created_by (int): User ID who created the lesson.
         updated_by (int): User ID who last updated the lesson.
     """
-    __tablename__ = "lessons"
+    __tablename__ = "Lesson"
     __table_args__ = (
         UniqueConstraint("video_provider", "video_id", name="uq_lessons_video_provider_video_id"),
-        Index("ix_lessons_status_published_at", "status", "published_at"),
-        Index("ix_lessons_category_id_status", "category_id", "status"),
-        Index("ix_lessons_difficulty_status", "difficulty", "status"),
+        Index("lessons_idx", "status", "published_at"),
+        Index("lessons_category_idx", "category_id", "status"),
+        Index("lessons_difficulty_idx", "difficulty", "status"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    category_id = Column(Integer, ForeignKey("categories.id", ondelete="SET NULL"), nullable=True)
+    category_id = Column(Integer, ForeignKey("Category.id", ondelete="SET NULL"), nullable=True)
     title = Column(String, nullable=False)
     slug = Column(String, nullable=False, unique=True)
     description = Column(Text)
@@ -96,12 +96,12 @@ class Lesson(Base, TimeStampMixin):
     status = Column(String, nullable=False, default=ContentStatus.DRAFT.value)
     views_count = Column(Integer, nullable=False, default=0)
     published_at = Column(DateTime(timezone=True))
-    created_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
-    updated_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_by = Column(Integer, ForeignKey("User.id", ondelete="SET NULL"), nullable=True)
+    updated_by = Column(Integer, ForeignKey("User.id", ondelete="SET NULL"), nullable=True)
 
     category = relationship("Category", back_populates="lessons")
     lesson_tags = relationship("LessonTag", back_populates="lesson", cascade="all, delete-orphan")
-    tags = relationship("Tag", secondary="lesson_tags", back_populates="lessons", viewonly=True)
+    tags = relationship("Tag", secondary=lambda: LessonTag.__table__, back_populates="lessons", viewonly=True)
     subtitles = relationship("Subtitle", back_populates="lesson", cascade="all, delete-orphan", order_by="Subtitle.sequence")
     learning_progress = relationship("LearningProgress", back_populates="lesson", cascade="all, delete-orphan")
     practice_sessions = relationship("PracticeSession", back_populates="lesson", cascade="all, delete-orphan")
@@ -117,12 +117,12 @@ class LessonTag(Base, TimeStampMixin):
         lesson_id (int): The lesson identifier.
         tag_id (int): The tag identifier.
     """
-    __tablename__ = "lesson_tags"
+    __tablename__ = "LessonTag"
     __table_args__ = (UniqueConstraint("lesson_id", "tag_id", name="uq_lesson_tags_lesson_id_tag_id"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
-    tag_id = Column(Integer, ForeignKey("tags.id", ondelete="CASCADE"), nullable=False)
+    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="CASCADE"), nullable=False)
+    tag_id = Column(Integer, ForeignKey("Tag.id", ondelete="CASCADE"), nullable=False)
 
     lesson = relationship("Lesson", back_populates="lesson_tags")
     tag = relationship("Tag", back_populates="lesson_tags")
@@ -141,16 +141,16 @@ class Subtitle(Base, TimeStampMixin):
         content_en (str): English subtitle content.
         translation_vi (str): Vietnamese translation.
     """
-    __tablename__ = "subtitles"
+    __tablename__ = "Subtitle"
     __table_args__ = (
         UniqueConstraint("lesson_id", "sequence", name="uq_subtitles_lesson_id_sequence"),
         CheckConstraint("start_ms >= 0", name="start_ms_non_negative"),
         CheckConstraint("end_ms > start_ms", name="end_ms_after_start_ms"),
-        Index("ix_subtitles_lesson_id_start_ms", "lesson_id", "start_ms"),
+        Index("subtitles_idx", "lesson_id", "start_ms"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    lesson_id = Column(Integer, ForeignKey("lessons.id", ondelete="CASCADE"), nullable=False)
+    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="CASCADE"), nullable=False)
     sequence = Column(Integer, nullable=False)
     start_ms = Column(Integer, nullable=False)
     end_ms = Column(Integer, nullable=False)
