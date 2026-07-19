@@ -2,7 +2,7 @@ from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, I
 from sqlalchemy.orm import relationship
 
 from app.database.model import Base, TimeStampMixin
-from app.utils.constants import ContentStatus, DifficultyLevel, TagType
+from app.utils.constants import ContentStatus, TagType
 
 
 class Category(Base, TimeStampMixin):

@@ -28,6 +28,7 @@ from app.features.vocabulary.model import (
     VocabularyBook
 )
 from app.features.notifications.model import Notification
+from app.features.feedback.model import Feedback
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

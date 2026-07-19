@@ -1,6 +1,7 @@
 import asyncio
 
 from dataclasses import dataclass
+from sqlalchemy import func
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.exc import DBAPIError
 from functools import wraps
@@ -14,7 +15,7 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.engine.events import event
-from sqlmodel import create_engine
+from sqlmodel import asc, create_engine, desc
 from typing import Any, Dict, List, Literal, Optional, Union
 
 from loguru import logger
@@ -24,6 +25,7 @@ from sqlmodel import select, update
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.utils.common import raise_bad_request, raise_not_found
+from app.utils.constants import SortOrder
 
 # ============================================================================
 # DATA CLASSES
@@ -1083,4 +1085,51 @@ async def async_bulk_update_records(
         raise_bad_request(
             f"Cannot bulk update {model.__name__} failed! "
             f"Please contact administrator for support"
+        )
+
+
+async def async_get_paginated_records(
+    model,
+    session: AsyncSession,
+    criteria: Optional[list] = None,
+    skip: int = 0,
+    page_size: int = 20,
+    sort_by: Optional[str] = None,
+    sort_order: SortOrder = SortOrder.ASCEND,
+):
+    """
+    Retrieve paginated records from the database asynchronously.
+
+    Args:
+        model: The SQLAlchemy model class to query.
+        session (AsyncSession): The SQLAlchemy async session for database operations.
+        criteria (list, optional): SQLAlchemy filter conditions.
+        skip (int, optional): The number of records to skip. Defaults to 0.
+        page_size (int, optional): The number of records per page. Defaults to 20.
+        sort_by (str, optional): The column to sort the results by.
+        sort_order (SortOrder): The sorting direction.
+    """
+    where_clause = criteria or []
+    try:
+        count_statement = select(func.count()).select_from(model)
+        if where_clause:
+            count_statement = count_statement.where(*where_clause)
+        total = (await session.exec(count_statement)).one()
+
+        stmt = select(model)
+        if where_clause:
+            stmt = stmt.where(*where_clause)
+        if sort_by:
+            sort_column = getattr(model, sort_by, None)
+            if sort_column is not None:
+                order_fn = desc if sort_order == SortOrder.DESCEND else asc
+                stmt = stmt.order_by(order_fn(sort_column))
+        row = await session.exec(stmt.offset(skip).limit(page_size))
+        records = row.all()
+        return records, total
+    except Exception as e:
+        logger.exception(str(e))
+        return raise_bad_request(
+            f"Fetching paginated records from {model.__name__} failed. "
+            f"Please contact administrator. Error: {str(e)}"
         )

@@ -211,3 +211,28 @@ class Message(object):
 
     # NOT FOUND
     MSG_NOT_FOUND = "Not found."
+
+    MSG_UNAUTHORIZED = "You are not authorized to access this resource."
+
+
+class SortOrder(str, Enum):
+    """
+    Defines the available sort orders.
+    """
+    ASCEND= "ascend"
+    DESCEND = "descend"
+
+
+class FeedbackType(str, Enum):
+    """
+    Defines the available feedback types.
+
+    Attributes:
+        BUG (str): Feedback related to a bug.
+        FEATURE_REQUEST (str): Feedback requesting a new feature.
+        OTHER (str): Other types of feedback.
+    """
+    BUG = "bug"
+    FEATURE_REQUEST = "feature_request"
+    IMPROVEMENT = "improvement"
+    OTHER = "other"

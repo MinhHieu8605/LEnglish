@@ -247,9 +247,9 @@ class ManagementResponseMetadata(BaseModel):
         pages (int): Total number of pages.
     """
     total: int
-    page: int
-    page_size: int
-    pages: int
+    page: Optional[int] = None
+    page_size: Optional[int] = None
+    pages: Optional[int] = None
 
 
 class UserManagementItemResponse(BaseModel):

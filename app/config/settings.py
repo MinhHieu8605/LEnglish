@@ -1,10 +1,12 @@
+import os
+
 from dotenv import load_dotenv, dotenv_values
 from typing import Union
 
 from app.utils.singleton import BaseSingleton
 
 load_dotenv()
-config = dotenv_values(".env")
+config = {**dotenv_values(".env"), **os.environ}
 
 
 class Database(object):

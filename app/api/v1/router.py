@@ -1,6 +1,14 @@
 from fastapi import APIRouter, Depends
 
-from app.api.v1.endpoint import dictionary, lesson, token, user, vocabulary, wordlist
+from app.api.v1.endpoint import (
+    dictionary,
+    feedback,
+    lesson,
+    token,
+    user,
+    vocabulary,
+    wordlist,
+)
 from app.middleware.auth import get_current_user
 
 api_router = APIRouter(prefix="/api/v1")
@@ -16,6 +24,11 @@ authentication_api_router.include_router(dictionary.router, prefix="/dictionary"
 authentication_api_router.include_router(wordlist.router, prefix="/word-lists", tags=["Word Lists"])
 authentication_api_router.include_router(vocabulary.router, prefix="/vocabulary", tags=["Vocabulary"])
 authentication_api_router.include_router(lesson.router, prefix="/lessons", tags=["Lessons"])
+authentication_api_router.include_router(
+    feedback.router,
+    prefix="/feedbacks",
+    tags=["Feedbacks"],
+)
 
 api_router.include_router(
     authentication_api_router, dependencies=[Depends(get_current_user)]
