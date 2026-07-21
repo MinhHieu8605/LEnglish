@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Security
+from fastapi.security import HTTPBearer
 
 from app.api.v1.endpoint import (
     dictionary,
@@ -10,6 +11,14 @@ from app.api.v1.endpoint import (
     wordlist,
 )
 from app.middleware.auth import get_current_user
+
+
+_bearer_auth = HTTPBearer(
+    bearerFormat="JWT",
+    scheme_name="BearerAuth",
+    description="Enter the access token only. Swagger adds the Bearer prefix.",
+    auto_error=False,
+)
 
 api_router = APIRouter(prefix="/api/v1")
 authentication_api_router = APIRouter()
@@ -31,5 +40,6 @@ authentication_api_router.include_router(
 )
 
 api_router.include_router(
-    authentication_api_router, dependencies=[Depends(get_current_user)]
+    authentication_api_router,
+    dependencies=[Security(_bearer_auth), Depends(get_current_user)],
 )

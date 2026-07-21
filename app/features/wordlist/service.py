@@ -23,11 +23,13 @@ from app.features.vocabulary.model import (
 )
 from app.features.wordlist.model import Notebook, NotebookItem
 from app.features.wordlist.schemas import (
+    CreateWordListRequest,
     SavedWordFilter,
     SavedWordResponse,
     SavedWordReviewResponse,
     SavedWordsDueFilter,
     SaveWordRequest,
+    WordListResponse,
 )
 from app.utils.common import page_size_to_offset_limit
 from app.utils.constants import ReviewRating, WordStatus
@@ -152,7 +154,7 @@ async def _get_or_create_vocabularies(
     data: SaveWordRequest, session: AsyncSession
 ) -> List[Vocabulary]:
     """
-    Get stored vocabulary entries or create submitted dictionary meanings.
+    Get stored vocabulary entries or create a manually submitted word.
 
     Args:
         data (SaveWordRequest): Word and dictionary meanings to save.
@@ -162,7 +164,7 @@ async def _get_or_create_vocabularies(
         List[Vocabulary]: Existing or newly created entries for all word types.
 
     Raises:
-        HTTPException: If a new word has no valid dictionary meanings.
+        HTTPException: If a new word has no translation or dictionary meaning.
     """
     normalized = data.word.strip().lower()
     vocabularies = await async_get_many_records_by(
@@ -189,16 +191,28 @@ async def _get_or_create_vocabularies(
                 "word_type": word_type,
                 "ipa": meaning.ipa,
                 "audio_url": meaning.audio_url,
+                "image_url": data.image_url,
                 "definition_vi": definition.definition_vi,
                 "example_sentence": definition.example,
                 "example_translation_vi": definition.example_vi,
+                "source_subtitle_id": data.source_subtitle_id,
+            }
+        )
+
+    if not vocabulary_data and data.translation_vi:
+        vocabulary_data.append(
+            {
+                "word": normalized,
+                "definition_vi": data.translation_vi,
+                "image_url": data.image_url,
+                "source_subtitle_id": data.source_subtitle_id,
             }
         )
 
     if not vocabulary_data:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Dictionary meanings are required for a new word.",
+            detail="A translation or dictionary meaning is required for a new word.",
         )
 
     return await async_create_bulk_records(Vocabulary, vocabulary_data, session)
@@ -251,6 +265,7 @@ def _build_saved_word_response(
         word_type=vocab.word_type,
         ipa=vocab.ipa,
         audio_url=vocab.audio_url,
+        image_url=vocab.image_url,
         definition_vi=vocab.definition_vi,
         example_sentence=vocab.example_sentence,
         example_translation_vi=vocab.example_translation_vi,
@@ -293,6 +308,74 @@ def _build_saved_word_review_response(
 
 class WordListService(object):
     """Manage words explicitly saved by a user and their review schedule."""
+
+    @staticmethod
+    @transactional()
+    async def create_word_list(
+        user_id: int,
+        data: CreateWordListRequest,
+        session: AsyncSession,
+    ) -> WordListResponse:
+        """Create an empty personal word list."""
+        duplicate = await async_get_one_record_by(
+            Notebook,
+            [Notebook.user_id == user_id, Notebook.name == data.name],
+            session,
+            raise_if_not_found=False,
+        )
+        if duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A word list with this name already exists",
+            )
+
+        word_list = await async_create_record(
+            Notebook,
+            {
+                "user_id": user_id,
+                "name": data.name,
+                "description": data.description,
+            },
+            session,
+        )
+        return WordListResponse(
+            id=word_list.id,
+            name=word_list.name,
+            description=word_list.description,
+            word_count=0,
+            created_time=word_list.created_time,
+        )
+
+    @staticmethod
+    async def get_word_lists(
+        user_id: int,
+        session: AsyncSession,
+    ) -> List[WordListResponse]:
+        """List a user's word lists with their saved-word counts."""
+        word_count = (
+            select(func.count(NotebookItem.id))
+            .where(NotebookItem.notebook_id == Notebook.id)
+            .correlate(Notebook)
+            .scalar_subquery()
+        )
+        rows = (
+            await session.exec(
+                select(Notebook, word_count.label("word_count"))
+                .where(Notebook.user_id == user_id)
+                .order_by(Notebook.created_time.desc())
+            )
+        ).all()
+
+        return [
+            WordListResponse(
+                id=word_list.id,
+                name=word_list.name,
+                description=word_list.description,
+                word_count=count,
+                created_time=word_list.created_time,
+            )
+            for word_list, count in rows
+        ]
 
     @staticmethod
     @transactional()

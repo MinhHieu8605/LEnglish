@@ -4,7 +4,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database.async_db import get_session
 from app.features.lesson.schemas import (
     LessonListResponse,
-    LessonPlayerResponse,
+    LessonDetailResponse,
     YouTubeLessonImportRequest,
 )
 from app.features.lesson.service import LessonService
@@ -30,7 +30,7 @@ async def list_lessons(
 
 @router.post(
     "/import/youtube",
-    response_model=LessonPlayerResponse,
+    response_model=LessonDetailResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Import a YouTube video and all available English captions",
 )
@@ -49,13 +49,30 @@ async def import_youtube_lesson(
 
 
 @router.get(
-    "/{lesson_slug}/player",
-    response_model=LessonPlayerResponse,
-    summary="Get a lesson video with all timed subtitle sentences",
+    "/{lesson_slug}",
+    response_model=LessonDetailResponse,
+    summary="Get lesson details with timed subtitles",
 )
-async def get_lesson_player(
+async def get_lesson_detail(
     lesson_slug: str,
     session: AsyncSession = Depends(get_session),
 ):
-    """Load the player and complete transcript in one request."""
-    return await LessonService.get_player(lesson_slug, session)
+    return await LessonService.get_detail(lesson_slug, session)
+
+
+@router.delete(
+    "/{lesson_slug}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete an imported video lesson",
+)
+async def delete_lesson(
+    lesson_slug: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    if get_user_role_from_request(request) != Role.ADMIN.value:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin role required",
+        )
+    await LessonService.delete_lesson(lesson_slug, session)

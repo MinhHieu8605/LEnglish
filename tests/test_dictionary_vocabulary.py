@@ -15,6 +15,7 @@ from app.features.vocabulary.service import (
     _build_topic_word_response,
 )
 from app.features.wordlist.schemas import (
+    CreateWordListRequest,
     SavedWordFilter,
     SavedWordsDueFilter,
     SavedWordsDueResponse,
@@ -38,6 +39,69 @@ def test_save_request_strips_word_and_rejects_blank_word():
         SaveWordRequest(word="   ")
 
 
+def test_manual_word_request_accepts_translation_and_https_image():
+    request = SaveWordRequest(
+        word="  persistence  ",
+        translation_vi="  sự kiên trì  ",
+        image_url="  https://images.test/persistence.png  ",
+    )
+
+    assert request.word == "persistence"
+    assert request.translation_vi == "sự kiên trì"
+    assert request.image_url == "https://images.test/persistence.png"
+
+    with pytest.raises(ValidationError):
+        SaveWordRequest(
+            word="persistence",
+            translation_vi="sự kiên trì",
+            image_url="http://images.test/persistence.png",
+        )
+
+
+def test_create_word_list_request_strips_text():
+    request = CreateWordListRequest(name="  My Words  ", description="   ")
+
+    assert request.name == "My Words"
+    assert request.description is None
+
+
+def test_create_word_list_rejects_duplicate_name(monkeypatch):
+    monkeypatch.setattr(
+        "app.features.wordlist.service.async_get_one_record_by",
+        AsyncMock(return_value=SimpleNamespace(id=1)),
+    )
+
+    with pytest.raises(HTTPException) as error:
+        asyncio.run(
+            WordListService.create_word_list.__wrapped__(
+                user_id=7,
+                data=CreateWordListRequest(name="My Words"),
+                session=object(),
+            )
+        )
+
+    assert error.value.status_code == 409
+
+
+def test_get_word_lists_includes_saved_word_count():
+    word_list = SimpleNamespace(
+        id=3,
+        name="My Words",
+        description="Words from videos",
+        created_time=datetime(2026, 7, 21, tzinfo=timezone.utc),
+    )
+
+    class FakeSession:
+        async def exec(self, statement):
+            return SimpleNamespace(all=lambda: [(word_list, 4)])
+
+    result = asyncio.run(WordListService.get_word_lists(7, FakeSession()))
+
+    assert len(result) == 1
+    assert result[0].id == 3
+    assert result[0].word_count == 4
+
+
 def test_list_filter_ignores_blank_keyword():
     filters = SavedWordFilter(keyword="   ")
 
@@ -53,6 +117,7 @@ def test_saved_word_list_filter_does_not_expose_progress_status():
 def test_word_list_and_vocabulary_routes_are_separated():
     paths = app.openapi()["paths"]
 
+    assert {"get", "post"} <= set(paths["/api/v1/word-lists"])
     assert "/api/v1/word-lists/{word_list_id}/words" in paths
     assert "/api/v1/word-lists/{word_list_id}/review/due" in paths
     assert "/api/v1/vocabulary/books" in paths
@@ -285,6 +350,22 @@ def test_save_uses_stored_entries_or_creates_ai_meanings(monkeypatch):
     assert [record.ipa for record in result] == ["/ˈrek.ɔːd/", "/rɪˈkɔːd/"]
     assert result[0].audio_url == "https://audio.test/record-noun.mp3"
 
+    lookup.return_value = []
+    result = asyncio.run(
+        _get_or_create_vocabularies(
+            SaveWordRequest(
+                word="persistence",
+                translation_vi="sự kiên trì",
+                image_url="https://images.test/persistence.png",
+            ),
+            object(),
+        )
+    )
+    assert len(result) == 1
+    assert result[0].word == "persistence"
+    assert result[0].definition_vi == "sự kiên trì"
+    assert result[0].image_url == "https://images.test/persistence.png"
+
     with pytest.raises(HTTPException) as error:
         asyncio.run(
             _get_or_create_vocabularies(
@@ -408,6 +489,7 @@ def test_saved_word_response_uses_notebook_item_data():
     assert response.source_subtitle_id == 7
     assert response.context_sentence == "Take off your coat."
     assert response.note == "from lesson 1"
+    assert response.image_url is None
     assert "status" not in response.model_dump()
     assert review_response.status == "learning"
     assert review_response.ease_factor == 2.5

@@ -412,8 +412,6 @@ class UserService(object):
             "role": role,
             "refresh_token": refresh_token,
             "access_token": access_token,
-            "lastest_request": user.lastest_request,
-            "lastest_login": user.lastest_login,
         }
 
     @staticmethod

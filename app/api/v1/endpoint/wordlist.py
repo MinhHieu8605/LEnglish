@@ -5,6 +5,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import get_session
 from app.features.wordlist.schemas import (
+    CreateWordListRequest,
     ReviewSavedWordRequest,
     SavedWordFilter,
     SavedWordListMeta,
@@ -14,11 +15,42 @@ from app.features.wordlist.schemas import (
     SavedWordsDueFilter,
     SavedWordsDueResponse,
     SaveWordRequest,
+    WordListResponse,
 )
 from app.features.wordlist.service import WordListService
 from app.utils.common import get_user_id_from_request
 
 router = APIRouter()
+
+
+@router.post(
+    "",
+    response_model=WordListResponse,
+    status_code=201,
+    summary="Create a word list",
+)
+async def create_word_list(
+    request: Request,
+    data: CreateWordListRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Create an empty word list for the authenticated user."""
+    user_id = get_user_id_from_request(request)
+    return await WordListService.create_word_list(user_id, data, session)
+
+
+@router.get(
+    "",
+    response_model=List[WordListResponse],
+    summary="List word lists",
+)
+async def list_word_lists(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    """List word lists owned by the authenticated user."""
+    user_id = get_user_id_from_request(request)
+    return await WordListService.get_word_lists(user_id, session)
 
 
 @router.post(

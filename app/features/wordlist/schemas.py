@@ -1,9 +1,41 @@
 from datetime import datetime
 from typing import List, Optional
+from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field, field_validator
 
 from app.utils.constants import ReviewRating
+
+
+class CreateWordListRequest(BaseModel):
+    """Request for creating a personal word list."""
+
+    name: str = Field(..., min_length=1, max_length=100)
+    description: Optional[str] = Field(default=None, max_length=500)
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def strip_name(cls, value: str) -> str:
+        """Remove surrounding whitespace from the list name."""
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def strip_description(cls, value: Optional[str]) -> Optional[str]:
+        """Trim the description and normalize blank text to ``None``."""
+        if not isinstance(value, str):
+            return value
+        return value.strip() or None
+
+
+class WordListResponse(BaseModel):
+    """One personal word list and its saved-word count."""
+
+    id: int
+    name: str
+    description: Optional[str]
+    word_count: int
+    created_time: Optional[datetime]
 
 
 class WordDefinitionInput(BaseModel):
@@ -24,9 +56,11 @@ class WordMeaningInput(BaseModel):
 
 
 class SaveWordRequest(BaseModel):
-    """Request for saving a dictionary result to a word list."""
+    """Request for manually saving a word or dictionary result."""
 
     word: str = Field(..., min_length=1, max_length=100)
+    translation_vi: Optional[str] = Field(default=None, max_length=500)
+    image_url: Optional[str] = Field(default=None, max_length=2048)
     meanings: List[WordMeaningInput] = Field(
         default_factory=list,
         description=(
@@ -45,6 +79,28 @@ class SaveWordRequest(BaseModel):
         """
         return value.strip() if isinstance(value, str) else value
 
+    @field_validator(
+        "translation_vi", "image_url", "context_sentence", "note", mode="before"
+    )
+    @classmethod
+    def strip_optional_text(cls, value: Optional[str]) -> Optional[str]:
+        """Trim optional text and normalize blank values to ``None``."""
+        if not isinstance(value, str):
+            return value
+        return value.strip() or None
+
+    @field_validator("image_url")
+    @classmethod
+    def validate_image_url(cls, value: Optional[str]) -> Optional[str]:
+        """Only accept HTTPS image URLs, matching the manual-add form."""
+        if value is None:
+            return None
+
+        parsed = urlparse(value)
+        if parsed.scheme.lower() != "https" or not parsed.netloc:
+            raise ValueError("image_url must use HTTPS")
+        return value
+
 
 class SavedWordResponse(BaseModel):
     """A word explicitly saved in one user word list."""
@@ -54,6 +110,7 @@ class SavedWordResponse(BaseModel):
     word_type: Optional[str]
     ipa: Optional[str]
     audio_url: Optional[str]
+    image_url: Optional[str]
     definition_vi: Optional[str]
     example_sentence: Optional[str]
     example_translation_vi: Optional[str]

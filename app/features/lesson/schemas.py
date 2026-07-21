@@ -21,7 +21,7 @@ class YouTubeLessonImportRequest(BaseModel):
         return value.strip() if isinstance(value, str) else value
 
 
-class SubtitlePlayerResponse(BaseModel):
+class LessonSubtitleResponse(BaseModel):
     """One timed sentence in a lesson video."""
 
     id: int
@@ -32,8 +32,8 @@ class SubtitlePlayerResponse(BaseModel):
     translation_vi: Optional[str]
 
 
-class LessonPlayerResponse(BaseModel):
-    """Everything the client needs to play a lesson sentence by sentence."""
+class LessonDetailResponse(BaseModel):
+    """Lesson details including the complete timed transcript."""
 
     id: int
     title: str
@@ -46,7 +46,7 @@ class LessonPlayerResponse(BaseModel):
     duration_seconds: int
     difficulty: str
     subtitle_count: int
-    subtitles: List[SubtitlePlayerResponse] = Field(default_factory=list)
+    subtitles: List[LessonSubtitleResponse] = Field(default_factory=list)
 
 
 class LessonSummaryResponse(BaseModel):
