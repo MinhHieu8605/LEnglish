@@ -8,6 +8,7 @@ from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 import httpx
+import pysbd
 from fastapi import HTTPException, status
 from loguru import logger
 from youtube_transcript_api import (
@@ -32,14 +33,20 @@ _YOUTUBE_HOSTS = {                                      # Allowed YouTube hosts.
     "youtu.be"
 }
 _VIDEO_ID_RE = re.compile(r"[A-Za-z0-9_-]{6,20}")       # Match valid YouTube video IDs.
-_SENTENCE_END_RE = re.compile(r"[.!?][\"')\]]*$")       # Detect sentence-ending punctuation.
 _HTML_TAG_RE = re.compile(r"<[^>]+>")                   # Strip simple HTML tags.
 _SPACE_RE = re.compile(r"\s+")                          # Collapse consecutive whitespace.
 _NON_SPEECH_CUE_RE = re.compile(r"\[[^\]]+\]")          # Match cues such as [Music].
+
 _MAX_GAP_SECONDS = 2.0                                  # Maximum silence allowed within one segment.
 _MAX_SEGMENT_SECONDS = 12.0                             # Maximum duration of one segment.
 _MAX_SEGMENT_WORDS = 24                                 # Maximum words in one segment.
 _TRANSLATION_BATCH_SIZE = 40                            # Subtitles translated per AI request.
+
+_SENTENCE_SEGMENTER = pysbd.Segmenter(
+    language="en",
+    clean=False,
+    char_span=True,
+)
 _AI_TRANSLATION_SYSTEM_PROMPT = (                       # Enforce ordered JSON translations.
     "You translate English lesson subtitles into natural Vietnamese. "
     "Use surrounding subtitles as context, preserve meaning and tone, and treat "
@@ -64,31 +71,36 @@ class YouTubeLessonSource:
     segments: list[TranscriptSegment]
 
 
+@dataclass(frozen=True)
+class _CaptionTextSpan:
+    start_offset: int
+    end_offset: int
+    cue: TranscriptSegment
+
+
 def _extract_youtube_video_id(video_url: str) -> str:
     """Extract a video ID while rejecting non-YouTube hosts."""
     parsed = urlparse(video_url)
     # parsed.scheme   # "https"
-    # parsed.netloc   # "www.youtube.com"
+    # parsed.hostname # "www.youtube.com"
     # parsed.path     # "/watch"
     # parsed.query    # "v=iISY9FgeYpU&t=10"
     
-    host = parsed.netloc.lower()
+    host = parsed.hostname.lower()
 
     if parsed.scheme not in {"http", "https"} or host not in _YOUTUBE_HOSTS:
         raise ValueError("Only YouTube video URLs are supported")
 
-    if host == "youtu.be":
-        video_id = parsed.path.strip("/").split("/")[0]
+    parts = [part for part in parsed.path.split("/") if part]
+    if host == "youtu.be" and parts:
+        video_id = parts[0]
     elif parsed.path == "/watch":
         video_id = parse_qs(parsed.query).get("v", [""])[0]
-    else:
-        parts = [part for part in parsed.path.split("/") if part]
-        if len(parts) >= 2 and parts[0] in {"embed", "shorts", "live"}:
-            video_id = parts[1]
+    elif len(parts) >= 2 and parts[0] in {"embed", "shorts", "live"}:
+        video_id = parts[1]
 
     if not _VIDEO_ID_RE.fullmatch(video_id):
         raise ValueError("Invalid YouTube video URL")
-    
     return video_id
 
 
@@ -112,7 +124,8 @@ def _remove_repeated_prefix(previous_text: str, current_text: str) -> str:
     clean_curr = [w.strip(string.punctuation).casefold() for w in curr_words]
 
     # Check for the longest overlap of words at the end of the previous text and the start of the current text.
-    for overlap in range(min(len(prev_words), len(curr_words)), 0, -1):
+    max_overlap = min(len(prev_words), len(curr_words))
+    for overlap in range(max_overlap, 0, -1):
         if clean_prev[-overlap:] == clean_curr[:overlap]:
             return " ".join(curr_words[overlap:])
 
@@ -141,10 +154,11 @@ def _trim_overlapping_segment_ends(
     return trimmed
 
 
-def _group_transcript(raw_snippets: list[dict[str, Any]]) -> list[TranscriptSegment]:
-    """Merge caption cues into readable timed sentences."""
-    segments: list[TranscriptSegment] = []
-    current: TranscriptSegment | None = None
+def _prepare_transcript_cues(
+    raw_snippets: list[dict[str, Any]],
+) -> list[TranscriptSegment]:
+    """Clean YouTube snippets and remove repeated text from rolling captions."""
+    cues: list[TranscriptSegment] = []
     prev_text: str | None = None
     prev_end = 0.0
 
@@ -169,31 +183,160 @@ def _group_transcript(raw_snippets: list[dict[str, Any]]) -> list[TranscriptSegm
 
         if not text:
             continue
-        
-        # Start a new segment if there is no current segment or if the gap between segments exceeds the maximum allowed.
-        if current is None or start - current.end_seconds > _MAX_GAP_SECONDS:
-            if current is not None:
-                segments.append(current)
-            current = TranscriptSegment(start, end, text)
+
+        cues.append(TranscriptSegment(start, end, text))
+
+    return cues
+
+
+def _split_cues_on_silence(
+    cues: list[TranscriptSegment],
+) -> list[list[TranscriptSegment]]:
+    """Split cues into continuous speech groups using the configured silence gap."""
+    groups: list[list[TranscriptSegment]] = []
+    current_group: list[TranscriptSegment] = []
+    current_end = 0.0
+
+    for cue in cues:
+        if current_group and cue.start_seconds - current_end > _MAX_GAP_SECONDS:
+            groups.append(current_group)
+            current_group = []
+            current_end = 0.0
+
+        current_group.append(cue)
+        current_end = max(current_end, cue.end_seconds)
+
+    if current_group:
+        groups.append(current_group)
+    return groups
+
+
+def _join_cues_with_spans(
+    cues: list[TranscriptSegment],
+) -> tuple[str, list[_CaptionTextSpan]]:
+    """Join cue text while retaining character ranges for timestamp mapping."""
+    parts: list[str] = []
+    spans: list[_CaptionTextSpan] = []
+    offset = 0
+
+    for cue in cues:
+        if parts:
+            offset += 1
+
+        start_offset = offset
+        parts.append(cue.content_en)
+        offset += len(cue.content_en)
+        spans.append(_CaptionTextSpan(start_offset, offset, cue))
+
+    return " ".join(parts), spans
+
+
+def _find_sentence_ranges(text: str) -> list[tuple[int, int]]:
+    """Find English sentence ranges using pySBD."""
+    ranges: list[tuple[int, int]] = []
+
+    for sentence in _SENTENCE_SEGMENTER.segment(text):
+        end = sentence.end
+        while end > sentence.start and text[end - 1].isspace():
+            end -= 1
+        if sentence.start < end:
+            ranges.append((sentence.start, end))
+
+    return ranges
+
+
+def _text_offset_to_seconds(
+    span: _CaptionTextSpan,
+    offset: int,
+) -> float:
+    """Convert a character offset inside one cue to an approximate timestamp."""
+    cue_text_length = span.end_offset - span.start_offset
+    relative_offset = min(max(offset - span.start_offset, 0), cue_text_length)
+    ratio = relative_offset / cue_text_length
+    cue = span.cue
+    return cue.start_seconds + (cue.end_seconds - cue.start_seconds) * ratio
+
+
+def _map_sentence_to_cues(
+    text: str,
+    sentence_start: int,
+    sentence_end: int,
+    spans: list[_CaptionTextSpan],
+) -> list[TranscriptSegment]:
+    """Map one sentence back to the text and timing of its source cues."""
+    pieces: list[TranscriptSegment] = []
+    for span in spans:
+        content_start = max(sentence_start, span.start_offset)
+        content_end = min(sentence_end, span.end_offset)
+        if content_start >= content_end:
+            continue
+
+        pieces.append(
+            TranscriptSegment(
+                start_seconds=_text_offset_to_seconds(span, content_start),
+                end_seconds=_text_offset_to_seconds(span, content_end),
+                content_en=text[content_start:content_end],
+            )
+        )
+    return pieces
+
+
+def _pack_sentence_cues(
+    pieces: list[TranscriptSegment],
+) -> list[TranscriptSegment]:
+    """Merge sentence pieces, splitting only when a display limit is reached."""
+    segments: list[TranscriptSegment] = []
+    current: TranscriptSegment | None = None
+
+    for piece in pieces:
+        if current is None:
+            current = piece
         else:
             current = replace(
                 current,
-                end_seconds=max(current.end_seconds, end),
-                content_en=f"{current.content_en} {text}",
+                end_seconds=max(current.end_seconds, piece.end_seconds),
+                content_en=f"{current.content_en} {piece.content_en}",
             )
 
-        is_complete = (
-            _SENTENCE_END_RE.search(current.content_en)
-            or current.end_seconds - current.start_seconds >= _MAX_SEGMENT_SECONDS
+        if (
+            current.end_seconds - current.start_seconds >= _MAX_SEGMENT_SECONDS
             or len(current.content_en.split()) >= _MAX_SEGMENT_WORDS
-        )
-        if is_complete:
+        ):
             segments.append(current)
             current = None
 
     if current is not None:
         segments.append(current)
+    return segments
 
+
+def _segment_cue_group(
+    cues: list[TranscriptSegment],
+) -> list[TranscriptSegment]:
+    """Split one continuous speech group into timed English sentences."""
+    text, spans = _join_cues_with_spans(cues)
+    segments: list[TranscriptSegment] = []
+
+    for sentence_start, sentence_end in _find_sentence_ranges(text):
+        pieces = _map_sentence_to_cues(
+            text,
+            sentence_start,
+            sentence_end,
+            spans,
+        )
+        segments.extend(_pack_sentence_cues(pieces))
+
+    return segments
+
+
+def _group_transcript(raw_snippets: list[dict[str, Any]]) -> list[TranscriptSegment]:
+    """Convert raw YouTube caption cues into readable timed sentences."""
+    cues = _prepare_transcript_cues(raw_snippets)
+    segments = [
+        segment
+        for group in _split_cues_on_silence(cues)
+        for segment in _segment_cue_group(group)
+    ]
     return _trim_overlapping_segment_ends(segments)
 
 

@@ -7,7 +7,8 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from youtube_transcript_api import RequestBlocked, TranscriptsDisabled
 
-from app.api.v1.endpoint.lesson import delete_lesson
+from app.api.v1.endpoint.lesson import delete_lesson, list_lessons as list_lessons_endpoint
+from app.features.lesson.schemas import LessonPaginationFilter
 from app.features.lesson.service import (
     LessonService,
     _build_lesson_detail_response,
@@ -133,9 +134,27 @@ def test_group_transcript_removes_inline_non_speech_cues():
     segments = _group_transcript(raw_snippets)
 
     assert [segment.content_en for segment in segments] == [
-        "World Cup. Put your flags up in the air.",
+        "World Cup.",
+        "Put your flags up in the air.",
         "Put your hands up in the air.",
     ]
+
+
+def test_group_transcript_handles_abbreviation_across_cues():
+    raw_snippets = [
+        {"text": "Mr.", "start": 0.0, "duration": 0.4},
+        {"text": "Smith teaches English.", "start": 0.4, "duration": 2.6},
+        {"text": "He lives in the U.S.", "start": 3.0, "duration": 2.0},
+    ]
+
+    segments = _group_transcript(raw_snippets)
+
+    assert [segment.content_en for segment in segments] == [
+        "Mr. Smith teaches English.",
+        "He lives in the U.S.",
+    ]
+    assert segments[0].start_seconds == 0.0
+    assert segments[0].end_seconds == 3.0
 
 
 def test_group_transcript_handles_overlapping_youtube_shorts_cues():
@@ -217,6 +236,56 @@ def test_lesson_detail_returns_every_subtitle_in_sequence_order():
     assert response.subtitle_count == 2
     assert [subtitle.id for subtitle in response.subtitles] == [1, 2]
     assert response.subtitles[0].start_ms == 0
+
+
+def test_list_lessons_returns_page_data_total_and_pages():
+    lesson = SimpleNamespace(
+        id=1,
+        title="Sample lesson",
+        slug="sample-lesson",
+        video_provider="youtube",
+        video_id="video-123",
+        thumbnail_url=None,
+        duration_seconds=30,
+        difficulty="A1",
+    )
+    session = SimpleNamespace(
+        exec=AsyncMock(
+            side_effect=[
+                SimpleNamespace(one=lambda: 21),
+                SimpleNamespace(all=lambda: [(lesson, 3)]),
+            ]
+        )
+    )
+    filters = LessonPaginationFilter(page=2, page_size=10)
+
+    lessons, total, pages = asyncio.run(
+        LessonService.list_lessons(filters, session)
+    )
+
+    assert total == 21
+    assert pages == 3
+    assert len(lessons) == 1
+    assert lessons[0].subtitle_count == 3
+
+
+def test_list_lessons_endpoint_builds_pagination_metadata(monkeypatch):
+    list_records = AsyncMock(return_value=([], 21, 3))
+    monkeypatch.setattr(
+        "app.api.v1.endpoint.lesson.LessonService.list_lessons",
+        list_records,
+    )
+    filters = LessonPaginationFilter(page=2, page_size=10)
+    session = SimpleNamespace()
+
+    response = asyncio.run(list_lessons_endpoint(filters, session))
+
+    list_records.assert_awaited_once_with(filters, session)
+    assert response.data == []
+    assert response.metadata.total == 21
+    assert response.metadata.page == 2
+    assert response.metadata.page_size == 10
+    assert response.metadata.pages == 3
 
 
 def test_save_imported_lesson_flushes_inside_transaction():

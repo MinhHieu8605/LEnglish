@@ -63,6 +63,13 @@ class LessonSummaryResponse(BaseModel):
     subtitle_count: int
 
 
+class LessonPaginationFilter(BaseModel):
+    """Pagination parameters for the lesson catalog."""
+
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=20, ge=1, le=100)
+
+
 class LessonListMeta(BaseModel):
     total: int
     page: int
@@ -72,4 +79,4 @@ class LessonListMeta(BaseModel):
 
 class LessonListResponse(BaseModel):
     data: List[LessonSummaryResponse]
-    meta: LessonListMeta
+    metadata: LessonListMeta

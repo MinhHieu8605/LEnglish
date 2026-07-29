@@ -18,9 +18,8 @@ from app.database.async_db import (
 )
 from app.features.lesson.model import Category, Lesson, Subtitle
 from app.features.lesson.schemas import (
-    LessonListMeta,
-    LessonListResponse,
     LessonDetailResponse,
+    LessonPaginationFilter,
     LessonSubtitleResponse,
     LessonSummaryResponse,
     YouTubeLessonImportRequest,
@@ -89,7 +88,7 @@ def _build_lesson_summary_response(
     )
 
 
-async def _validate_import_target(
+async def _validate_import(
     video_id: str,
     category_id: int | None,
     session: AsyncSession,
@@ -238,53 +237,41 @@ class LessonService(object):
 
     @staticmethod
     async def list_lessons(
-        page: int,
-        page_size: int,
+        filters: LessonPaginationFilter,
         session: AsyncSession,
-    ) -> LessonListResponse:
+    ) -> tuple[list[LessonSummaryResponse], int, int]:
         """
         List all lessons with their summary and subtitle count.
 
         Args:
-            page (int): Page number for pagination.
-            page_size (int): Number of lessons per page.
+            filters (LessonPaginationFilter): Pagination parameters.
             session (AsyncSession): Active database session.
 
         Returns:
-            LessonListResponse: Paginated lesson summaries with metadata.
+            tuple[list[LessonSummaryResponse], int, int]: Page items, total
+                lesson count, and total page count.
         """
         published_condition = Lesson.status == ContentStatus.PUBLISHED.value
-        total = (
-            await session.exec(
-                select(func.count(Lesson.id)).where(published_condition)
-            )
-        ).one()
-        offset, limit = page_size_to_offset_limit(page, page_size)
-
-        rows = (
-            await session.exec(
-                select(Lesson, func.count(Subtitle.id))
-                .outerjoin(Subtitle, Subtitle.lesson_id == Lesson.id)
-                .where(published_condition)
-                .group_by(Lesson.id)
-                .order_by(Lesson.published_at.desc(), Lesson.id.desc())
-                .offset(offset)
-                .limit(limit)
-            )
-        ).all()
-
-        return LessonListResponse(
-            data=[
-                _build_lesson_summary_response(lesson, subtitle_count)
-                for lesson, subtitle_count in rows
-            ],
-            meta=LessonListMeta(
-                total=total,
-                page=page,
-                page_size=page_size,
-                pages=-(-total // page_size) if total else 0,
-            ),
+        query = (
+            select(Lesson, func.count(Subtitle.id))
+            .outerjoin(Subtitle, Subtitle.lesson_id == Lesson.id)
+            .where(published_condition)
+            .group_by(Lesson.id)
+            .order_by(Lesson.published_at.desc(), Lesson.id.desc())
         )
+        count_query = select(func.count(Lesson.id)).where(published_condition)
+        total = (await session.exec(count_query)).one()
+
+        pages = -(-total // filters.page_size) if total else 0
+        offset, limit = page_size_to_offset_limit(filters.page, filters.page_size)
+        query = query.offset(offset).limit(limit)
+
+        rows = (await session.exec(query)).all()
+        lessons = [
+            _build_lesson_summary_response(lesson, subtitle_count)
+            for lesson, subtitle_count in rows
+        ]
+        return lessons, total, pages
 
     @staticmethod
     async def import_youtube(
@@ -297,7 +284,7 @@ class LessonService(object):
             data.video_url,
             data.translate_to_vi,
         )
-        await _validate_import_target(source.video_id, data.category_id, session)
+        await _validate_import(source.video_id, data.category_id, session)
         title = _resolve_title(data.title, source.title)
         slug = await _create_unique_slug(title, source.video_id, session)
         lesson = _build_youtube_lesson(user_id, data, source, title, slug)

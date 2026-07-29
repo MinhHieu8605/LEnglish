@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import get_session
 from app.features.lesson.schemas import (
-    LessonListResponse,
     LessonDetailResponse,
+    LessonListMeta,
+    LessonListResponse,
+    LessonPaginationFilter,
     YouTubeLessonImportRequest,
 )
 from app.features.lesson.service import LessonService
@@ -21,11 +23,19 @@ router = APIRouter()
     summary="List imported video lessons",
 )
 async def list_lessons(
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=20, ge=1, le=100),
+    filters: LessonPaginationFilter = Depends(),
     session: AsyncSession = Depends(get_session),
-):
-    return await LessonService.list_lessons(page, page_size, session)
+) -> LessonListResponse:
+    lessons, total, pages = await LessonService.list_lessons(filters, session)
+    return LessonListResponse(
+        data=lessons,
+        metadata=LessonListMeta(
+            total=total,
+            page=filters.page,
+            page_size=filters.page_size,
+            pages=pages,
+        ),
+    )
 
 
 @router.post(
