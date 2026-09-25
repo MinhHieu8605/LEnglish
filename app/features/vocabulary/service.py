@@ -9,10 +9,10 @@ from app.database.async_db import async_get_many_records_by, async_get_one_recor
 from app.features.vocabulary.model import (
     Vocabulary,
     VocabularyBook,
-    VocabularyProgress,
     VocabularyTopic,
     VocabularyTopicWord,
 )
+from app.features.practice.model import PracticeProgress
 from app.features.vocabulary.schemas import (
     TopicWordResponse,
     VocabularyTopicResponse,
@@ -35,16 +35,16 @@ def _build_topic_response(
         slug=topic.slug,
         order_num=topic.order_num,
         word_count=word_count,
-        mastered_word=mastered_count,
-        learning_word=learning_count,
-        new_word=new_count,
+        mastered_word_count=mastered_count,
+        learning_word_count=learning_count,
+        new_word_count=new_count,
     )
 
 
 def _build_topic_word_response(
     vocab: Vocabulary,
     order_num: int,
-    progress: Optional[VocabularyProgress] = None,
+    progress: Optional[PracticeProgress] = None,
 ) -> TopicWordResponse:
     """Build a curated-topic word with optional user progress."""
     return TopicWordResponse(
@@ -98,14 +98,14 @@ class VocabularyService(object):
                     VocabularyTopic,
                     func.count(VocabularyTopicWord.id).label("word_count"),
                     func.count(
-                        case((VocabularyProgress.status == WordStatus.MASTERED.value, 1))
+                        case((PracticeProgress.status == WordStatus.MASTERED.value, 1))
                     ).label("mastered_count"),
                     func.count(
                         case(
                             (
-                                (VocabularyProgress.status == WordStatus.LEARNING.value)
+                                (PracticeProgress.status == WordStatus.LEARNING.value)
                                 | (
-                                    VocabularyProgress.status
+                                    PracticeProgress.status
                                     == WordStatus.REVIEW.value
                                 ),
                                 1,
@@ -117,9 +117,9 @@ class VocabularyService(object):
                             (
                                 VocabularyTopicWord.id.is_not(None)
                                 & (
-                                    VocabularyProgress.id.is_(None)
+                                    PracticeProgress.id.is_(None)
                                     | (
-                                        VocabularyProgress.status
+                                        PracticeProgress.status
                                         == WordStatus.NEW.value
                                     )
                                 ),
@@ -135,12 +135,12 @@ class VocabularyService(object):
                     isouter=True,
                 )
                 .join(
-                    VocabularyProgress,
+                    PracticeProgress,
                     (
-                        VocabularyProgress.vocabulary_id
+                        PracticeProgress.vocabulary_id
                         == VocabularyTopicWord.vocabulary_id
                     )
-                    & (VocabularyProgress.user_id == user_id),
+                    & (PracticeProgress.user_id == user_id),
                     isouter=True,
                 )
                 .group_by(VocabularyTopic.id)
@@ -188,15 +188,15 @@ class VocabularyService(object):
 
         rows = (
             await session.exec(
-                select(Vocabulary, VocabularyTopicWord.order_num, VocabularyProgress)
+                select(Vocabulary, VocabularyTopicWord.order_num, PracticeProgress)
                 .join(
                     VocabularyTopicWord,
                     VocabularyTopicWord.vocabulary_id == Vocabulary.id,
                 )
                 .join(
-                    VocabularyProgress,
-                    (VocabularyProgress.vocabulary_id == Vocabulary.id)
-                    & (VocabularyProgress.user_id == user_id),
+                    PracticeProgress,
+                    (PracticeProgress.vocabulary_id == Vocabulary.id)
+                    & (PracticeProgress.user_id == user_id),
                     isouter=True,
                 )
                 .where(VocabularyTopicWord.topic_id == topic.id)
@@ -204,6 +204,51 @@ class VocabularyService(object):
             )
         ).all()
 
+        return [
+            _build_topic_word_response(vocab, order_num, progress)
+            for vocab, order_num, progress in rows
+        ]
+
+    @staticmethod
+    async def get_book_topic_words(
+        user_id: int, book_slug: str, topic_slug: str, session: AsyncSession
+    ) -> List[TopicWordResponse]:
+        """Fetch topic words only when the topic belongs to the requested book."""
+        topic = (
+            await session.exec(
+                select(VocabularyTopic)
+                .join(VocabularyBook, VocabularyTopic.book_id == VocabularyBook.id)
+                .where(
+                    VocabularyBook.slug == book_slug,
+                    VocabularyTopic.slug == topic_slug,
+                    VocabularyBook.deleted.is_(False),
+                )
+            )
+        ).first()
+        
+        if not topic:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Vocabulary topic not found",
+            )
+
+        rows = (
+            await session.exec(
+                select(Vocabulary, VocabularyTopicWord.order_num, PracticeProgress)
+                .join(
+                    VocabularyTopicWord,
+                    VocabularyTopicWord.vocabulary_id == Vocabulary.id,
+                )
+                .join(
+                    PracticeProgress,
+                    (PracticeProgress.vocabulary_id == Vocabulary.id)
+                    & (PracticeProgress.user_id == user_id),
+                    isouter=True,
+                )
+                .where(VocabularyTopicWord.topic_id == topic.id)
+                .order_by(VocabularyTopicWord.order_num.asc())
+            )
+        ).all()
         return [
             _build_topic_word_response(vocab, order_num, progress)
             for vocab, order_num, progress in rows

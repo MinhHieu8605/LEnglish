@@ -21,8 +21,9 @@ class User(Base, TimeStampMixin):
         deleted (bool): Indicates whether the user has been deleted.
     """
     __tablename__ = "User"
+    __table_args__ = (UniqueConstraint("email", name="uq_users_email"),)
     id = Column(Integer, autoincrement=True, primary_key=True)
-    email = Column(UnicodeText, nullable=False, unique=True)
+    email = Column(UnicodeText, nullable=False)
     password = Column(String, default="")
     full_name = Column(String)
     avatar_url = Column(String)
@@ -54,11 +55,12 @@ class User(Base, TimeStampMixin):
     tokens = relationship("Token", back_populates="user", cascade="all, delete-orphan")
     roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
     preferences = relationship("UserPreferences", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    learning_progress = relationship("LearningProgress", back_populates="user", cascade="all, delete-orphan")
-    practice_sessions = relationship("PracticeSession", back_populates="user", cascade="all, delete-orphan")
+    lesson_progress = relationship("LessonProgress", back_populates="user", cascade="all, delete-orphan")
+    lesson_sessions = relationship("LessonSession", back_populates="user", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     notebooks = relationship("Notebook", back_populates="user", cascade="all, delete-orphan")
-    vocabulary_progress = relationship("VocabularyProgress", back_populates="user", cascade="all, delete-orphan")
+    practice_progress = relationship("PracticeProgress", back_populates="user", cascade="all, delete-orphan")
+    vocabulary_practice_sessions = relationship("PracticeSession", back_populates="user", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
 
 

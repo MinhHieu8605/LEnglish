@@ -16,10 +16,24 @@ For detailed help on each command, use:
 
 import psycopg2
 import click
+from psycopg2 import sql
 
 from app.config.settings import Database
 from app.database.async_db import get_engine
 from app.database.model import Base
+from app.features.conversation import model as _conversation_model
+from app.features.dictionary import model as _dictionary_model
+from app.features.engagement import model as _engagement_model
+from app.features.feedback import model as _feedback_model
+from app.features.learning import model as _learning_model
+from app.features.lesson import model as _lesson_model
+from app.features.notifications import model as _notification_model
+from app.features.practice import model as _practice_model
+from app.features.preferences import model as _preferences_model
+from app.features.token import model as _token_model
+from app.features.user import model as _user_model
+from app.features.vocabulary import model as _vocabulary_model
+from app.features.wordlist import model as _wordlist_model
 
 db = Database()
 
@@ -56,7 +70,9 @@ def init_database():
             cursor.execute("SELECT 1 FROM pg_catalog.pg_database WHERE datname = %s;", (db.db_name,))
             exists = cursor.fetchone()
             if not exists:
-                cursor.execute(f'CREATE DATABASE "{db.db_name}";')
+                cursor.execute(
+                    sql.SQL("CREATE DATABASE {};").format(sql.Identifier(db.db_name))
+                )
                 click.secho(f"Database '{db.db_name}' created.", fg="green")
             else:
                 click.secho(f"Database '{db.db_name}' already exists.", fg="green")

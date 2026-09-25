@@ -43,6 +43,24 @@ async def get_book_topics(
 
 
 @router.get(
+    "/books/{book_slug}/topics/{topic_slug}/words",
+    response_model=List[TopicWordResponse],
+    summary="Get words in a book topic with user progress",
+)
+async def get_book_topic_words(
+    request: Request,
+    book_slug: str,
+    topic_slug: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get words only when both slugs identify the same active book/topic."""
+    user_id = get_user_id_from_request(request)
+    return await VocabularyService.get_book_topic_words(
+        user_id, book_slug, topic_slug, session
+    )
+
+
+@router.get(
     "/topics/{topic_slug}/words",
     response_model=List[TopicWordResponse],
     summary="Get topic words with user progress",

@@ -1,6 +1,5 @@
-from datetime import datetime, timedelta, timezone
-from math import ceil
-from typing import List, Tuple
+from datetime import datetime, timezone
+from typing import List, Optional, Tuple
 
 from fastapi import HTTPException, status
 from sqlalchemy import func
@@ -18,8 +17,11 @@ from app.database.async_db import (
 from app.features.lesson.model import Subtitle
 from app.features.vocabulary.model import (
     Vocabulary,
-    VocabularyProgress,
-    VocabularyReviewLog,
+)
+from app.features.practice.model import PracticeAttempt, PracticeProgress
+from app.features.practice.srs import (
+    PracticeProgressState,
+    calculate_review_schedule,
 )
 from app.features.wordlist.model import Notebook, NotebookItem
 from app.features.wordlist.schemas import (
@@ -35,56 +37,8 @@ from app.utils.common import page_size_to_offset_limit
 from app.utils.constants import ReviewRating, WordStatus
 
 
-_SRS_INTERVAL_STEPS = [1, 3, 5, 8, 15, 21]
-_MIN_EASE_FACTOR = 1.30
-_MAX_INTERVAL_DAYS = 365
-_AGAIN_DELAY = timedelta(minutes=10)
-_HARD_DELAY = timedelta(hours=12)
-
-
-def _next_good_interval(
-    repetition_count: int, 
-    current_interval: int, 
-    ease_factor: float
-) -> int:
-    """
-    Calculate the next interval for a Good review.
-
-    Args:
-        repetition_count (int): Number of successful reviews including the
-            current review.
-        current_interval (int): Current review interval in days.
-        ease_factor (float): Multiplier used after all fixed steps are passed.
-
-    Returns:
-        int: Next review interval in days, capped at the maximum interval.
-    """
-    if repetition_count <= len(_SRS_INTERVAL_STEPS):
-        return _SRS_INTERVAL_STEPS[repetition_count - 1]
-
-    interval = ceil(max(current_interval, _SRS_INTERVAL_STEPS[-1]) * ease_factor)  # _SRS_INTERVAL_STEPS[-1] is the last fixed step (21 days)
-    return min(interval, _MAX_INTERVAL_DAYS)
-
-
-def _status_for_interval(interval_days: int) -> str:
-    """
-    Map a review interval to its learning status.
-
-    Args:
-        interval_days (int): Scheduled interval in days.
-
-    Returns:
-        str: Learning, review, or mastered status value.
-    """
-    if interval_days >= _SRS_INTERVAL_STEPS[-1]:
-        return WordStatus.MASTERED.value
-    if interval_days >= 1:
-        return WordStatus.REVIEW.value
-    return WordStatus.LEARNING.value
-
-
 def _calculate_srs_schedule(
-    progress: VocabularyProgress,
+    progress: PracticeProgress,
     rating: ReviewRating,
     reviewed_at: datetime,
 ) -> dict:
@@ -92,61 +46,28 @@ def _calculate_srs_schedule(
     Calculate the next SRS state for a reviewed word.
 
     Args:
-        progress (VocabularyProgress): Current progress of the vocabulary.
+        progress (PracticeProgress): Current progress of the vocabulary.
         rating (ReviewRating): User-selected Again, Hard, Good, or Easy rating.
         reviewed_at (datetime): Time at which the review was submitted.
 
     Returns:
         dict: Fields used to update the vocabulary progress record.
     """
-    repetition_count = int(progress.repetition_count)
-    current_interval = int(progress.interval_days)
-    ease_factor = float(progress.ease_factor)
-
-    if rating == ReviewRating.AGAIN:
-        return {
-            "repetition_count": 0,
-            "interval_days": 0,
-            "ease_factor": max(_MIN_EASE_FACTOR, round(ease_factor - 0.20, 2)),
-            "next_review_at": reviewed_at + _AGAIN_DELAY,
-            "status": WordStatus.LEARNING.value,
-        }
-
-    if rating == ReviewRating.HARD:
-        ease_factor = max(_MIN_EASE_FACTOR, round(ease_factor - 0.15, 2))
-        if current_interval <= 1:
-            return {
-                "repetition_count": repetition_count,
-                "interval_days": 0,
-                "ease_factor": ease_factor,
-                "next_review_at": reviewed_at + _HARD_DELAY,
-                "status": WordStatus.LEARNING.value,
-            }
-
-        interval_days = min(
-            max(current_interval + 1, ceil(current_interval * 1.20)),
-            _MAX_INTERVAL_DAYS,
-        )
-    else:
-        repetition_count += 1
-        interval_days = _next_good_interval(
-            repetition_count, current_interval, ease_factor
-        )
-        if rating == ReviewRating.EASY:
-            ease_factor = round(ease_factor + 0.15, 2)
-            if repetition_count > 1:
-                interval_days = min(
-                    max(interval_days + 1, ceil(interval_days * 1.30)),
-                    _MAX_INTERVAL_DAYS,
-                )
-
-    review_base = reviewed_at.replace(hour=0, minute=0, second=0, microsecond=0)
+    schedule = calculate_review_schedule(
+        PracticeProgressState(
+            repetition_count=progress.repetition_count,
+            interval_days=progress.interval_days,
+            ease_factor=float(progress.ease_factor),
+        ),
+        rating,
+        reviewed_at,
+    )
     return {
-        "repetition_count": repetition_count,
-        "interval_days": interval_days,
-        "ease_factor": ease_factor,
-        "next_review_at": review_base + timedelta(days=interval_days),
-        "status": _status_for_interval(interval_days),
+        "repetition_count": schedule.repetition_count,
+        "interval_days": schedule.interval_days,
+        "ease_factor": schedule.ease_factor,
+        "next_review_at": schedule.next_review_at,
+        "status": schedule.status,
     }
 
 
@@ -280,7 +201,7 @@ def _build_saved_word_response(
 
 def _build_saved_word_review_response(
     vocab: Vocabulary,
-    progress: VocabularyProgress,
+    progress: PracticeProgress,
     item: NotebookItem,
 ) -> SavedWordReviewResponse:
     """
@@ -288,7 +209,7 @@ def _build_saved_word_review_response(
 
     Args:
         vocab (Vocabulary): Vocabulary data shared by all users.
-        progress (VocabularyProgress): User-specific SRS progress.
+        progress (PracticeProgress): User-specific SRS progress.
         item (NotebookItem): User-specific saved-word data.
 
     Returns:
@@ -456,17 +377,17 @@ class WordListService(object):
                 )
 
             progress = await async_get_one_record_by(
-                VocabularyProgress,
+                PracticeProgress,
                 [
-                    VocabularyProgress.user_id == user_id,
-                    VocabularyProgress.vocabulary_id == vocab.id,
+                    PracticeProgress.user_id == user_id,
+                    PracticeProgress.vocabulary_id == vocab.id,
                 ],
                 session,
                 raise_if_not_found=False,
             )
             if not progress:
                 progress = await async_create_record(
-                    VocabularyProgress,
+                    PracticeProgress,
                     {"user_id": user_id, "vocabulary_id": vocab.id},
                     session,
                 )
@@ -535,6 +456,7 @@ class WordListService(object):
         vocabulary_id: int,
         rating: ReviewRating,
         session: AsyncSession,
+        attempt_id: Optional[str] = None,
     ) -> SavedWordReviewResponse:
         """
         Update SRS progress for a word in the selected word list.
@@ -556,18 +478,18 @@ class WordListService(object):
 
         row = (
             await session.exec(
-                select(VocabularyProgress, Vocabulary, NotebookItem)
+                select(PracticeProgress, Vocabulary, NotebookItem)
                 .join(
                     Vocabulary, 
-                    VocabularyProgress.vocabulary_id == Vocabulary.id
+                    PracticeProgress.vocabulary_id == Vocabulary.id
                 )
                 .join(
                     NotebookItem,
                     NotebookItem.vocabulary_id == Vocabulary.id,
                 )
                 .where(
-                    VocabularyProgress.user_id == user_id,
-                    VocabularyProgress.vocabulary_id == vocabulary_id,
+                    PracticeProgress.user_id == user_id,
+                    PracticeProgress.vocabulary_id == vocabulary_id,
                     NotebookItem.notebook_id == word_list_id,
                 )
             )
@@ -580,11 +502,43 @@ class WordListService(object):
             )
         progress, vocab, item = row
 
+        if attempt_id:
+            existing = await async_get_one_record_by(
+                PracticeAttempt,
+                [
+                    PracticeAttempt.practice_progress_id == progress.id,
+                    PracticeAttempt.attempt_id == attempt_id,
+                ],
+                session,
+                raise_if_not_found=False,
+            )
+            if existing:
+                return _build_saved_word_review_response(vocab, progress, item)
+
+            belongs_elsewhere = (
+                await session.exec(
+                    select(PracticeAttempt, PracticeProgress)
+                    .join(
+                        PracticeProgress,
+                        PracticeAttempt.practice_progress_id == PracticeProgress.id,
+                    )
+                    .where(
+                        PracticeAttempt.attempt_id == attempt_id,
+                        PracticeProgress.user_id == user_id,
+                    )
+                )
+            ).first()
+            if belongs_elsewhere and belongs_elsewhere[1].vocabulary_id != vocabulary_id:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="attempt_id belongs to another vocabulary",
+                )
+
         now = datetime.now(timezone.utc)
         schedule = _calculate_srs_schedule(progress, rating, now)
 
         progress = await async_update_one_record(
-            VocabularyProgress,
+            PracticeProgress,
             progress.id,
             {
                 **schedule,
@@ -593,9 +547,10 @@ class WordListService(object):
             session,
         )
         await async_create_record(
-            VocabularyReviewLog,
+            PracticeAttempt,
             {
-                "vocabulary_progress_id": progress.id,
+                "practice_progress_id": progress.id,
+                "attempt_id": attempt_id,
                 "rating": rating.value,
                 "reviewed_at": now,
             },
@@ -632,12 +587,12 @@ class WordListService(object):
 
         due_conditions = [
             NotebookItem.notebook_id == word_list_id,
-            VocabularyProgress.user_id == user_id,
+            PracticeProgress.user_id == user_id,
             or_(
-                VocabularyProgress.next_review_at <= now,
-                VocabularyProgress.next_review_at.is_(None),
+                PracticeProgress.next_review_at <= now,
+                PracticeProgress.next_review_at.is_(None),
             ),
-            VocabularyProgress.status != WordStatus.IGNORED.value,
+            PracticeProgress.status != WordStatus.IGNORED.value,
         ]
 
         total_due = (
@@ -645,9 +600,9 @@ class WordListService(object):
                 select(func.count(NotebookItem.id))
                 .join(Vocabulary, NotebookItem.vocabulary_id == Vocabulary.id)
                 .join(
-                    VocabularyProgress,
-                    (VocabularyProgress.vocabulary_id == Vocabulary.id)
-                    & (VocabularyProgress.user_id == user_id),
+                    PracticeProgress,
+                    (PracticeProgress.vocabulary_id == Vocabulary.id)
+                    & (PracticeProgress.user_id == user_id),
                 )
                 .where(*due_conditions)
             )
@@ -656,15 +611,15 @@ class WordListService(object):
         pages = -(-total_due // filters.page_size)
         offset, limit = page_size_to_offset_limit(filters.page, filters.page_size)
         query = (
-            select(Vocabulary, VocabularyProgress, NotebookItem)
+            select(Vocabulary, PracticeProgress, NotebookItem)
             .join(NotebookItem, NotebookItem.vocabulary_id == Vocabulary.id)
             .join(
-                VocabularyProgress,
-                (VocabularyProgress.vocabulary_id == Vocabulary.id)
-                & (VocabularyProgress.user_id == user_id),
+                PracticeProgress,
+                (PracticeProgress.vocabulary_id == Vocabulary.id)
+                & (PracticeProgress.user_id == user_id),
             )
             .where(*due_conditions)
-            .order_by(VocabularyProgress.next_review_at.asc().nullsfirst())
+            .order_by(PracticeProgress.next_review_at.asc().nullsfirst())
             .offset(offset)
             .limit(limit)
         )

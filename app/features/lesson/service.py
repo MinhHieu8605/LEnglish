@@ -138,9 +138,12 @@ async def _create_unique_slug(
     session: AsyncSession,
 ) -> str:
     slug = (_slugify(title) or f"youtube-{video_id}")[:255]
-    slug_exists = (
-        await session.exec(select(Lesson.id).where(Lesson.slug == slug))
-    ).first()
+    slug_exists = await async_get_one_record_by(
+        Lesson,
+        [Lesson.slug == slug],
+        session,
+        raise_if_not_found=False,
+    )
     if slug_exists is None:
         return slug
     return f"{slug[:244].rstrip('-')}-{video_id}"
@@ -304,5 +307,3 @@ class LessonService(object):
             session,
             search_criteria=[Lesson.slug == lesson_slug],
         )
-
-        return "Deleted lesson successfully"

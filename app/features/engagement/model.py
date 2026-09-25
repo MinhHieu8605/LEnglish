@@ -15,7 +15,7 @@ class ActivityEvent(Base, TimeStampMixin):
         type (str): Activity type (lesson_viewed, practice_completed, etc.).
         lesson_id (int): Related lesson identifier (optional).
         vocabulary_id (int): Related vocabulary identifier (optional).
-        practice_session_id (int): Related practice session identifier (optional).
+        lesson_session_id (int): Related lesson session identifier (optional).
         conversation_id (int): Related conversation identifier (optional).
         duration_seconds (int): Activity duration in seconds.
         xp_earned (int): Experience points earned.
@@ -32,7 +32,7 @@ class ActivityEvent(Base, TimeStampMixin):
     type = Column(String, nullable=False)
     lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="SET NULL"), nullable=True)
     vocabulary_id = Column(Integer, ForeignKey("Vocabulary.id", ondelete="SET NULL"), nullable=True)
-    practice_session_id = Column(Integer, ForeignKey("PracticeSession.id", ondelete="SET NULL"), nullable=True)
+    lesson_session_id = Column(Integer, ForeignKey("LessonSession.id", ondelete="SET NULL"), nullable=True)
     conversation_id = Column(Integer, ForeignKey("Conversation.id", ondelete="SET NULL"), nullable=True)
     duration_seconds = Column(Integer, nullable=False, default=0)
     xp_earned = Column(Integer, nullable=False, default=0)
@@ -41,7 +41,7 @@ class ActivityEvent(Base, TimeStampMixin):
     user = relationship("User")
     lesson = relationship("Lesson")
     vocabulary = relationship("Vocabulary")
-    practice_session = relationship("PracticeSession")
+    lesson_session = relationship("LessonSession")
     conversation = relationship("Conversation")
 
 
@@ -61,8 +61,9 @@ class Achievement(Base, TimeStampMixin):
         display_order (int): Display order for sorting.
     """
     __tablename__ = "Achievement"
+    __table_args__ = (UniqueConstraint("code", name="uq_achievements_code"),)
     id = Column(Integer, autoincrement=True, primary_key=True)
-    code = Column(String, nullable=False, unique=True)
+    code = Column(String, nullable=False)
     name = Column(String, nullable=False)
     description = Column(Text)
     icon_url = Column(String)
@@ -106,8 +107,9 @@ class Streak(Base, TimeStampMixin):
         last_active_date (date): Last date user was active.
     """
     __tablename__ = "Streak"
+    __table_args__ = (UniqueConstraint("user_id", name="uq_streaks_user_id"),)
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False, unique=True)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     current_streak = Column(Integer, nullable=False, default=0)
     longest_streak = Column(Integer, nullable=False, default=0)
     last_active_date = Column(Date)

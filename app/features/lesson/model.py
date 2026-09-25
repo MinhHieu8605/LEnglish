@@ -19,10 +19,11 @@ class Category(Base, TimeStampMixin):
         is_active (bool): Whether the category is active.
     """
     __tablename__ = "Category"
+    __table_args__ = (UniqueConstraint("slug", name="uq_categories_slug"),)
     id = Column(Integer, autoincrement=True, primary_key=True)
     parent_id = Column(Integer, ForeignKey("Category.id", ondelete="SET NULL"), nullable=True)
     name = Column(String, nullable=False)
-    slug = Column(String, nullable=False, unique=True)
+    slug = Column(String, nullable=False)
     description = Column(Text)
     display_order = Column(Integer, nullable=False, default=0)
     is_active = Column(Boolean, nullable=False, default=True)
@@ -43,9 +44,10 @@ class Tag(Base, TimeStampMixin):
         type (str): The tag type (topic, skill, accent, source, grammar).
     """
     __tablename__ = "Tag"
+    __table_args__ = (UniqueConstraint("slug", name="uq_tags_slug"),)
     id = Column(Integer, autoincrement=True, primary_key=True)
     name = Column(String, nullable=False)
-    slug = Column(String, nullable=False, unique=True)
+    slug = Column(String, nullable=False)
     type = Column(String, nullable=False, default=TagType.TOPIC.value)
 
     lesson_tags = relationship("LessonTag", back_populates="tag", cascade="all, delete-orphan")
@@ -76,6 +78,7 @@ class Lesson(Base, TimeStampMixin):
     """
     __tablename__ = "Lesson"
     __table_args__ = (
+        UniqueConstraint("slug", name="uq_lessons_slug"),
         UniqueConstraint("video_provider", "video_id", name="uq_lessons_video_provider_video_id"),
         Index("lessons_idx", "status", "published_at"),
         Index("lessons_category_idx", "category_id", "status"),
@@ -85,7 +88,7 @@ class Lesson(Base, TimeStampMixin):
     id = Column(Integer, autoincrement=True, primary_key=True)
     category_id = Column(Integer, ForeignKey("Category.id", ondelete="SET NULL"), nullable=True)
     title = Column(String, nullable=False)
-    slug = Column(String, nullable=False, unique=True)
+    slug = Column(String, nullable=False)
     description = Column(Text)
     video_provider = Column(String, nullable=False, default="youtube")
     video_id = Column(String, nullable=False)
@@ -103,8 +106,8 @@ class Lesson(Base, TimeStampMixin):
     lesson_tags = relationship("LessonTag", back_populates="lesson", cascade="all, delete-orphan")
     tags = relationship("Tag", secondary=lambda: LessonTag.__table__, back_populates="lessons", viewonly=True)
     subtitles = relationship("Subtitle", back_populates="lesson", cascade="all, delete-orphan", order_by="Subtitle.sequence")
-    learning_progress = relationship("LearningProgress", back_populates="lesson", cascade="all, delete-orphan")
-    practice_sessions = relationship("PracticeSession", back_populates="lesson", cascade="all, delete-orphan")
+    lesson_progress = relationship("LessonProgress", back_populates="lesson", cascade="all, delete-orphan")
+    lesson_sessions = relationship("LessonSession", back_populates="lesson", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="lesson")
 
 
@@ -159,4 +162,4 @@ class Subtitle(Base, TimeStampMixin):
 
     lesson = relationship("Lesson", back_populates="subtitles")
     vocabulary_items = relationship("Vocabulary", back_populates="source_subtitle")
-    practice_answers = relationship("PracticeAnswer", back_populates="subtitle")
+    lesson_answers = relationship("LessonAnswer", back_populates="subtitle")

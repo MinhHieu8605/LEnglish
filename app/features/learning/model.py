@@ -1,11 +1,23 @@
-from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint
+)
 from sqlalchemy.orm import relationship
 
 from app.database.model import Base, TimeStampMixin
-from app.utils.constants import PracticeMode, PracticeStatus
+from app.utils.constants import LessonSessionMode, LessonSessionStatus
 
 
-class LearningProgress(Base, TimeStampMixin):
+class LessonProgress(Base, TimeStampMixin):
     """
     Represents a user's progress through a lesson.
 
@@ -18,11 +30,11 @@ class LearningProgress(Base, TimeStampMixin):
         completed_at (datetime): When the lesson was completed.
         last_watched_at (datetime): Last time the lesson was watched.
     """
-    __tablename__ = "LearningProgress"
+    __tablename__ = "LessonProgress"
     __table_args__ = (
-        UniqueConstraint("user_id", "lesson_id", name="uq_learning_progress_user_id_lesson_id"),
+        UniqueConstraint("user_id", "lesson_id", name="uq_lesson_progress_user_id_lesson_id"),
         CheckConstraint("completion_percent >= 0 AND completion_percent <= 100", name="completion_percent_range"),
-        Index("learning_progress_idx", "user_id", "last_watched_at"),
+        Index("lesson_progress_idx", "user_id", "last_watched_at"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -33,11 +45,11 @@ class LearningProgress(Base, TimeStampMixin):
     completed_at = Column(DateTime(timezone=True))
     last_watched_at = Column(DateTime(timezone=True))
 
-    user = relationship("User", back_populates="learning_progress")
-    lesson = relationship("Lesson", back_populates="learning_progress")
+    user = relationship("User", back_populates="lesson_progress")
+    lesson = relationship("Lesson", back_populates="lesson_progress")
 
 
-class PracticeSession(Base, TimeStampMixin):
+class LessonSession(Base, TimeStampMixin):
     """
     Represents a practice session for a lesson.
 
@@ -54,12 +66,12 @@ class PracticeSession(Base, TimeStampMixin):
         started_at (datetime): When the session started.
         completed_at (datetime): When the session completed.
     """
-    __tablename__ = "PracticeSession"
+    __tablename__ = "LessonSession"
     id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="CASCADE"), nullable=False)
-    mode = Column(String, nullable=False, default=PracticeMode.DICTATION.value)
-    status = Column(String, nullable=False, default=PracticeStatus.STARTED.value)
+    mode = Column(String, nullable=False, default=LessonSessionMode.DICTATION.value)
+    status = Column(String, nullable=False, default=LessonSessionStatus.STARTED.value)
     score = Column(Numeric(5, 2))
     correct_count = Column(Integer, nullable=False, default=0)
     total_count = Column(Integer, nullable=False, default=0)
@@ -67,12 +79,12 @@ class PracticeSession(Base, TimeStampMixin):
     started_at = Column(DateTime(timezone=True), nullable=False)
     completed_at = Column(DateTime(timezone=True))
 
-    user = relationship("User", back_populates="practice_sessions")
-    lesson = relationship("Lesson", back_populates="practice_sessions")
-    answers = relationship("PracticeAnswer", back_populates="session", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="lesson_sessions")
+    lesson = relationship("Lesson", back_populates="lesson_sessions")
+    answers = relationship("LessonAnswer", back_populates="session", cascade="all, delete-orphan")
 
 
-class PracticeAnswer(Base, TimeStampMixin):
+class LessonAnswer(Base, TimeStampMixin):
     """
     Represents a user's answer in a practice session.
 
@@ -86,11 +98,11 @@ class PracticeAnswer(Base, TimeStampMixin):
         attempt_count (int): Number of attempts for this question.
         answered_at (datetime): When the answer was submitted.
     """
-    __tablename__ = "PracticeAnswer"
-    __table_args__ = (UniqueConstraint("session_id", "subtitle_id", name="uq_practice_answers_session_id_subtitle_id"),)
+    __tablename__ = "LessonAnswer"
+    __table_args__ = (UniqueConstraint("session_id", "subtitle_id", name="uq_lesson_answers_session_id_subtitle_id"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    session_id = Column(Integer, ForeignKey("PracticeSession.id", ondelete="CASCADE"), nullable=False)
+    session_id = Column(Integer, ForeignKey("LessonSession.id", ondelete="CASCADE"), nullable=False)
     subtitle_id = Column(Integer, ForeignKey("Subtitle.id", ondelete="CASCADE"), nullable=False)
     user_input = Column(Text, nullable=False)
     accuracy_score = Column(Numeric(5, 2))
@@ -98,5 +110,5 @@ class PracticeAnswer(Base, TimeStampMixin):
     attempt_count = Column(Integer, nullable=False, default=1)
     answered_at = Column(DateTime(timezone=True), nullable=False)
 
-    session = relationship("PracticeSession", back_populates="answers")
-    subtitle = relationship("Subtitle", back_populates="practice_answers")
+    session = relationship("LessonSession", back_populates="answers")
+    subtitle = relationship("Subtitle", back_populates="lesson_answers")

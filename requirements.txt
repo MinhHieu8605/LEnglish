@@ -35,9 +35,11 @@ pandas
 openpyxl
 
 # Utilities
+click
 python-dotenv
 loguru
 cachetools
+tzdata
 gunicorn
 
 # Testing

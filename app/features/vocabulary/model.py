@@ -1,9 +1,9 @@
 import sqlalchemy as sa
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint, text
+from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.database.model import Base, TimeStampMixin
-from app.utils.constants import VocabularyBookCategory, WordStatus, WordType
+from app.utils.constants import VocabularyBookCategory
 
 
 class Vocabulary(Base, TimeStampMixin):
@@ -41,67 +41,8 @@ class Vocabulary(Base, TimeStampMixin):
 
     source_subtitle = relationship("Subtitle", back_populates="vocabulary_items")
     notebook_items = relationship("NotebookItem", back_populates="vocabulary", cascade="all, delete-orphan")
-    progress_entries = relationship("VocabularyProgress", back_populates="vocabulary", cascade="all, delete-orphan")
+    practice_progress_entries = relationship("PracticeProgress", back_populates="vocabulary", cascade="all, delete-orphan")
     topic_entries = relationship("VocabularyTopicWord", back_populates="vocabulary", cascade="all, delete-orphan")
-
-
-class VocabularyProgress(Base, TimeStampMixin):
-    """
-    Represents a user's learning progress for a vocabulary word using spaced repetition.
-
-    Attributes:
-        id (int): The unique identifier of the vocabulary progress.
-        user_id (int): The user identifier.
-        vocabulary_id (int): The vocabulary identifier.
-        status (str): Learning status (new, learning, review, mastered, ignored).
-        ease_factor (Decimal): Spaced repetition ease factor.
-        repetition_count (int): Number of times reviewed.
-        interval_days (int): Days until next review.
-        next_review_at (datetime): Next scheduled review time.
-        last_reviewed_at (datetime): Last review time.
-        personal_note (str): User's personal note.
-    """
-    __tablename__ = "VocabularyProgress"
-    __table_args__ = (
-        UniqueConstraint("user_id", "vocabulary_id", name="uq_vocabulary_progress_user_id_vocabulary_id"),
-        Index("vocabulary_progress_idx", "user_id", "status", "next_review_at"),
-    )
-
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
-    vocabulary_id = Column(Integer, ForeignKey("Vocabulary.id", ondelete="CASCADE"), nullable=False)
-    status = Column(String, nullable=False, default=WordStatus.NEW.value)
-    ease_factor = Column(Numeric(4, 2), nullable=False, default=2.50)
-    repetition_count = Column(Integer, nullable=False, default=0)
-    interval_days = Column(Integer, nullable=False, default=0)
-    next_review_at = Column(DateTime(timezone=True))
-    last_reviewed_at = Column(DateTime(timezone=True))
-    personal_note = Column(Text)
-
-    user = relationship("User", back_populates="vocabulary_progress")
-    vocabulary = relationship("Vocabulary", back_populates="progress_entries")
-    review_logs = relationship("VocabularyReviewLog", back_populates="vocabulary_progress", cascade="all, delete-orphan")
-
-
-class VocabularyReviewLog(Base, TimeStampMixin):
-    """
-    Represents a review log entry for vocabulary spaced repetition.
-
-    Attributes:
-        id (int): The unique identifier of the review log.
-        vocabulary_progress_id (int): The vocabulary progress identifier.
-        rating (str): Review rating (again, hard, good, easy).
-        response_ms (int): Response time in milliseconds.
-        reviewed_at (datetime): When the review happened.
-    """
-    __tablename__ = "VocabularyReviewLog"
-    id = Column(Integer, autoincrement=True, primary_key=True)
-    vocabulary_progress_id = Column(Integer, ForeignKey("VocabularyProgress.id", ondelete="CASCADE"), nullable=False)
-    rating = Column(String, nullable=False)
-    response_ms = Column(Integer)
-    reviewed_at = Column(DateTime(timezone=True), nullable=False)
-
-    vocabulary_progress = relationship("VocabularyProgress", back_populates="review_logs")
 
 
 class VocabularyBook(Base, TimeStampMixin):
@@ -157,6 +98,7 @@ class VocabularyTopic(Base, TimeStampMixin):
 
     book = relationship("VocabularyBook", back_populates="topics")
     topic_words = relationship("VocabularyTopicWord", back_populates="topic", cascade="all, delete-orphan")
+    practice_sessions = relationship("PracticeSession", back_populates="topic", cascade="all, delete-orphan")
 
 
 class VocabularyTopicWord(Base):

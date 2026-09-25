@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import Column, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -24,9 +24,10 @@ class Scenario(Base, TimeStampMixin):
         display_order (int): Display order for sorting.
     """
     __tablename__ = "Scenario"
+    __table_args__ = (UniqueConstraint("slug", name="uq_scenarios_slug"),)
     id = Column(Integer, autoincrement=True, primary_key=True)
     title = Column(String, nullable=False)
-    slug = Column(String, nullable=False, unique=True)
+    slug = Column(String, nullable=False)
     description = Column(Text)
     difficulty = Column(String, nullable=False)
     character_name = Column(String)

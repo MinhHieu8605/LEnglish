@@ -143,7 +143,7 @@ async def review_saved_word(
     """
     user_id = get_user_id_from_request(request)
     return await WordListService.review_saved_word(
-        user_id, word_list_id, vocabulary_id, data.rating, session
+        user_id, word_list_id, vocabulary_id, data.rating, session, data.attempt_id
     )
 
 

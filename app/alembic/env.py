@@ -14,21 +14,25 @@ from app.features.user.model import User, UserRole
 from app.features.token.model import Token
 from app.features.preferences.model import UserPreferences
 from app.features.lesson.model import Category, Tag, Lesson, LessonTag, Subtitle
-from app.features.learning.model import LearningProgress, PracticeSession, PracticeAnswer
+from app.features.learning.model import LessonProgress, LessonSession, LessonAnswer
 from app.features.conversation.model import Scenario, Conversation, Message
 from app.features.engagement.model import ActivityEvent, Achievement, AchievementUnlock, Streak
 from app.features.dictionary.model import DictionaryLookup
 from app.features.wordlist.model import Notebook, NotebookItem
 from app.features.vocabulary.model import (
     Vocabulary,
-    VocabularyProgress, 
-    VocabularyReviewLog, 
     VocabularyTopicWord, 
     VocabularyTopic, 
     VocabularyBook
 )
 from app.features.notifications.model import Notification
 from app.features.feedback.model import Feedback
+from app.features.practice.model import (
+    PracticeAttempt,
+    PracticeProgress,
+    PracticeSession,
+    PracticeSessionItem,
+)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

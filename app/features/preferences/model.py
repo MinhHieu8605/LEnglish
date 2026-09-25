@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Time
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Time, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.database.model import Base, TimeStampMixin
@@ -20,8 +20,11 @@ class UserPreferences(Base, TimeStampMixin):
         timezone (str): User's timezone.
     """
     __tablename__ = "UserPreferences"
+    __table_args__ = (
+        UniqueConstraint("user_id", name="uq_user_preferences_user_id"),
+    )
     id = Column(Integer, autoincrement=True, primary_key=True)
-    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False, unique=True)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     subtitle_display = Column(String, nullable=False, default=SubtitleDisplay.BOTH.value)
     daily_goal_minutes = Column(Integer, nullable=False, default=15)
     daily_new_words = Column(Integer, nullable=False, default=5)

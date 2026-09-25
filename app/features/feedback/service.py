@@ -134,7 +134,7 @@ class FeedbackService(object):
             Feedback: The created feedback record.
         """
         user_id = get_user_id_from_request(request)
-        feedback_data = feedback_in.model_dump(exclude={"user_id"})
+        feedback_data = feedback_in.model_dump()
 
         record = await async_create_record(
             Feedback,

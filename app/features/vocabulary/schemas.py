@@ -24,9 +24,9 @@ class VocabularyTopicResponse(BaseModel):
     slug: str
     order_num: int
     word_count: int
-    mastered_word: int
-    learning_word: int
-    new_word: int
+    mastered_word_count: int
+    learning_word_count: int
+    new_word_count: int
 
 
 class TopicWordResponse(BaseModel):

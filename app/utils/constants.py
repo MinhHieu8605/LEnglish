@@ -1,4 +1,3 @@
-from email.policy import default
 from enum import Enum, unique
 
 
@@ -76,7 +75,7 @@ class TagType(Enum):
 
 
 @unique
-class PracticeMode(Enum):
+class LessonSessionMode(Enum):
     DICTATION = "dictation"
     LISTENING = "listening"
     SHADOWING = "shadowing"
@@ -84,7 +83,7 @@ class PracticeMode(Enum):
 
 
 @unique
-class PracticeStatus(Enum):
+class LessonSessionStatus(Enum):
     STARTED = "started"
     COMPLETED = "completed"
     ABANDONED = "abandoned"
@@ -149,6 +148,23 @@ class ReviewRating(Enum):
     HARD = "hard"
     GOOD = "good"
     EASY = "easy"
+
+
+@unique
+class VocabularyDeckMode(str, Enum):
+    """Practice mode for a curated vocabulary deck."""
+
+    FLASHCARD = "flashcard"
+    TYPING = "typing"
+    CLOZE = "cloze"
+
+
+@unique
+class PracticeScope(str, Enum):
+    """Words included in a vocabulary practice deck."""
+
+    DUE = "due"
+    ALL = "all"
 
 
 @unique

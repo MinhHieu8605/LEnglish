@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.utils.constants import FeedbackType, SortOrder
 
@@ -16,10 +16,9 @@ class FeedbackCreate(BaseModel):
         title (str): The title of the feedback.
         description (Optional[str]): An optional detailed description of the feedback.
     """
-    user_id: int = 0
     type: FeedbackType
-    title: str
-    description: Optional[str] = None
+    title: str = Field(..., min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=5000)
 
 
 class FeedbackUpdate(BaseModel):
@@ -32,8 +31,8 @@ class FeedbackUpdate(BaseModel):
         description (Optional[str]): An optional updated detailed description of the feedback.
     """
     type: Optional[FeedbackType] = None
-    title: Optional[str] = None
-    description: Optional[str] = None
+    title: Optional[str] = Field(default=None, min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=5000)
 
 
 class FeedbackResponse(BaseModel):
@@ -71,12 +70,12 @@ class FeedbackPaginationFilter(BaseModel):
         sort_order: The order to sort the feedback (default is "desc").
     """
 
-    page: Optional[int] = 1
-    page_size: Optional[int] = 10
+    page: int = Field(default=1, ge=1)
+    page_size: int = Field(default=10, ge=1, le=100)
     type: Optional[FeedbackType] = None
     keyword: Optional[str] = None
-    sort_by: Optional[str] = "created_time"
-    sort_order: Optional[SortOrder] = SortOrder.DESCEND
+    sort_by: Literal["created_time", "updated_time", "title", "type"] = "created_time"
+    sort_order: SortOrder = SortOrder.DESCEND
 
 class FeedbackResponseMetadata(BaseModel):
     """

@@ -36,10 +36,13 @@ _VIDEO_ID_RE = re.compile(r"[A-Za-z0-9_-]{6,20}")       # Match valid YouTube vi
 _HTML_TAG_RE = re.compile(r"<[^>]+>")                   # Strip simple HTML tags.
 _SPACE_RE = re.compile(r"\s+")                          # Collapse consecutive whitespace.
 _NON_SPEECH_CUE_RE = re.compile(r"\[[^\]]+\]")          # Match cues such as [Music].
+_SPACE_BEFORE_PUNCTUATION_RE = re.compile(r"\s+([,.;:!?%”’\)\]])")
+_SPACE_AFTER_OPENING_PUNCTUATION_RE = re.compile(r"([“‘\(\[])\s+")
 
 _MAX_GAP_SECONDS = 2.0                                  # Maximum silence allowed within one segment.
-_MAX_SEGMENT_SECONDS = 12.0                             # Maximum duration of one segment.
-_MAX_SEGMENT_WORDS = 24                                 # Maximum words in one segment.
+_MAX_ROLLING_CAPTION_GAP_SECONDS = 0.25                 # Tolerate small gaps in rolling auto-captions.
+_MAX_SEGMENT_SECONDS = 10.0                             # Keep dictation clips short enough to replay.
+_MAX_SEGMENT_WORDS = 18                                 # Match short, sentence-sized dictation exercises.
 _TRANSLATION_BATCH_SIZE = 40                            # Subtitles translated per AI request.
 
 _SENTENCE_SEGMENTER = pysbd.Segmenter(
@@ -86,7 +89,8 @@ def _extract_youtube_video_id(video_url: str) -> str:
     # parsed.path     # "/watch"
     # parsed.query    # "v=iISY9FgeYpU&t=10"
     
-    host = parsed.hostname.lower()
+    host = (parsed.hostname or "").lower()
+    video_id = ""
 
     if parsed.scheme not in {"http", "https"} or host not in _YOUTUBE_HOSTS:
         raise ValueError("Only YouTube video URLs are supported")
@@ -176,7 +180,10 @@ def _prepare_transcript_cues(
         # Remove repeated words from overlapping cues, e.g., 
         # "Hello world" followed by "world, how are you?" becomes "Hello world, how are you?"
         text = caption
-        if prev_text is not None and start < prev_end:
+        if (
+            prev_text is not None
+            and start <= prev_end + _MAX_ROLLING_CAPTION_GAP_SECONDS
+        ):
             text = _remove_repeated_prefix(prev_text, caption)
         prev_text = caption
         prev_end = end
@@ -284,30 +291,64 @@ def _map_sentence_to_cues(
 def _pack_sentence_cues(
     pieces: list[TranscriptSegment],
 ) -> list[TranscriptSegment]:
-    """Merge sentence pieces, splitting only when a display limit is reached."""
+    """Merge sentence pieces into short clips without cutting through words."""
+    words = [
+        word
+        for piece in pieces
+        for word in _split_piece_into_timed_words(piece)
+    ]
+    if not words:
+        return []
+
     segments: list[TranscriptSegment] = []
-    current: TranscriptSegment | None = None
-
-    for piece in pieces:
-        if current is None:
-            current = piece
-        else:
-            current = replace(
-                current,
-                end_seconds=max(current.end_seconds, piece.end_seconds),
-                content_en=f"{current.content_en} {piece.content_en}",
-            )
-
-        if (
-            current.end_seconds - current.start_seconds >= _MAX_SEGMENT_SECONDS
-            or len(current.content_en.split()) >= _MAX_SEGMENT_WORDS
+    current: list[TranscriptSegment] = []
+    for word in words:
+        if current and (
+            len(current) >= _MAX_SEGMENT_WORDS
+            or word.end_seconds - current[0].start_seconds > _MAX_SEGMENT_SECONDS
         ):
-            segments.append(current)
-            current = None
+            segments.append(_words_to_segment(current))
+            current = []
+        current.append(word)
 
-    if current is not None:
-        segments.append(current)
+    if current:
+        segments.append(_words_to_segment(current))
     return segments
+
+
+def _words_to_segment(words: list[TranscriptSegment]) -> TranscriptSegment:
+    """Build one subtitle segment from consecutive timed words."""
+    return TranscriptSegment(
+        start_seconds=words[0].start_seconds,
+        end_seconds=words[-1].end_seconds,
+        content_en=_join_timed_words(words),
+    )
+
+
+def _split_piece_into_timed_words(
+    piece: TranscriptSegment,
+) -> list[TranscriptSegment]:
+    """Split one cue piece at whitespace and approximate each whole word's timing."""
+    text = piece.content_en
+    if not text:
+        return []
+
+    duration = piece.end_seconds - piece.start_seconds
+    return [
+        TranscriptSegment(
+            start_seconds=piece.start_seconds + duration * match.start() / len(text),
+            end_seconds=piece.start_seconds + duration * match.end() / len(text),
+            content_en=match.group(),
+        )
+        for match in re.finditer(r"\S+", text)
+    ]
+
+
+def _join_timed_words(words: list[TranscriptSegment]) -> str:
+    """Join timed tokens without introducing spaces around standalone punctuation."""
+    text = " ".join(word.content_en for word in words)
+    text = _SPACE_BEFORE_PUNCTUATION_RE.sub(r"\1", text)
+    return _SPACE_AFTER_OPENING_PUNCTUATION_RE.sub(r"\1", text)
 
 
 def _segment_cue_group(

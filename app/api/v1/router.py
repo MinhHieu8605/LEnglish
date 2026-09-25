@@ -5,6 +5,8 @@ from app.api.v1.endpoint import (
     dictionary,
     feedback,
     lesson,
+    preferences,
+    practice,
     token,
     user,
     vocabulary,
@@ -32,7 +34,13 @@ authentication_api_router.include_router(user.user_router, prefix="/users", tags
 authentication_api_router.include_router(dictionary.router, prefix="/dictionary", tags=["Dictionary"])
 authentication_api_router.include_router(wordlist.router, prefix="/word-lists", tags=["Word Lists"])
 authentication_api_router.include_router(vocabulary.router, prefix="/vocabulary", tags=["Vocabulary"])
+authentication_api_router.include_router(practice.router, prefix="/vocabulary", tags=["Vocabulary Practice"])
 authentication_api_router.include_router(lesson.router, prefix="/lessons", tags=["Lessons"])
+authentication_api_router.include_router(
+    preferences.router,
+    prefix="/preferences",
+    tags=["Preferences"],
+)
 authentication_api_router.include_router(
     feedback.router,
     prefix="/feedbacks",
