@@ -1,16 +1,86 @@
+import base64
+import os
 from typing import Any, Literal, Optional, overload
+import uuid
 
 from fastapi import HTTPException, Request,status
 from pydantic import BaseModel
 
 from loguru import logger
 
+from app.utils.constants import FileConstants
+
 
 def raise_not_found(message: str = "record not found"):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=message)
 
+
 def raise_bad_request(message: str = "Bad request"):
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message)
+
+
+def generate_short_uuid(length: int = FileConstants.SHORT_UUID_LENGTH) -> str:
+    """
+    Generate a short UUID string of the specified length.
+
+    Args:
+        length (int): The desired length of the UUID string. Default is 8.
+
+    Returns:
+        str: A short UUID string.
+    """
+    # Generate a UUID and convert it to a string without hyphens
+    unique_id = uuid.uuid4()
+
+    # Convert the UUID to a base64-encoded string and remove padding
+    short_uuid = (
+        base64.urlsafe_b64encode(unique_id.bytes)
+        .rstrip(b"=")
+        .decode("ascii")
+    )
+
+    return short_uuid[:length]
+
+def append_short_uuid_to_filename(
+    original_filename: str, length: int = FileConstants.MAX_FILENAME_LENGTH
+) -> str:
+    """
+    Append a short UUID to the original filename while preserving the file extension.
+
+    Args:
+        original_filename (str): The original filename.
+        length (int): The desired length of the short UUID. Default is 8.
+
+    Returns:
+        str: The new filename with the short UUID appended.
+    """
+    # Generate a short UUID
+    short_uuid = generate_short_uuid(length)
+
+    # Split the original filename into name and extension
+    filename, ext = os.path.splitext(original_filename)
+
+    # Calculate the maximum length for the base filename to ensure the total length does not exceed the specified limit
+    # Subtract 1 for the underscore
+    max_base_length = length - len(short_uuid) - len(ext) - 1
+
+    truncated_filename = filename[:max_base_length]
+    new_filename = f"{truncated_filename}_{short_uuid}{ext}"
+
+    return new_filename
+
+def remove_domain_from_email(email: str) -> str:
+    """
+    Remove the domain part from an email address.
+
+    Args:
+        email (str): The email address.
+    
+    Returns:
+        str: The email address without the domain part.
+    """
+    return email.split("@")[0] if "@" in email else email
+
 
 def page_size_to_offset_limit(page: int, page_size: int):
     """
@@ -24,6 +94,7 @@ def page_size_to_offset_limit(page: int, page_size: int):
         tuple: A tuple containing the offset and limit.
     """
     return (page - 1) * page_size, page_size
+
 
 def get_nested_value(obj, attr_path, default=None) -> Any:
     """

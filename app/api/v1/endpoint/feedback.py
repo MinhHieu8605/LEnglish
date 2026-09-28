@@ -1,16 +1,23 @@
-from fastapi import APIRouter, Depends, Request, status
+from typing import Optional
+
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import get_session
 from app.features.feedback.schemas import (
+    FeedbackAttachmentUploadResponse,
+    FeedbackBulkDeleteRequest,
     FeedbackCreate,
+    FeedbackDeleteResponse,
     FeedbackPaginationFilter,
     FeedbackResponse,
     FeedbackResponseMetadata,
     FeedbackUpdate,
     PaginatedFeedbackResponse,
+    ResponseFeedback,
 )
 from app.features.feedback.service import FeedbackService
+from app.utils.constants import FeedbackAttachmentType, FeedbackStatus, FeedbackType
 
 
 router = APIRouter()
@@ -58,18 +65,44 @@ async def get_one_feedback(
 
 
 @router.post(
+    "/attachments", response_model=FeedbackAttachmentUploadResponse
+)
+async def upload_feedback_attachment(
+    request: Request,
+    attachment_type: FeedbackAttachmentType = Form(...),
+    file: UploadFile = File(...),
+) -> FeedbackAttachmentUploadResponse:
+    """Generate a pre-signed URL for uploading feedback attachments."""
+    return await FeedbackService.save_feedback_file_locally(file, attachment_type, request  )
+
+
+@router.post(
     "",
     response_model=FeedbackResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create feedback",
 )
 async def create_feedback(
-    feedback_in: FeedbackCreate,
     request: Request,
+    type: FeedbackType = Form(...),
+    title: str = Form(...),
+    description: str = Form(...),
+    attachment_paths: Optional[list[str]] = Form(None),
     session: AsyncSession = Depends(get_session),
 ) -> FeedbackResponse:
     """Create feedback for the authenticated user."""
-    return await FeedbackService.create_feedback(feedback_in, request, session)
+    payload = FeedbackCreate(
+        type=type,
+        title=title,
+        description=description,
+        user_attachments=attachment_paths,
+    )
+    return await FeedbackService.create_feedback(
+        payload,
+        request,
+        session,
+        attachment_paths=attachment_paths or [],
+    )
 
 
 @router.put(
@@ -89,4 +122,58 @@ async def update_feedback(
         feedback_in,
         request,
         session,
+    )
+
+
+@router.post(
+    "/{feedback_id}/response",
+)
+async def response_feedback(
+    feedback_id: int,
+    status: Optional[FeedbackStatus] = Form(None),
+    response: str = Form(...),
+    attachment_paths: Optional[list[str]] = Form(None),
+    session: AsyncSession = Depends(get_session),
+) -> FeedbackResponse:
+    """Respond to feedback owned by the authenticated user."""
+    payload = ResponseFeedback(
+        status=status,
+        response=response,
+    )
+    return await FeedbackService.response_feedback(
+        feedback_id,
+        payload,
+        session,
+        attachment_paths=attachment_paths or [],
+    )
+
+
+@router.delete(
+    "/{feedback_id}",
+    response_model=FeedbackDeleteResponse,
+)
+async def delete_feedback(
+    feedback_id: int,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+) -> FeedbackDeleteResponse:
+    """Delete feedback owned by the authenticated user."""
+    return await FeedbackService.delete_feedback(
+        feedback_id,
+        session,
+        request
+    )
+
+
+@router.delete("", response_model=FeedbackDeleteResponse)
+async def bulk_delete_feedback(
+    feedback_ids: FeedbackBulkDeleteRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+) -> FeedbackDeleteResponse:
+    """Bulk delete feedback owned by the authenticated user."""
+    return await FeedbackService.bulk_delete_feedback(
+        feedback_ids.feedback_ids,
+        session,
+        request
     )

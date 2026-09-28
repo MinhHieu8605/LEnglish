@@ -1,4 +1,5 @@
 from enum import Enum, unique
+from typing import Literal
 
 
 @unique
@@ -248,7 +249,106 @@ class FeedbackType(str, Enum):
         FEATURE_REQUEST (str): Feedback requesting a new feature.
         OTHER (str): Other types of feedback.
     """
-    BUG = "bug"
+    BUG_REPORT = "bug_report"
     FEATURE_REQUEST = "feature_request"
     IMPROVEMENT = "improvement"
     OTHER = "other"
+
+
+class FeedbackStatus(str, Enum):
+    """
+    Defines the available feedback statuses.
+
+    Attributes:
+        IN_REVIEW (str): Feedback that is pending review.
+        NEW (str): Feedback that is new.
+        RESOLVED (str): Feedback that has been resolved.
+        CLOSED (str): Feedback that has been closed without resolution.
+    """
+    IN_REVIEW = "in_review"
+    NEW = "new"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+
+
+class FeedbackFilter(object):
+    """
+    Defines the available feedback filter options.
+    """
+
+    TYPE = "type"
+    STATUS = "status"
+    KEYWORD = "keyword"
+    FROM_DATE = "from_date"
+    TO_DATE = "to_date"
+
+
+class FeedbackAttachmentType(str, Enum):
+    """
+    Contains the available attachment types for feedback.
+    """
+
+    FEEDBACK = "feedback"
+    RESPONSE = "response"
+
+
+class FileMode(object):
+    """
+    Defines the available file modes for reading and writing files.
+    """
+
+    READ: Literal["r"] = "r"
+    READ_BINARY: Literal["rb"] = "rb"
+    READ_WRITE: Literal["r+"] = "r+"
+    READ_WRITE_BINARY: Literal["r+b"] = "r+b"
+
+    WRITE: Literal["w"] = "w"
+    WRITE_BINARY: Literal["wb"] = "wb"
+
+
+class FileType(object):
+    """
+    Defines the available file types for various document formats.
+    """
+
+    PDF = ".pdf"
+    CSV = ".csv"
+    DOCX = ".docx"
+    DOC = ".doc"
+    XLSX = ".xlsx"
+    XLS = ".xls"
+    PPTX = ".pptx"
+    PPT = ".ppt"
+    TXT = ".txt"
+    MD = ".md"
+    HTML = ".html"
+    PNG = ".png"
+    JPG = ".jpg"
+    JPEG = ".jpeg"
+    XLSM = ".xlsm"
+    CSVX = ".csvx"
+
+
+class FileSizeLimit(object):
+    """
+    File size limits for various file types in bytes.
+    """
+
+    _KB = 1024
+    _MB = 1024 * _KB
+
+    SIZE_1MB = 1 * _MB
+    SIZE_5MB = 5 * _MB
+    SIZE_10MB = 10 * _MB
+    SIZE_20MB = 20 * _MB
+    SIZE_50MB = 50 * _MB
+    SIZE_100MB = 100 * _MB
+
+
+class FileConstants(int, Enum):
+    """
+    Constants for file operations.
+    """
+
+    MAX_FILENAME_LENGTH = 255
+    SHORT_UUID_LENGTH = 22

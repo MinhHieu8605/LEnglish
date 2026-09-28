@@ -1,47 +1,43 @@
-# Web framework
-fastapi
-uvicorn[standard]
-python-multipart
+# Operators: == fixes a known-compatible version; >= sets the minimum supported version.
 
-# Validation
-pydantic[email]
-pydantic-settings
-pyhumps
+# Web API: HTTP routes, multipart uploads, and the ASGI server.
+fastapi==0.136.3
+uvicorn[standard]>=0.51.0
+python-multipart>=0.0.32
 
-# Database
-sqlmodel
-sqlalchemy
-alembic
+# Validation: request/response models, email validation, and timezone data.
+pydantic[email]>=2.13.4
+tzdata>=2026.3
 
-# PostgreSQL
-asyncpg
-psycopg2-binary
+# Database: ORM, Alembic migrations, and PostgreSQL drivers for async and sync access.
+sqlmodel>=0.0.39
+sqlalchemy>=2.0.51
+alembic>=1.18.5
+asyncpg>=0.31.0
+psycopg2-binary>=2.9.12
 
-# MySQL
-PyMySQL       # sync driver (Alembic migrations)
-asyncmy       # async driver (FastAPI requests)
+# Authentication: JWT signing and password hashing; bcrypt is pinned for Passlib compatibility.
+python-jose[cryptography]>=3.5.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.3.0
 
-# Auth
-python-jose[cryptography]
-passlib[bcrypt]
-
-# HTTP
-httpx
+# External services: HTTP requests, YouTube transcripts, and sentence segmentation.
+httpx>=0.28.1
 youtube-transcript-api==1.2.4
 pysbd==0.3.4
 
-# Data
-pandas
-openpyxl
+# Storage and email: Cloudflare R2 (S3-compatible) and SMTP delivery.
+aioboto3>=13.0.0
+aiosmtplib>=3.0.2
+aiofiles>=25.1.0
+python-slugify==8.0.4
 
-# Utilities
-click
-python-dotenv
-loguru
-cachetools
-tzdata
-gunicorn
+# Application utilities: CLI commands, environment loading, logging, and in-memory caching.
+click>=8.4.2
+python-dotenv>=1.2.2
+loguru>=0.7.3
+cachetools>=7.1.4
 
-# Testing
-pytest
-pytest-asyncio
+# Tests: test runner and async test support.
+pytest>=9.1.1
+pytest-asyncio>=1.4.0

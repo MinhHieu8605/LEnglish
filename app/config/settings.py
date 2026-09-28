@@ -1,3 +1,4 @@
+import json
 import os
 
 from dotenv import load_dotenv, dotenv_values
@@ -119,3 +120,81 @@ class AI(BaseSingleton):
         self.api_key = config.get("AI_API_KEY")
         self.model = config.get("AI_MODEL")
         self.api_url = config.get("AI_API_URL")
+
+
+class R2StorageConfig(object):
+    """
+    R2 Storage Configuration Class.
+
+    This class manages the configuration settings for connecting to an R2
+    storage service, including access credentials and endpoint information.
+
+    Attributes:
+        account_id: The account ID for R2 storage.
+        access_key_id: The access key ID for R2 storage.
+        secret_access_key: The secret access key for R2 storage.
+        bucket_name: The name of the R2 storage bucket.
+        endpoint_url: The endpoint URL for the R2 storage service.
+    """
+
+    account_id: Union[str, None]
+    access_key_id: Union[str, None]
+    secret_access_key: Union[str, None]
+    bucket_name: Union[str, None]
+    endpoint_url: Union[str, None]
+    signed_url_expiration_seconds: Union[int, None]
+
+    def __init__(self) -> None:
+        self.account_id = config.get("R2_ACCOUNT_ID")
+        self.access_key_id = config.get("R2_ACCESS_KEY_ID")
+        self.secret_access_key = config.get("R2_SECRET_ACCESS_KEY")
+        self.bucket_name = config.get("R2_BUCKET_NAME")
+        self.endpoint_url = config.get("R2_ENDPOINT_URL", "https://63b8bfcc9ddc489068abed2b002c1e51.r2.cloudflarestorage.com")
+        self.signed_url_expiration_seconds = int(config.get("R2_SIGNED_URL_EXPIRATION_SECONDS", 3600))
+
+
+class SmtpEmailConfig(object):
+    """
+    SMTP Email Configuration Class.
+
+    This class manages the configuration settings for connecting to an SMTP
+    email server, including host, port, and authentication credentials.
+
+    Attributes:
+        smtp_host: The SMTP server host address.
+        smtp_port: The SMTP server port number.
+        smtp_user: The username for SMTP authentication.
+        smtp_password: The password for SMTP authentication.
+        smtp_sender: The email address used as the sender in outgoing emails.
+        smtp_use_tls: A boolean indicating whether to use TLS for the SMTP connection.
+    """
+
+    smtp_host: Union[str, None]
+    smtp_port: Union[int, None]
+    smtp_user: Union[str, None]
+    smtp_password: Union[str, None]
+    smtp_sender: Union[str, None]
+    smtp_use_tls: Union[bool, None]
+
+    def __init__(self) -> None:
+        self.smtp_host = config.get("SMTP_HOST")
+        self.smtp_port = int(config.get("SMTP_PORT", 587))
+        self.smtp_user = config.get("SMTP_USER")
+        self.smtp_password = config.get("SMTP_PASSWORD")
+        self.smtp_sender = config.get("SMTP_FROM", self.smtp_user)
+        self.smtp_use_tls = config.get("SMTP_USE_TLS", "True").lower() == "true"
+
+
+class SystemConfig(BaseSingleton):
+    """
+    System Configuration Class.
+
+    This class manages the configuration settings for system-level
+    parameters, including the base URL for the application.
+
+    Attributes:
+        ENV: The environment in which the application is running.
+    """
+
+    ENV = config.get("ENV", "DEV")
+    ADMIN_EMAILS_FEEDBACK = json.loads(config.get("ADMIN_EMAILS_FEEDBACK", "[]"))
