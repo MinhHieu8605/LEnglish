@@ -1,8 +1,8 @@
 import json
 import os
+from typing import Union
 
 from dotenv import load_dotenv, dotenv_values
-from typing import Union
 
 from app.utils.singleton import BaseSingleton
 

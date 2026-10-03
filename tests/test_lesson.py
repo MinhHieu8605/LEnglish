@@ -1,8 +1,8 @@
 import asyncio
 from types import SimpleNamespace
 
-import pytest
 from fastapi import HTTPException
+import pytest
 
 from app.api.v1.endpoint.lesson import delete_lesson
 from app.features.lesson.service import _slugify

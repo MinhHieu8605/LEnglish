@@ -1,5 +1,5 @@
-import pkgutil
 import importlib
+import pkgutil
 
 # Automatically import all models in the features package
 packet = __name__

@@ -50,7 +50,7 @@ async def list_word_lists(
 ):
     """List word lists owned by the authenticated user."""
     user_id = get_user_id_from_request(request)
-    return await WordListService.get_word_lists(user_id, session)
+    return await WordListService.list_word_lists(user_id, session)
 
 
 @router.post(
@@ -103,7 +103,7 @@ async def list_saved_words(
         SavedWordListResponse: Paginated saved words and metadata.
     """
     user_id = get_user_id_from_request(request)
-    items, total, pages = await WordListService.get_saved_words(
+    items, total, pages = await WordListService.list_words(
         user_id, word_list_id, filters, session
     )
     return SavedWordListResponse(
@@ -122,7 +122,7 @@ async def list_saved_words(
     response_model=SavedWordReviewResponse,
     summary="Review a word saved in a word list",
 )
-async def review_saved_word(
+async def record_review(
     request: Request,
     word_list_id: int,
     vocabulary_id: int,
@@ -142,7 +142,7 @@ async def review_saved_word(
         SavedWordReviewResponse: Saved word with updated SRS progress.
     """
     user_id = get_user_id_from_request(request)
-    return await WordListService.review_saved_word(
+    return await WordListService.record_review(
         user_id, word_list_id, vocabulary_id, data.rating, session, data.attempt_id
     )
 
@@ -152,7 +152,7 @@ async def review_saved_word(
     response_model=SavedWordsDueResponse,
     summary="Get saved words due for review",
 )
-async def get_saved_words_due(
+async def list_due_words(
     request: Request,
     word_list_id: int,
     filters: SavedWordsDueFilter = Depends(),
@@ -170,7 +170,7 @@ async def get_saved_words_due(
         SavedWordsDueResponse: Due words and their total count.
     """
     user_id = get_user_id_from_request(request)
-    items, total, pages = await WordListService.get_saved_words_due(
+    items, total, pages = await WordListService.list_due_words(
         user_id, word_list_id, filters, session
     )
     return SavedWordsDueResponse(

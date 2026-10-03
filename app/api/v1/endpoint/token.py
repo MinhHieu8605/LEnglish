@@ -1,8 +1,8 @@
-from app.database.async_db import get_session
-from fastapi import Depends, HTTPException
 from fastapi import APIRouter, Body, status
-
+from fastapi import Depends, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
+
+from app.database.async_db import get_session
 from app.features.token.schemas import AccessTokenResponse
 from app.features.token.service import _build_token_payload
 from app.middleware.security import create_access_token, validate_token

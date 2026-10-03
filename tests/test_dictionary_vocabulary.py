@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from app.features.practice.srs import PracticeProgressState, calculate_review_schedule
+from app.features.review.srs import ReviewProgressState, calculate_review_schedule
 from app.features.wordlist.schemas import SaveWordRequest
 from app.utils.constants import ReviewRating, WordStatus
 
@@ -12,10 +12,10 @@ def test_save_word_request_normalizes_input():
     assert request.translation_vi == "cởi ra"
 
 
-def test_practice_schedule_again_repeats_in_ten_minutes():
+def test_review_schedule_again_repeats_in_ten_minutes():
     reviewed_at = datetime(2026, 9, 21, 9, tzinfo=timezone.utc)
     schedule = calculate_review_schedule(
-        PracticeProgressState(repetition_count=3, interval_days=8, ease_factor=2.5),
+        ReviewProgressState(repetition_count=3, interval_days=8, ease_factor=2.5),
         ReviewRating.AGAIN,
         reviewed_at,
     )

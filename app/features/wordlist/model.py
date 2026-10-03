@@ -4,12 +4,12 @@ from sqlalchemy.orm import relationship
 from app.database.model import Base, TimeStampMixin
 
 
-class Notebook(Base, TimeStampMixin):
+class WordList(Base, TimeStampMixin):
     """Represents a user's word-list collection."""
 
-    __tablename__ = "Notebook"
+    __tablename__ = "WordList"
     __table_args__ = (
-        UniqueConstraint("user_id", "name", name="uq_notebooks_user_id_name"),
+        UniqueConstraint("user_id", "name", name="uq_word_lists_user_id_name"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -17,27 +17,27 @@ class Notebook(Base, TimeStampMixin):
     name = Column(String, nullable=False)
     description = Column(String)
 
-    user = relationship("User", back_populates="notebooks")
+    user = relationship("User", back_populates="word_lists")
     items = relationship(
-        "NotebookItem", back_populates="notebook", cascade="all, delete-orphan"
+        "WordListItem", back_populates="word_list", cascade="all, delete-orphan"
     )
 
 
-class NotebookItem(Base, TimeStampMixin):
+class WordListItem(Base, TimeStampMixin):
     """Represents a vocabulary entry saved in a user's word list."""
 
-    __tablename__ = "NotebookItem"
+    __tablename__ = "WordListItem"
     __table_args__ = (
         UniqueConstraint(
-            "notebook_id",
+            "word_list_id",
             "vocabulary_id",
-            name="uq_notebook_items_notebook_id_vocabulary_id",
+            name="uq_word_list_items_word_list_id_vocabulary_id",
         ),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    notebook_id = Column(
-        Integer, ForeignKey("Notebook.id", ondelete="CASCADE"), nullable=False
+    word_list_id = Column(
+        Integer, ForeignKey("WordList.id", ondelete="CASCADE"), nullable=False
     )
     vocabulary_id = Column(
         Integer, ForeignKey("Vocabulary.id", ondelete="CASCADE"), nullable=False
@@ -48,5 +48,5 @@ class NotebookItem(Base, TimeStampMixin):
     context_sentence = Column(Text)
     note = Column(Text)
 
-    notebook = relationship("Notebook", back_populates="items")
-    vocabulary = relationship("Vocabulary", back_populates="notebook_items")
+    word_list = relationship("WordList", back_populates="items")
+    vocabulary = relationship("Vocabulary", back_populates="word_list_items")

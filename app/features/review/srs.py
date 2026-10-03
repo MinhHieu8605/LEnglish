@@ -1,4 +1,4 @@
-"""Pure spaced-repetition calculations used by vocabulary practice flows."""
+"""Pure spaced-repetition calculations used by vocabulary review flows."""
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -16,7 +16,7 @@ _HARD_DELAY = timedelta(hours=12)
 
 
 @dataclass(frozen=True)
-class PracticeProgressState:
+class ReviewProgressState:
     """The SRS fields required to calculate a review schedule."""
 
     repetition_count: int = 0
@@ -60,14 +60,14 @@ def _status_for_interval(interval_days: int) -> str:
 
 
 def calculate_review_schedule(
-    progress: PracticeProgressState,
+    progress: ReviewProgressState,
     rating: ReviewRating,
     reviewed_at: datetime,
 ) -> ReviewSchedule:
     """Calculate the next SRS schedule without truncating the review time.
 
     Args:
-        progress (PracticeProgressState): Current SRS state.
+        progress (ReviewProgressState): Current SRS state.
         rating (ReviewRating): User-selected review rating.
         reviewed_at (datetime): Timestamp at which the review was submitted.
 
@@ -127,12 +127,12 @@ def calculate_review_schedule(
 
 
 def build_review_options(
-    progress: PracticeProgressState, reviewed_at: datetime
+    progress: ReviewProgressState, reviewed_at: datetime
 ) -> Dict[ReviewRating, ReviewSchedule]:
     """Calculate the schedule for every supported review rating.
 
     Args:
-        progress (PracticeProgressState): Current SRS state.
+        progress (ReviewProgressState): Current SRS state.
         reviewed_at (datetime): Timestamp used as the schedule base.
 
     Returns:

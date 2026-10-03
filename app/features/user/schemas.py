@@ -1,7 +1,7 @@
-from typing import Literal
-from typing import Dict
 from datetime import datetime
+from typing import Dict
 from typing import List, Optional
+from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -98,7 +98,7 @@ class UserUpdate(BaseModel):
         default=None,
         description="Updated password. Must be at least 8 characters"
     )
-    deleted: Optional[bool]
+    deleted: Optional[bool] = None
 
     @field_validator("password", mode="before")
     @classmethod
@@ -167,9 +167,9 @@ class Register(BaseModel):
         full_name (str): User's full name.
         password (str): User's password.
     """
-    email: str
+    email: EmailStr
     full_name: str
-    password: str
+    password: str = Field(..., min_length=8)
 
     @field_validator("email", mode="before")
     @classmethod
@@ -181,7 +181,7 @@ class Register(BaseModel):
                 raise ValueError("Email list cannot be empty")
         if not isinstance(email, str):
             raise ValueError("Email must be a string or a list containing a string")
-        return email.lower()
+        return email.strip().lower()
 
     @field_validator("full_name", mode="before")
     @classmethod

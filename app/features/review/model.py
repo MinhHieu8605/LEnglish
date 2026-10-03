@@ -2,20 +2,20 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, Nu
 from sqlalchemy.orm import relationship
 
 from app.database.model import Base, TimeStampMixin
-from app.utils.constants import PracticeScope, VocabularyDeckMode, WordStatus
+from app.utils.constants import ReviewScope, ReviewMode, WordStatus
 
 
-class PracticeProgress(Base, TimeStampMixin):
+class ReviewProgress(Base, TimeStampMixin):
     """A user's spaced-repetition state for one vocabulary entry."""
 
-    __tablename__ = "PracticeProgress"
+    __tablename__ = "ReviewProgress"
     __table_args__ = (
         UniqueConstraint(
             "user_id",
             "vocabulary_id",
-            name="uq_practice_progress_user_id_vocabulary_id",
+            name="uq_review_progress_user_id_vocabulary_id",
         ),
-        Index("practice_progress_idx", "user_id", "status", "next_review_at"),
+        Index("review_progress_idx", "user_id", "status", "next_review_at"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -31,28 +31,28 @@ class PracticeProgress(Base, TimeStampMixin):
     last_reviewed_at = Column(DateTime(timezone=True))
     personal_note = Column(Text)
 
-    user = relationship("User", back_populates="practice_progress")
+    user = relationship("User", back_populates="review_progress")
     vocabulary = relationship(
-        "Vocabulary", back_populates="practice_progress_entries"
+        "Vocabulary", back_populates="review_progress_entries"
     )
     attempts = relationship(
-        "PracticeAttempt",
-        back_populates="practice_progress",
+        "ReviewAttempt",
+        back_populates="review_progress",
         cascade="all, delete-orphan",
     )
 
 
-class PracticeAttempt(Base, TimeStampMixin):
-    """One submitted vocabulary practice attempt and its review result."""
+class ReviewAttempt(Base, TimeStampMixin):
+    """One submitted vocabulary review attempt."""
 
-    __tablename__ = "PracticeAttempt"
+    __tablename__ = "ReviewAttempt"
     __table_args__ = (
-        Index("practice_attempts_attempt_id_uq", "attempt_id", unique=True),
+        Index("review_attempts_attempt_id_uq", "attempt_id", unique=True),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    practice_progress_id = Column(
-        Integer, ForeignKey("PracticeProgress.id", ondelete="CASCADE"), nullable=False
+    review_progress_id = Column(
+        Integer, ForeignKey("ReviewProgress.id", ondelete="CASCADE"), nullable=False
     )
     attempt_id = Column(String, nullable=True)
     mode = Column(String, nullable=True)
@@ -64,51 +64,51 @@ class PracticeAttempt(Base, TimeStampMixin):
     response_ms = Column(Integer)
     reviewed_at = Column(DateTime(timezone=True), nullable=False)
 
-    practice_progress = relationship("PracticeProgress", back_populates="attempts")
+    review_progress = relationship("ReviewProgress", back_populates="attempts")
 
 
-class PracticeSession(Base, TimeStampMixin):
-    """A snapshot of one user's vocabulary practice queue."""
+class ReviewSession(Base, TimeStampMixin):
+    """A snapshot of one user's vocabulary review queue."""
 
-    __tablename__ = "PracticeSession"
-    __table_args__ = (Index("practice_sessions_user_status_idx", "user_id", "status"),)
+    __tablename__ = "ReviewSession"
+    __table_args__ = (Index("review_sessions_user_status_idx", "user_id", "status"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     topic_id = Column(Integer, ForeignKey("VocabularyTopic.id", ondelete="CASCADE"), nullable=False)
-    scope = Column(String, nullable=False, default=PracticeScope.DUE.value)
-    initial_mode = Column(String, nullable=False, default=VocabularyDeckMode.FLASHCARD.value)
+    scope = Column(String, nullable=False, default=ReviewScope.DUE.value)
+    initial_mode = Column(String, nullable=False, default=ReviewMode.FLASHCARD.value)
     status = Column(String, nullable=False, default="started")
     current_position = Column(Integer, nullable=False, default=0)
     total_items = Column(Integer, nullable=False, default=0)
     started_at = Column(DateTime(timezone=True), nullable=False)
     completed_at = Column(DateTime(timezone=True), nullable=True)
 
-    user = relationship("User", back_populates="vocabulary_practice_sessions")
-    topic = relationship("VocabularyTopic", back_populates="practice_sessions")
+    user = relationship("User", back_populates="review_sessions")
+    topic = relationship("VocabularyTopic", back_populates="review_sessions")
     items = relationship(
-        "PracticeSessionItem",
+        "ReviewSessionItem",
         back_populates="session",
         cascade="all, delete-orphan",
-        order_by="PracticeSessionItem.order_num",
+        order_by="ReviewSessionItem.order_num",
     )
 
 
-class PracticeSessionItem(Base, TimeStampMixin):
-    """One vocabulary entry in a fixed practice-session queue."""
+class ReviewSessionItem(Base, TimeStampMixin):
+    """One vocabulary entry in a fixed review session."""
 
-    __tablename__ = "PracticeSessionItem"
+    __tablename__ = "ReviewSessionItem"
     __table_args__ = (
-        UniqueConstraint("session_id", "vocabulary_id", name="uq_practice_session_items_session_vocab"),
-        UniqueConstraint("session_id", "order_num", name="uq_practice_session_items_session_order"),
+        UniqueConstraint("session_id", "vocabulary_id", name="uq_review_session_items_session_vocab"),
+        UniqueConstraint("session_id", "order_num", name="uq_review_session_items_session_order"),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    session_id = Column(Integer, ForeignKey("PracticeSession.id", ondelete="CASCADE"), nullable=False)
+    session_id = Column(Integer, ForeignKey("ReviewSession.id", ondelete="CASCADE"), nullable=False)
     vocabulary_id = Column(Integer, ForeignKey("Vocabulary.id", ondelete="CASCADE"), nullable=False)
     order_num = Column(Integer, nullable=False)
     completed_at = Column(DateTime(timezone=True), nullable=True)
     last_attempt_id = Column(String, nullable=True)
 
-    session = relationship("PracticeSession", back_populates="items")
+    session = relationship("ReviewSession", back_populates="items")
     vocabulary = relationship("Vocabulary")

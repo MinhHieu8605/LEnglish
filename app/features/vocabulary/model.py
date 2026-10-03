@@ -20,7 +20,6 @@ class Vocabulary(Base, TimeStampMixin):
         definition_vi (str): Vietnamese definition.
         example_sentence (str): Example sentence using the word.
         example_translation_vi (str): Vietnamese translation of example.
-        source_subtitle_id (int): Source subtitle where word was found.
     """
     __tablename__ = "Vocabulary"
     __table_args__ = (
@@ -37,11 +36,8 @@ class Vocabulary(Base, TimeStampMixin):
     definition_vi = Column(Text, nullable=True)
     example_sentence = Column(Text)
     example_translation_vi = Column(Text)
-    source_subtitle_id = Column(Integer, ForeignKey("Subtitle.id", ondelete="SET NULL"), nullable=True)
-
-    source_subtitle = relationship("Subtitle", back_populates="vocabulary_items")
-    notebook_items = relationship("NotebookItem", back_populates="vocabulary", cascade="all, delete-orphan")
-    practice_progress_entries = relationship("PracticeProgress", back_populates="vocabulary", cascade="all, delete-orphan")
+    word_list_items = relationship("WordListItem", back_populates="vocabulary", cascade="all, delete-orphan")
+    review_progress_entries = relationship("ReviewProgress", back_populates="vocabulary", cascade="all, delete-orphan")
     topic_entries = relationship("VocabularyTopicWord", back_populates="vocabulary", cascade="all, delete-orphan")
 
 
@@ -98,7 +94,7 @@ class VocabularyTopic(Base, TimeStampMixin):
 
     book = relationship("VocabularyBook", back_populates="topics")
     topic_words = relationship("VocabularyTopicWord", back_populates="topic", cascade="all, delete-orphan")
-    practice_sessions = relationship("PracticeSession", back_populates="topic", cascade="all, delete-orphan")
+    review_sessions = relationship("ReviewSession", back_populates="topic", cascade="all, delete-orphan")
 
 
 class VocabularyTopicWord(Base):

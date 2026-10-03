@@ -176,7 +176,7 @@ class SavedWordListResponse(BaseModel):
 class ReviewSavedWordRequest(BaseModel):
     """Review result for one saved word."""
 
-    attempt_id: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    attempt_id: str = Field(..., min_length=1, max_length=100)
     rating: ReviewRating
 
 
