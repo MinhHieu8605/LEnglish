@@ -152,8 +152,8 @@ class ReviewRating(Enum):
 
 
 @unique
-class VocabularyDeckMode(str, Enum):
-    """Practice mode for a curated vocabulary deck."""
+class ReviewMode(str, Enum):
+    """Mode used to review vocabulary."""
 
     FLASHCARD = "flashcard"
     TYPING = "typing"
@@ -161,8 +161,8 @@ class VocabularyDeckMode(str, Enum):
 
 
 @unique
-class PracticeScope(str, Enum):
-    """Words included in a vocabulary practice deck."""
+class ReviewScope(str, Enum):
+    """Words included in a vocabulary review queue."""
 
     DUE = "due"
     ALL = "all"

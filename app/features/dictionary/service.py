@@ -3,8 +3,8 @@ import json
 import re
 from urllib.parse import quote
 
-import httpx
 from fastapi import HTTPException, status
+import httpx
 from loguru import logger
 from pydantic import ValidationError
 from sqlmodel import func

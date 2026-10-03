@@ -1,32 +1,30 @@
-from app.database.async_db import transactional
-from app.utils.common import page_size_to_offset_limit
-from sqlmodel import asc
-from sqlmodel import desc
-from sqlmodel import case
+from datetime import datetime, timedelta, timezone
 import math
 import secrets
-
-from app.database.async_db import async_create_record, async_get_one_record_by_id, async_update_one_record
-from sqlalchemy.exc import SQLAlchemyError
-from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
+import httpx
+from sqlalchemy.exc import SQLAlchemyError
+from sqlmodel import asc
+from sqlmodel import case
+from sqlmodel import desc
 from sqlmodel import func, or_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
-
-import httpx
 
 from app.database.async_db import (
     async_create_bulk_records,
     async_get_many_records_by,
     async_get_one_record_by,
 )
+from app.database.async_db import async_create_record, async_get_one_record_by_id, async_update_one_record
+from app.database.async_db import transactional
 from app.features.token.service import generate_tokens
 from app.features.user.model import User, UserRole
 from app.features.user.schemas import Login, Register, UserCreate, UserPaginationFilter, UserResponse, UserUpdate
 from app.middleware.security import get_password_hash
+from app.utils.common import page_size_to_offset_limit
 from app.utils.constants import Message, Role, UserStatus
 
 
@@ -478,6 +476,8 @@ class UserService(object):
 
             return await _build_user_response(dbuser, session)
         
+        except HTTPException:
+            raise
         except SQLAlchemyError as db_error:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

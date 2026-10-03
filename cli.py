@@ -14,8 +14,8 @@ For detailed help on each command, use:
     $ python cli.py [command] --help
 """
 
-import psycopg2
 import click
+import psycopg2
 from psycopg2 import sql
 
 from app.config.settings import Database
@@ -25,11 +25,10 @@ from app.features.conversation import model as _conversation_model
 from app.features.dictionary import model as _dictionary_model
 from app.features.engagement import model as _engagement_model
 from app.features.feedback import model as _feedback_model
-from app.features.learning import model as _learning_model
 from app.features.lesson import model as _lesson_model
 from app.features.notifications import model as _notification_model
-from app.features.practice import model as _practice_model
 from app.features.preferences import model as _preferences_model
+from app.features.review import model as _review_model
 from app.features.token import model as _token_model
 from app.features.user import model as _user_model
 from app.features.vocabulary import model as _vocabulary_model

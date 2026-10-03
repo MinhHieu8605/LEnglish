@@ -1,8 +1,10 @@
+from datetime import datetime
+from decimal import Decimal
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.utils.constants import DifficultyLevel
+from app.utils.constants import DifficultyLevel, LessonSessionMode
 
 
 class YouTubeLessonImportRequest(BaseModel):
@@ -80,3 +82,52 @@ class LessonListMeta(BaseModel):
 class LessonListResponse(BaseModel):
     data: List[LessonSummaryResponse]
     metadata: LessonListMeta
+
+
+class LessonProgressRequest(BaseModel):
+    last_position_seconds: int = Field(..., ge=0)
+
+
+class LessonProgressResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    lesson_id: int
+    last_position_seconds: int
+    completion_percent: Decimal
+    completed_at: Optional[datetime]
+    last_watched_at: Optional[datetime]
+
+
+class LessonSessionRequest(BaseModel):
+    mode: LessonSessionMode = LessonSessionMode.DICTATION
+
+
+class LessonSessionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    lesson_id: int
+    mode: LessonSessionMode
+    status: str
+    score: Optional[Decimal]
+    correct_count: int
+    total_count: int
+    duration_seconds: int
+    started_at: datetime
+    completed_at: Optional[datetime]
+
+
+class LessonAnswerRequest(BaseModel):
+    subtitle_id: int = Field(..., ge=1)
+    user_input: str = Field(..., min_length=1)
+
+
+class LessonAnswerResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    subtitle_id: int
+    user_input: str
+    accuracy_score: Optional[Decimal]
+    is_correct: bool
+    attempt_count: int
+    answered_at: datetime

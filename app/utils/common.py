@@ -4,9 +4,8 @@ from typing import Any, Literal, Optional, overload
 import uuid
 
 from fastapi import HTTPException, Request,status
-from pydantic import BaseModel
-
 from loguru import logger
+from pydantic import BaseModel
 
 from app.utils.constants import FileConstants
 

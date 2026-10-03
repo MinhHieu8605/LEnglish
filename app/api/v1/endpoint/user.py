@@ -1,27 +1,28 @@
-from app.features.user.schemas import ManagementResponseMetadata
-from app.features.user.schemas import UserStatisticSummaryResponse
-from app.features.user.schemas import PaginatedUserListResponse
-from app.features.user.schemas import UserPaginationFilter
 from datetime import datetime, timezone
 from typing import List, Optional
-from loguru import logger
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
+from loguru import logger
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import get_session
 from app.features.user.schemas import Login, Register, UserCreate, UserResponse, UserUpdate
+from app.features.user.schemas import ManagementResponseMetadata
+from app.features.user.schemas import PaginatedUserListResponse
+from app.features.user.schemas import UserPaginationFilter
+from app.features.user.schemas import UserStatisticSummaryResponse
 from app.features.user.service import UserService
 from app.utils.common import get_user_id_from_request
-from app.utils.constants import Message
+from app.utils.constants import Message, Role
+from app.utils.permission.enforcer import Policy, PolicyEnforcer
 
 public_router = APIRouter()
-user_router = APIRouter()
+router = APIRouter()
 
 
 @public_router.post("/login")
 async def login(
-    user_in: Login = None,
+    user_in: Optional[Login] = None,
     token_google: Optional[str] = Header(None),
     session: AsyncSession = Depends(get_session),
 ):
@@ -47,14 +48,14 @@ async def login(
         email = None
     
     try:
-        if user_in is None:
+        if user_in is None and not token_google:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=Message.MSG_LOGIN_INVALID_TOKEN
             )
 
         user = await UserService.handle_login_process(
-            user_in,
+            user_in or Login(),
             token_google,
             session,
             email=email
@@ -63,6 +64,8 @@ async def login(
             session, user["email"], datetime.now(tz=timezone.utc)
         )
         return user
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Unexpected error during login: {str(e)}")
         raise HTTPException(
@@ -90,12 +93,13 @@ async def register(
     return await UserService.register(user_in, session)
 
 
-@user_router.post(
+@router.post(
     "",
     response_model=List[UserResponse],
     status_code=status.HTTP_201_CREATED,
     summary="Create user"
 )
+@PolicyEnforcer.required(Policy.role(Role.ADMIN))
 async def create_user(
     data: UserCreate,
     session: AsyncSession = Depends(get_session)
@@ -106,11 +110,12 @@ async def create_user(
     return await UserService.create_user(data, session)
 
 
-@user_router.get(
+@router.get(
     "/user_management",
     response_model=PaginatedUserListResponse,
     summary="Get all users"
 )
+@PolicyEnforcer.required(Policy.role(Role.ADMIN))
 async def list_users(
     request: Request,
     filters: UserPaginationFilter = Depends(),
@@ -140,7 +145,7 @@ async def list_users(
     )
 
 
-@user_router.get(
+@router.get(
     "/{user_id}",
     response_model=UserResponse,
     summary="Get user by ID"
@@ -155,7 +160,7 @@ async def get_user_by_id(
     return await UserService.get_user_by_id(user_id, session)
 
 
-@user_router.put(
+@router.put(
     "/{user_id}",
     response_model=UserResponse,
     summary="Update user"
@@ -171,11 +176,12 @@ async def update_user(
     return await UserService.update_user(user_id, data, session)
 
 
-@user_router.delete(
+@router.delete(
     "/{user_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete user"
 )
+@PolicyEnforcer.required(Policy.role(Role.ADMIN))
 async def delete_user(
     user_id: int,
     request: Request,

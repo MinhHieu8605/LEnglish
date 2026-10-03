@@ -1,18 +1,19 @@
 from typing import List, Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy import case, func
+from sqlalchemy import and_, case, func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import async_get_many_records_by, async_get_one_record_by
+from app.features.review.model import ReviewProgress
 from app.features.vocabulary.model import (
     Vocabulary,
     VocabularyBook,
     VocabularyTopic,
     VocabularyTopicWord,
 )
-from app.features.practice.model import PracticeProgress
+from app.features.vocabulary.queries import get_topic_words_with_progress
 from app.features.vocabulary.schemas import (
     TopicWordResponse,
     VocabularyTopicResponse,
@@ -44,7 +45,7 @@ def _build_topic_response(
 def _build_topic_word_response(
     vocab: Vocabulary,
     order_num: int,
-    progress: Optional[PracticeProgress] = None,
+    progress: Optional[ReviewProgress] = None,
 ) -> TopicWordResponse:
     """Build a curated-topic word with optional user progress."""
     return TopicWordResponse(
@@ -69,7 +70,7 @@ class VocabularyService(object):
     """Read curated vocabulary collections and user progress within them."""
 
     @staticmethod
-    async def get_books(session: AsyncSession) -> List[VocabularyBook]:
+    async def list_books(session: AsyncSession) -> List[VocabularyBook]:
         """Fetch all active vocabulary books sorted by creation date."""
         return await async_get_many_records_by(
             VocabularyBook,
@@ -80,10 +81,20 @@ class VocabularyService(object):
         )
 
     @staticmethod
-    async def get_book_topics(
+    async def list_topics(
         user_id: int, book_slug: str, session: AsyncSession
     ) -> List[VocabularyTopicResponse]:
-        """Fetch topics for a collection with aggregated user progress."""
+        """
+        Fetch topics for a collection with aggregated user progress.
+
+        Args:
+            user_id (int): The ID of the user.
+            book_slug (str): The slug of the vocabulary book.
+            session (AsyncSession): The database session.
+
+        Returns:
+            List[VocabularyTopicResponse]: A list of topics with user progress.
+        """
         book = await async_get_one_record_by(
             VocabularyBook,
             [VocabularyBook.slug == book_slug, VocabularyBook.deleted.is_(False)],
@@ -92,56 +103,35 @@ class VocabularyService(object):
             not_found_msg="Vocabulary book not found",
         )
 
+        mastered = ReviewProgress.status == WordStatus.MASTERED.value
+        learning = ReviewProgress.status.in_(
+            [WordStatus.LEARNING.value, WordStatus.REVIEW.value]
+        )
+        is_new = VocabularyTopicWord.id.is_not(None) & (
+            ReviewProgress.id.is_(None)
+            | (ReviewProgress.status == WordStatus.NEW.value)
+        )
         rows = (
             await session.exec(
                 select(
                     VocabularyTopic,
                     func.count(VocabularyTopicWord.id).label("word_count"),
-                    func.count(
-                        case((PracticeProgress.status == WordStatus.MASTERED.value, 1))
-                    ).label("mastered_count"),
-                    func.count(
-                        case(
-                            (
-                                (PracticeProgress.status == WordStatus.LEARNING.value)
-                                | (
-                                    PracticeProgress.status
-                                    == WordStatus.REVIEW.value
-                                ),
-                                1,
-                            )
-                        )
-                    ).label("learning_count"),
-                    func.count(
-                        case(
-                            (
-                                VocabularyTopicWord.id.is_not(None)
-                                & (
-                                    PracticeProgress.id.is_(None)
-                                    | (
-                                        PracticeProgress.status
-                                        == WordStatus.NEW.value
-                                    )
-                                ),
-                                1,
-                            )
-                        )
-                    ).label("new_count"),
+                    func.count(case((mastered, 1))).label("mastered_count"),
+                    func.count(case((learning, 1))).label("learning_count"),
+                    func.count(case((is_new, 1))).label("new_count"),
                 )
                 .where(VocabularyTopic.book_id == book.id)
                 .join(
                     VocabularyTopicWord,
                     VocabularyTopic.id == VocabularyTopicWord.topic_id,
-                    isouter=True,
                 )
                 .join(
-                    PracticeProgress,
+                    ReviewProgress,
                     (
-                        PracticeProgress.vocabulary_id
+                        ReviewProgress.vocabulary_id
                         == VocabularyTopicWord.vocabulary_id
                     )
-                    & (PracticeProgress.user_id == user_id),
-                    isouter=True,
+                    & (ReviewProgress.user_id == user_id),
                 )
                 .group_by(VocabularyTopic.id)
                 .order_by(VocabularyTopic.order_num.asc())
@@ -166,90 +156,46 @@ class VocabularyService(object):
         ]
 
     @staticmethod
-    async def get_topic_words(
-        user_id: int, topic_slug: str, session: AsyncSession
+    async def list_words(
+        user_id: int,
+        topic_slug: str,
+        session: AsyncSession,
+        book_slug: str | None = None,
     ) -> List[TopicWordResponse]:
-        """Fetch words in a curated topic with optional user progress."""
-        topic = (
-            await session.exec(
-                select(VocabularyTopic)
-                .join(VocabularyBook, VocabularyTopic.book_id == VocabularyBook.id)
-                .where(
-                    VocabularyTopic.slug == topic_slug,
-                    VocabularyBook.deleted.is_(False),
-                )
-            )
-        ).first()
+        """
+        Fetch words in a curated topic with optional user progress.
+
+        Args:
+            user_id (int): The ID of the user.
+            topic_slug (str): The slug of the vocabulary topic.
+            session (AsyncSession): The database session.
+            book_slug (str | None): Optional slug of the vocabulary book to filter by.
+
+        Returns:
+            List[TopicWordResponse]: A list of words in the topic with user progress.
+        """
+        book_conditions = [VocabularyBook.deleted.is_(False)]
+        if book_slug:
+            book_conditions.append(VocabularyBook.slug == book_slug)
+        topic = await async_get_one_record_by(
+            VocabularyTopic,
+            [
+                VocabularyTopic.slug == topic_slug,
+                VocabularyTopic.book.has(and_(*book_conditions)),
+            ],
+            session,
+            raise_if_not_found=False,
+        )
         if not topic:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Vocabulary topic not found",
             )
 
-        rows = (
-            await session.exec(
-                select(Vocabulary, VocabularyTopicWord.order_num, PracticeProgress)
-                .join(
-                    VocabularyTopicWord,
-                    VocabularyTopicWord.vocabulary_id == Vocabulary.id,
-                )
-                .join(
-                    PracticeProgress,
-                    (PracticeProgress.vocabulary_id == Vocabulary.id)
-                    & (PracticeProgress.user_id == user_id),
-                    isouter=True,
-                )
-                .where(VocabularyTopicWord.topic_id == topic.id)
-                .order_by(VocabularyTopicWord.order_num.asc())
-            )
-        ).all()
+        rows = await get_topic_words_with_progress(topic.id, user_id, session)
+        rows.sort(key=lambda row: row[1].order_num)
 
         return [
-            _build_topic_word_response(vocab, order_num, progress)
-            for vocab, order_num, progress in rows
-        ]
-
-    @staticmethod
-    async def get_book_topic_words(
-        user_id: int, book_slug: str, topic_slug: str, session: AsyncSession
-    ) -> List[TopicWordResponse]:
-        """Fetch topic words only when the topic belongs to the requested book."""
-        topic = (
-            await session.exec(
-                select(VocabularyTopic)
-                .join(VocabularyBook, VocabularyTopic.book_id == VocabularyBook.id)
-                .where(
-                    VocabularyBook.slug == book_slug,
-                    VocabularyTopic.slug == topic_slug,
-                    VocabularyBook.deleted.is_(False),
-                )
-            )
-        ).first()
-        
-        if not topic:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Vocabulary topic not found",
-            )
-
-        rows = (
-            await session.exec(
-                select(Vocabulary, VocabularyTopicWord.order_num, PracticeProgress)
-                .join(
-                    VocabularyTopicWord,
-                    VocabularyTopicWord.vocabulary_id == Vocabulary.id,
-                )
-                .join(
-                    PracticeProgress,
-                    (PracticeProgress.vocabulary_id == Vocabulary.id)
-                    & (PracticeProgress.user_id == user_id),
-                    isouter=True,
-                )
-                .where(VocabularyTopicWord.topic_id == topic.id)
-                .order_by(VocabularyTopicWord.order_num.asc())
-            )
-        ).all()
-        return [
-            _build_topic_word_response(vocab, order_num, progress)
-            for vocab, order_num, progress in rows
+            _build_topic_word_response(vocab, topic_word.order_num, progress)
+            for vocab, topic_word, progress in rows
         ]

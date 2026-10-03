@@ -1,12 +1,12 @@
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.database.async_db import async_create_record, async_get_one_record_by, async_update_one_record
 from app.features.token.model import Token
 from app.features.token.schemas import AccessTokenPayload
 from app.features.user.model import UserRole
 from app.middleware.security import create_access_token, create_refresh_token, validate_token
 from app.utils.constants import TokenType
-
-from sqlmodel import select
-from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 async def _build_token_payload(

@@ -7,6 +7,12 @@ from app.features.lesson.schemas import (
     LessonListMeta,
     LessonListResponse,
     LessonPaginationFilter,
+    LessonProgressRequest,
+    LessonProgressResponse,
+    LessonSessionRequest,
+    LessonSessionResponse,
+    LessonAnswerRequest,
+    LessonAnswerResponse,
     YouTubeLessonImportRequest,
 )
 from app.features.lesson.service import LessonService
@@ -68,6 +74,76 @@ async def get_lesson_detail(
     session: AsyncSession = Depends(get_session),
 ):
     return await LessonService.get_detail(lesson_slug, session)
+
+
+@router.get("/{lesson_slug}/progress", response_model=LessonProgressResponse)
+async def get_lesson_progress(
+    lesson_slug: str,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    return await LessonService.get_progress(
+        get_user_id_from_request(request), lesson_slug, session
+    )
+
+
+@router.put("/{lesson_slug}/progress", response_model=LessonProgressResponse)
+async def save_lesson_progress(
+    lesson_slug: str,
+    data: LessonProgressRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    return await LessonService.save_progress(
+        get_user_id_from_request(request), lesson_slug, data, session
+    )
+
+
+@router.post(
+    "/{lesson_slug}/sessions",
+    response_model=LessonSessionResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def start_lesson_session(
+    lesson_slug: str,
+    data: LessonSessionRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    return await LessonService.start_session(
+        get_user_id_from_request(request), lesson_slug, data, session
+    )
+
+
+@router.post(
+    "/{lesson_slug}/sessions/{session_id}/answers",
+    response_model=LessonAnswerResponse,
+)
+async def submit_lesson_answer(
+    lesson_slug: str,
+    session_id: int,
+    data: LessonAnswerRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    return await LessonService.submit_answer(
+        get_user_id_from_request(request), lesson_slug, session_id, data, session
+    )
+
+
+@router.post(
+    "/{lesson_slug}/sessions/{session_id}/complete",
+    response_model=LessonSessionResponse,
+)
+async def complete_lesson_session(
+    lesson_slug: str,
+    session_id: int,
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    return await LessonService.complete_session(
+        get_user_id_from_request(request), lesson_slug, session_id, session
+    )
 
 
 @router.delete(

@@ -17,7 +17,8 @@ from app.features.feedback.schemas import (
     ResponseFeedback,
 )
 from app.features.feedback.service import FeedbackService
-from app.utils.constants import FeedbackAttachmentType, FeedbackStatus, FeedbackType
+from app.utils.constants import FeedbackAttachmentType, FeedbackStatus, FeedbackType, Role
+from app.utils.permission.enforcer import Policy, PolicyEnforcer
 
 
 router = APIRouter()
@@ -128,8 +129,10 @@ async def update_feedback(
 @router.post(
     "/{feedback_id}/response",
 )
+@PolicyEnforcer.required(Policy.role(Role.ADMIN))
 async def response_feedback(
     feedback_id: int,
+    request: Request,
     status: Optional[FeedbackStatus] = Form(None),
     response: str = Form(...),
     attachment_paths: Optional[list[str]] = Form(None),
@@ -152,6 +155,7 @@ async def response_feedback(
     "/{feedback_id}",
     response_model=FeedbackDeleteResponse,
 )
+@PolicyEnforcer.required(Policy.role(Role.ADMIN))
 async def delete_feedback(
     feedback_id: int,
     request: Request,
@@ -161,11 +165,11 @@ async def delete_feedback(
     return await FeedbackService.delete_feedback(
         feedback_id,
         session,
-        request
     )
 
 
 @router.delete("", response_model=FeedbackDeleteResponse)
+@PolicyEnforcer.required(Policy.role(Role.ADMIN))
 async def bulk_delete_feedback(
     feedback_ids: FeedbackBulkDeleteRequest,
     request: Request,
@@ -175,5 +179,4 @@ async def bulk_delete_feedback(
     return await FeedbackService.bulk_delete_feedback(
         feedback_ids.feedback_ids,
         session,
-        request
     )

@@ -58,9 +58,9 @@ class User(Base, TimeStampMixin):
     lesson_progress = relationship("LessonProgress", back_populates="user", cascade="all, delete-orphan")
     lesson_sessions = relationship("LessonSession", back_populates="user", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
-    notebooks = relationship("Notebook", back_populates="user", cascade="all, delete-orphan")
-    practice_progress = relationship("PracticeProgress", back_populates="user", cascade="all, delete-orphan")
-    vocabulary_practice_sessions = relationship("PracticeSession", back_populates="user", cascade="all, delete-orphan")
+    word_lists = relationship("WordList", back_populates="user", cascade="all, delete-orphan")
+    review_progress = relationship("ReviewProgress", back_populates="user", cascade="all, delete-orphan")
+    review_sessions = relationship("ReviewSession", back_populates="user", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
 
 

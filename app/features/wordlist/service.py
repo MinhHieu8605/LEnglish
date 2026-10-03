@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 from fastapi import HTTPException, status
 from sqlalchemy import func
@@ -15,15 +15,13 @@ from app.database.async_db import (
     transactional,
 )
 from app.features.lesson.model import Subtitle
+from app.features.review.model import ReviewProgress
+from app.features.review.schemas import ReviewWordRequest
+from app.features.review.service import ReviewService
 from app.features.vocabulary.model import (
     Vocabulary,
 )
-from app.features.practice.model import PracticeAttempt, PracticeProgress
-from app.features.practice.srs import (
-    PracticeProgressState,
-    calculate_review_schedule,
-)
-from app.features.wordlist.model import Notebook, NotebookItem
+from app.features.wordlist.model import WordList, WordListItem
 from app.features.wordlist.schemas import (
     CreateWordListRequest,
     SavedWordFilter,
@@ -35,40 +33,6 @@ from app.features.wordlist.schemas import (
 )
 from app.utils.common import page_size_to_offset_limit
 from app.utils.constants import ReviewRating, WordStatus
-
-
-def _calculate_srs_schedule(
-    progress: PracticeProgress,
-    rating: ReviewRating,
-    reviewed_at: datetime,
-) -> dict:
-    """
-    Calculate the next SRS state for a reviewed word.
-
-    Args:
-        progress (PracticeProgress): Current progress of the vocabulary.
-        rating (ReviewRating): User-selected Again, Hard, Good, or Easy rating.
-        reviewed_at (datetime): Time at which the review was submitted.
-
-    Returns:
-        dict: Fields used to update the vocabulary progress record.
-    """
-    schedule = calculate_review_schedule(
-        PracticeProgressState(
-            repetition_count=progress.repetition_count,
-            interval_days=progress.interval_days,
-            ease_factor=float(progress.ease_factor),
-        ),
-        rating,
-        reviewed_at,
-    )
-    return {
-        "repetition_count": schedule.repetition_count,
-        "interval_days": schedule.interval_days,
-        "ease_factor": schedule.ease_factor,
-        "next_review_at": schedule.next_review_at,
-        "status": schedule.status,
-    }
 
 
 async def _get_or_create_vocabularies(
@@ -116,7 +80,6 @@ async def _get_or_create_vocabularies(
                 "definition_vi": definition.definition_vi,
                 "example_sentence": definition.example,
                 "example_translation_vi": definition.example_vi,
-                "source_subtitle_id": data.source_subtitle_id,
             }
         )
 
@@ -126,7 +89,6 @@ async def _get_or_create_vocabularies(
                 "word": normalized,
                 "definition_vi": data.translation_vi,
                 "image_url": data.image_url,
-                "source_subtitle_id": data.source_subtitle_id,
             }
         )
 
@@ -141,7 +103,7 @@ async def _get_or_create_vocabularies(
 
 async def _get_user_word_list(
     word_list_id: int, user_id: int, session: AsyncSession
-) -> Notebook:
+) -> WordList:
     """
     Get a word list owned by the authenticated user.
 
@@ -151,15 +113,15 @@ async def _get_user_word_list(
         session (AsyncSession): Active database session.
 
     Returns:
-        Notebook: The word list owned by the user.
+        WordList: The word list owned by the user.
 
     Raises:
         HTTPException: If the word list does not exist or belongs to another
             user.
     """
     return await async_get_one_record_by(
-        Notebook,
-        [Notebook.id == word_list_id, Notebook.user_id == user_id],
+        WordList,
+        [WordList.id == word_list_id, WordList.user_id == user_id],
         session,
         raise_if_not_found=True,
         not_found_msg="Word list not found",
@@ -168,14 +130,14 @@ async def _get_user_word_list(
 
 def _build_saved_word_response(
     vocab: Vocabulary,
-    item: NotebookItem,
+    item: WordListItem,
 ) -> SavedWordResponse:
     """
     Build a saved-word response without review progress.
 
     Args:
         vocab (Vocabulary): Vocabulary data shared by all users.
-        item (NotebookItem): User-specific saved-word data.
+        item (WordListItem): User-specific saved-word data.
 
     Returns:
         SavedWordResponse: Combined vocabulary and word-list item response.
@@ -192,7 +154,7 @@ def _build_saved_word_response(
         example_translation_vi=vocab.example_translation_vi,
         created_time=item.created_time,
         word_list_item_id=item.id,
-        word_list_id=item.notebook_id,
+        word_list_id=item.word_list_id,
         source_subtitle_id=item.source_subtitle_id,
         context_sentence=item.context_sentence,
         note=item.note,
@@ -201,16 +163,16 @@ def _build_saved_word_response(
 
 def _build_saved_word_review_response(
     vocab: Vocabulary,
-    progress: PracticeProgress,
-    item: NotebookItem,
+    progress: ReviewProgress,
+    item: WordListItem,
 ) -> SavedWordReviewResponse:
     """
     Build a saved-word response containing SRS progress.
 
     Args:
         vocab (Vocabulary): Vocabulary data shared by all users.
-        progress (PracticeProgress): User-specific SRS progress.
-        item (NotebookItem): User-specific saved-word data.
+        progress (ReviewProgress): User-specific SRS progress.
+        item (WordListItem): User-specific saved-word data.
 
     Returns:
         SavedWordReviewResponse: Saved word combined with its SRS state.
@@ -239,8 +201,8 @@ class WordListService(object):
     ) -> WordListResponse:
         """Create an empty personal word list."""
         duplicate = await async_get_one_record_by(
-            Notebook,
-            [Notebook.user_id == user_id, Notebook.name == data.name],
+            WordList,
+            [WordList.user_id == user_id, WordList.name == data.name],
             session,
             raise_if_not_found=False,
         )
@@ -251,7 +213,7 @@ class WordListService(object):
             )
 
         word_list = await async_create_record(
-            Notebook,
+            WordList,
             {
                 "user_id": user_id,
                 "name": data.name,
@@ -268,22 +230,22 @@ class WordListService(object):
         )
 
     @staticmethod
-    async def get_word_lists(
+    async def list_word_lists(
         user_id: int,
         session: AsyncSession,
     ) -> List[WordListResponse]:
         """List a user's word lists with their saved-word counts."""
         word_count = (
-            select(func.count(NotebookItem.id))
-            .where(NotebookItem.notebook_id == Notebook.id)
-            .correlate(Notebook)
+            select(func.count(WordListItem.id))
+            .where(WordListItem.word_list_id == WordList.id)
+            .correlate(WordList)
             .scalar_subquery()
         )
         rows = (
             await session.exec(
-                select(Notebook, word_count.label("word_count"))
-                .where(Notebook.user_id == user_id)
-                .order_by(Notebook.created_time.desc())
+                select(WordList, word_count.label("word_count"))
+                .where(WordList.user_id == user_id)
+                .order_by(WordList.created_time.desc())
             )
         ).all()
 
@@ -339,19 +301,19 @@ class WordListService(object):
         responses = []
         for vocab in vocabularies:
             item = await async_get_one_record_by(
-                NotebookItem,
+                WordListItem,
                 [
-                    NotebookItem.notebook_id == word_list.id,
-                    NotebookItem.vocabulary_id == vocab.id,
+                    WordListItem.word_list_id == word_list.id,
+                    WordListItem.vocabulary_id == vocab.id,
                 ],
                 session,
                 raise_if_not_found=False,
             )
             if not item:
                 item = await async_create_record(
-                    NotebookItem,
+                    WordListItem,
                     {
-                        "notebook_id": word_list.id,
+                        "word_list_id": word_list.id,
                         "vocabulary_id": vocab.id,
                         "source_subtitle_id": data.source_subtitle_id,
                         "context_sentence": context_sentence,
@@ -369,25 +331,26 @@ class WordListService(object):
                     update["source_subtitle_id"] = data.source_subtitle_id
                     update["context_sentence"] = context_sentence
                 elif data.context_sentence is not None:
+                    update["source_subtitle_id"] = None
                     update["context_sentence"] = context_sentence
                 if data.note is not None:
                     update["note"] = data.note
                 item = await async_update_one_record(
-                    NotebookItem, item.id, update, session
+                    WordListItem, item.id, update, session
                 )
 
             progress = await async_get_one_record_by(
-                PracticeProgress,
+                ReviewProgress,
                 [
-                    PracticeProgress.user_id == user_id,
-                    PracticeProgress.vocabulary_id == vocab.id,
+                    ReviewProgress.user_id == user_id,
+                    ReviewProgress.vocabulary_id == vocab.id,
                 ],
                 session,
                 raise_if_not_found=False,
             )
             if not progress:
                 progress = await async_create_record(
-                    PracticeProgress,
+                    ReviewProgress,
                     {"user_id": user_id, "vocabulary_id": vocab.id},
                     session,
                 )
@@ -397,7 +360,7 @@ class WordListService(object):
         return responses
 
     @staticmethod
-    async def get_saved_words(
+    async def list_words(
         user_id: int,
         word_list_id: int,
         filters: SavedWordFilter,
@@ -422,20 +385,20 @@ class WordListService(object):
         await _get_user_word_list(word_list_id, user_id, session)
 
         conditions = [
-            NotebookItem.notebook_id == word_list_id,
+            WordListItem.word_list_id == word_list_id,
         ]
         if filters.keyword:
             conditions.append(Vocabulary.word.ilike(f"%{filters.keyword}%"))
 
         query = (
-            select(Vocabulary, NotebookItem)
-            .join(NotebookItem, NotebookItem.vocabulary_id == Vocabulary.id)
+            select(Vocabulary, WordListItem)
+            .join(WordListItem, WordListItem.vocabulary_id == Vocabulary.id)
             .where(*conditions)
-            .order_by(NotebookItem.created_time.desc())
+            .order_by(WordListItem.created_time.desc())
         )
         count_query = (
-            select(func.count(NotebookItem.id))
-            .join(Vocabulary, NotebookItem.vocabulary_id == Vocabulary.id)
+            select(func.count(WordListItem.id))
+            .join(Vocabulary, WordListItem.vocabulary_id == Vocabulary.id)
             .where(*conditions)
         )
         total = (await session.exec(count_query)).one()
@@ -449,14 +412,13 @@ class WordListService(object):
         return items, total, pages
 
     @staticmethod
-    @transactional()
-    async def review_saved_word(
+    async def record_review(
         user_id: int,
         word_list_id: int,
         vocabulary_id: int,
         rating: ReviewRating,
         session: AsyncSession,
-        attempt_id: Optional[str] = None,
+        attempt_id: str,
     ) -> SavedWordReviewResponse:
         """
         Update SRS progress for a word in the selected word list.
@@ -478,19 +440,14 @@ class WordListService(object):
 
         row = (
             await session.exec(
-                select(PracticeProgress, Vocabulary, NotebookItem)
+                select(Vocabulary, WordListItem)
                 .join(
-                    Vocabulary, 
-                    PracticeProgress.vocabulary_id == Vocabulary.id
-                )
-                .join(
-                    NotebookItem,
-                    NotebookItem.vocabulary_id == Vocabulary.id,
+                    WordListItem,
+                    WordListItem.vocabulary_id == Vocabulary.id,
                 )
                 .where(
-                    PracticeProgress.user_id == user_id,
-                    PracticeProgress.vocabulary_id == vocabulary_id,
-                    NotebookItem.notebook_id == word_list_id,
+                    Vocabulary.id == vocabulary_id,
+                    WordListItem.word_list_id == word_list_id,
                 )
             )
         ).first()
@@ -500,67 +457,26 @@ class WordListService(object):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Word not found in this word list",
             )
-        progress, vocab, item = row
-
-        if attempt_id:
-            existing = await async_get_one_record_by(
-                PracticeAttempt,
-                [
-                    PracticeAttempt.practice_progress_id == progress.id,
-                    PracticeAttempt.attempt_id == attempt_id,
-                ],
-                session,
-                raise_if_not_found=False,
-            )
-            if existing:
-                return _build_saved_word_review_response(vocab, progress, item)
-
-            belongs_elsewhere = (
-                await session.exec(
-                    select(PracticeAttempt, PracticeProgress)
-                    .join(
-                        PracticeProgress,
-                        PracticeAttempt.practice_progress_id == PracticeProgress.id,
-                    )
-                    .where(
-                        PracticeAttempt.attempt_id == attempt_id,
-                        PracticeProgress.user_id == user_id,
-                    )
-                )
-            ).first()
-            if belongs_elsewhere and belongs_elsewhere[1].vocabulary_id != vocabulary_id:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail="attempt_id belongs to another vocabulary",
-                )
-
-        now = datetime.now(timezone.utc)
-        schedule = _calculate_srs_schedule(progress, rating, now)
-
-        progress = await async_update_one_record(
-            PracticeProgress,
-            progress.id,
-            {
-                **schedule,
-                "last_reviewed_at": now,
-            },
+        vocab, item = row
+        await ReviewService.record_review(
+            user_id,
+            vocabulary_id,
+            ReviewWordRequest(attempt_id=attempt_id, rating=rating),
             session,
         )
-        await async_create_record(
-            PracticeAttempt,
-            {
-                "practice_progress_id": progress.id,
-                "attempt_id": attempt_id,
-                "rating": rating.value,
-                "reviewed_at": now,
-            },
+        progress = await async_get_one_record_by(
+            ReviewProgress,
+            [
+                ReviewProgress.user_id == user_id,
+                ReviewProgress.vocabulary_id == vocabulary_id,
+            ],
             session,
+            raise_if_not_found=True,
         )
-
         return _build_saved_word_review_response(vocab, progress, item)
 
     @staticmethod
-    async def get_saved_words_due(
+    async def list_due_words(
         user_id: int,
         word_list_id: int,
         filters: SavedWordsDueFilter,
@@ -586,23 +502,23 @@ class WordListService(object):
         now = datetime.now(timezone.utc)
 
         due_conditions = [
-            NotebookItem.notebook_id == word_list_id,
-            PracticeProgress.user_id == user_id,
+            WordListItem.word_list_id == word_list_id,
+            ReviewProgress.user_id == user_id,
             or_(
-                PracticeProgress.next_review_at <= now,
-                PracticeProgress.next_review_at.is_(None),
+                ReviewProgress.next_review_at <= now,
+                ReviewProgress.next_review_at.is_(None),
             ),
-            PracticeProgress.status != WordStatus.IGNORED.value,
+            ReviewProgress.status != WordStatus.IGNORED.value,
         ]
 
         total_due = (
             await session.exec(
-                select(func.count(NotebookItem.id))
-                .join(Vocabulary, NotebookItem.vocabulary_id == Vocabulary.id)
+                select(func.count(WordListItem.id))
+                .join(Vocabulary, WordListItem.vocabulary_id == Vocabulary.id)
                 .join(
-                    PracticeProgress,
-                    (PracticeProgress.vocabulary_id == Vocabulary.id)
-                    & (PracticeProgress.user_id == user_id),
+                    ReviewProgress,
+                    (ReviewProgress.vocabulary_id == Vocabulary.id)
+                    & (ReviewProgress.user_id == user_id),
                 )
                 .where(*due_conditions)
             )
@@ -611,15 +527,15 @@ class WordListService(object):
         pages = -(-total_due // filters.page_size)
         offset, limit = page_size_to_offset_limit(filters.page, filters.page_size)
         query = (
-            select(Vocabulary, PracticeProgress, NotebookItem)
-            .join(NotebookItem, NotebookItem.vocabulary_id == Vocabulary.id)
+            select(Vocabulary, ReviewProgress, WordListItem)
+            .join(WordListItem, WordListItem.vocabulary_id == Vocabulary.id)
             .join(
-                PracticeProgress,
-                (PracticeProgress.vocabulary_id == Vocabulary.id)
-                & (PracticeProgress.user_id == user_id),
+                ReviewProgress,
+                (ReviewProgress.vocabulary_id == Vocabulary.id)
+                & (ReviewProgress.user_id == user_id),
             )
             .where(*due_conditions)
-            .order_by(PracticeProgress.next_review_at.asc().nullsfirst())
+            .order_by(ReviewProgress.next_review_at.asc().nullsfirst())
             .offset(offset)
             .limit(limit)
         )

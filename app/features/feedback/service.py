@@ -6,8 +6,8 @@ import shutil
 from typing import Any, Dict, List, Optional, Union
 
 from fastapi import HTTPException, Request, UploadFile, status
-from slugify import slugify
 from loguru import logger
+from slugify import slugify
 from sqlalchemy import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -798,7 +798,6 @@ class FeedbackService(object):
         cls,
         feedback_id: int,
         session: AsyncSession,
-        request: Request,
     ) -> FeedbackDeleteResponse:
         """
         Delete one feedback item owned by the current user.
@@ -811,13 +810,6 @@ class FeedbackService(object):
         Returns:
             FeedbackDeleteResponse: The response indicating the result of the deletion operation.
         """
-        user_role = get_user_role_from_request(request)
-        if user_role != Role.ADMIN.value:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only Admin can delete feedback.",
-            )
-
         await async_get_one_record_by(
             Feedback,
             [Feedback.id == feedback_id, Feedback.deleted.is_(False)],
@@ -848,7 +840,6 @@ class FeedbackService(object):
         cls,
         feedback_ids: List[int],
         session: AsyncSession,
-        request: Request,
     ) -> FeedbackDeleteResponse:
         """
         Bulk delete feedback items owned by the current user.
@@ -861,13 +852,6 @@ class FeedbackService(object):
         Returns:
             FeedbackDeleteResponse: The response indicating the result of the bulk deletion operation.
         """
-        user_role = get_user_role_from_request(request)
-        if user_role != Role.ADMIN.value:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only Admin can bulk delete feedback.",
-            )
-
         unique_feedback_ids = list(dict.fromkeys(feedback_ids))
         logger.info(f"Attempting to bulk delete feedback with IDs: {unique_feedback_ids}")
 

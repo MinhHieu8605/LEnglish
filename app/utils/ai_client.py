@@ -1,5 +1,5 @@
-import httpx
 from fastapi import HTTPException, status
+import httpx
 from loguru import logger
 
 from app.config.settings import AI

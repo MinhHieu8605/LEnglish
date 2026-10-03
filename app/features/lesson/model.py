@@ -1,8 +1,8 @@
-from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from app.database.model import Base, TimeStampMixin
-from app.utils.constants import ContentStatus, TagType
+from app.utils.constants import ContentStatus, LessonSessionMode, LessonSessionStatus, TagType
 
 
 class Category(Base, TimeStampMixin):
@@ -161,5 +161,63 @@ class Subtitle(Base, TimeStampMixin):
     translation_vi = Column(Text)
 
     lesson = relationship("Lesson", back_populates="subtitles")
-    vocabulary_items = relationship("Vocabulary", back_populates="source_subtitle")
     lesson_answers = relationship("LessonAnswer", back_populates="subtitle")
+
+
+class LessonProgress(Base, TimeStampMixin):
+    __tablename__ = "LessonProgress"
+    __table_args__ = (
+        UniqueConstraint("user_id", "lesson_id", name="uq_lesson_progress_user_id_lesson_id"),
+        CheckConstraint("completion_percent >= 0 AND completion_percent <= 100", name="completion_percent_range"),
+        Index("lesson_progress_idx", "user_id", "last_watched_at"),
+    )
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="CASCADE"), nullable=False)
+    last_position_seconds = Column(Integer, nullable=False, default=0)
+    completion_percent = Column(Numeric(5, 2), nullable=False, default=0)
+    completed_at = Column(DateTime(timezone=True))
+    last_watched_at = Column(DateTime(timezone=True))
+
+    user = relationship("User", back_populates="lesson_progress")
+    lesson = relationship("Lesson", back_populates="lesson_progress")
+
+
+class LessonSession(Base, TimeStampMixin):
+    __tablename__ = "LessonSession"
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
+    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="CASCADE"), nullable=False)
+    mode = Column(String, nullable=False, default=LessonSessionMode.DICTATION.value)
+    status = Column(String, nullable=False, default=LessonSessionStatus.STARTED.value)
+    score = Column(Numeric(5, 2))
+    correct_count = Column(Integer, nullable=False, default=0)
+    total_count = Column(Integer, nullable=False, default=0)
+    duration_seconds = Column(Integer, nullable=False, default=0)
+    started_at = Column(DateTime(timezone=True), nullable=False)
+    completed_at = Column(DateTime(timezone=True))
+
+    user = relationship("User", back_populates="lesson_sessions")
+    lesson = relationship("Lesson", back_populates="lesson_sessions")
+    answers = relationship("LessonAnswer", back_populates="session", cascade="all, delete-orphan")
+
+
+class LessonAnswer(Base, TimeStampMixin):
+    __tablename__ = "LessonAnswer"
+    __table_args__ = (
+        UniqueConstraint("session_id", "subtitle_id", name="uq_lesson_answers_session_id_subtitle_id"),
+    )
+
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    session_id = Column(Integer, ForeignKey("LessonSession.id", ondelete="CASCADE"), nullable=False)
+    subtitle_id = Column(Integer, ForeignKey("Subtitle.id", ondelete="CASCADE"), nullable=False)
+    user_input = Column(Text, nullable=False)
+    accuracy_score = Column(Numeric(5, 2))
+    is_correct = Column(Boolean, nullable=False, default=False)
+    attempt_count = Column(Integer, nullable=False, default=1)
+    answered_at = Column(DateTime(timezone=True), nullable=False)
+
+    session = relationship("LessonSession", back_populates="answers")
+    subtitle = relationship("Subtitle", back_populates="lesson_answers")
