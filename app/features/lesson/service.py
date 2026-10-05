@@ -1,12 +1,14 @@
-from datetime import datetime, timezone
-from difflib import SequenceMatcher
 import math
 import re
 import unicodedata
+from datetime import datetime, timezone
+from difflib import SequenceMatcher
+from typing import Optional
 
 from fastapi import HTTPException, status
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -28,25 +30,22 @@ from app.features.lesson.model import (
     Subtitle,
 )
 from app.features.lesson.schemas import (
-    LessonDetailResponse,
-    LessonPaginationFilter,
-    LessonSubtitleResponse,
-    LessonSummaryResponse,
-    LessonProgressRequest,
-    LessonProgressResponse,
-    LessonSessionRequest,
-    LessonSessionResponse,
     LessonAnswerRequest,
     LessonAnswerResponse,
+    LessonDetailResponse,
+    LessonPaginationFilter,
+    LessonProgressRequest,
+    LessonProgressResponse,
+    LessonResumeResponse,
+    LessonSessionRequest,
+    LessonSessionResponse,
+    LessonSubtitleResponse,
+    LessonSummaryResponse,
     YouTubeLessonImportRequest,
 )
-from app.features.lesson.youtube import (
-    TranscriptSegment,
-    YouTubeLessonSource,
-    load_youtube_lesson_source,
-)
+from app.features.lesson.youtube import load_youtube_lesson_source
 from app.utils.common import page_size_to_offset_limit
-from app.utils.constants import ContentStatus, LessonSessionStatus
+from app.utils.constants import ContentStatus, LessonSessionStatus, SortOrder
 
 
 def _slugify(value: str) -> str:
@@ -59,7 +58,9 @@ def _build_lesson_detail_response(
     subtitles: list[Subtitle],
 ) -> LessonDetailResponse:
     """Build lesson details with every subtitle in timeline order."""
-    ordered_subtitles = sorted(subtitles, key=lambda item: (item.sequence, item.start_ms))
+    ordered_subtitles = sorted(
+        subtitles, key=lambda item: (item.sequence, item.start_ms)
+    )
     subtitle_responses = [
         LessonSubtitleResponse(
             id=subtitle.id,
@@ -90,6 +91,7 @@ def _build_lesson_detail_response(
 def _build_lesson_summary_response(
     lesson: Lesson,
     subtitle_count: int,
+    topic: Optional[str] = None,
 ) -> LessonSummaryResponse:
     return LessonSummaryResponse(
         id=lesson.id,
@@ -101,163 +103,23 @@ def _build_lesson_summary_response(
         duration_seconds=lesson.duration_seconds,
         difficulty=lesson.difficulty,
         subtitle_count=subtitle_count,
+        views_count=lesson.views_count,
+        channel_name=lesson.channel_name,
+        topic=topic,
     )
-
-
-async def _validate_import(
-    video_id: str,
-    category_id: int | None,
-    session: AsyncSession,
-) -> None:
-    existing_lesson = await async_get_one_record_by(
-        Lesson,
-        [
-            Lesson.video_provider == "youtube",
-            Lesson.video_id == video_id,
-        ],
-        session,
-        raise_if_not_found=False,
-    )
-    if existing_lesson is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This YouTube video has already been imported",
-        )
-
-    if category_id is not None:
-        category = await async_get_one_record_by_id(
-            Category,
-            category_id,
-            session,
-            raise_if_not_found=False,
-        )
-        if category is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Category not found",
-            )
-
-
-def _resolve_title(requested_title: str | None, source_title: str) -> str:
-    title = requested_title or source_title
-    if not title:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="The YouTube video has no usable title",
-        )
-    return title
-
-
-async def _create_unique_slug(
-    title: str,
-    video_id: str,
-    session: AsyncSession,
-) -> str:
-    slug = (_slugify(title) or f"youtube-{video_id}")[:255]
-    slug_exists = await async_get_one_record_by(
-        Lesson,
-        [Lesson.slug == slug],
-        session,
-        raise_if_not_found=False,
-    )
-    if slug_exists is None:
-        return slug
-    return f"{slug[:244].rstrip('-')}-{video_id}"
-
-
-def _build_youtube_lesson(
-    user_id: int,
-    data: YouTubeLessonImportRequest,
-    source: YouTubeLessonSource,
-    title: str,
-    slug: str,
-) -> Lesson:
-    return Lesson(
-        category_id=data.category_id,
-        title=title,
-        slug=slug,
-        description=data.description,
-        video_provider="youtube",
-        video_id=source.video_id,
-        video_url=f"https://www.youtube.com/watch?v={source.video_id}",
-        thumbnail_url=source.thumbnail_url,
-        duration_seconds=math.ceil(source.segments[-1].end_seconds),
-        difficulty=data.difficulty.value,
-        status=ContentStatus.PUBLISHED.value,
-        views_count=0,
-        published_at=datetime.now(timezone.utc),
-        created_by=user_id,
-        updated_by=user_id,
-    )
-
-
-def _build_subtitles(
-    lesson: Lesson,
-    segments: list[TranscriptSegment],
-) -> list[Subtitle]:
-    subtitles: list[Subtitle] = []
-    for sequence, segment in enumerate(segments, start=1):
-        start_ms = round(segment.start_seconds * 1000)
-        end_ms = max(round(segment.end_seconds * 1000), start_ms + 1)
-        subtitles.append(
-            Subtitle(
-                lesson=lesson,
-                sequence=sequence,
-                start_ms=start_ms,
-                end_ms=end_ms,
-                content_en=segment.content_en,
-                translation_vi=segment.translation_vi,
-            )
-        )
-    return subtitles
-
-
-@transactional()
-async def _save_imported_lesson(
-    lesson: Lesson,
-    subtitles: list[Subtitle],
-    session: AsyncSession,
-) -> Lesson:
-    try:
-        return await async_create_record(
-            Lesson,
-            {
-                "category_id": lesson.category_id,
-                "title": lesson.title,
-                "slug": lesson.slug,
-                "description": lesson.description,
-                "video_provider": lesson.video_provider,
-                "video_id": lesson.video_id,
-                "video_url": lesson.video_url,
-                "thumbnail_url": lesson.thumbnail_url,
-                "duration_seconds": lesson.duration_seconds,
-                "difficulty": lesson.difficulty,
-                "status": lesson.status,
-                "views_count": lesson.views_count,
-                "published_at": lesson.published_at,
-                "created_by": lesson.created_by,
-                "updated_by": lesson.updated_by,
-                "subtitles": subtitles,
-            },
-            session,
-        )
-    except IntegrityError:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="The lesson conflicts with an existing record",
-        )
 
 
 class LessonService(object):
     """Import and read video lessons with complete timed transcripts."""
 
     @staticmethod
-    async def _get_published_lesson(
-        lesson_slug: str, session: AsyncSession
-    ) -> Lesson:
+    async def _get_published_lesson(lesson_slug: str, session: AsyncSession) -> Lesson:
         return await async_get_one_record_by(
             Lesson,
-            [Lesson.slug == lesson_slug, Lesson.status == ContentStatus.PUBLISHED.value],
+            [
+                Lesson.slug == lesson_slug,
+                Lesson.status == ContentStatus.PUBLISHED.value,
+            ],
             session,
             not_found_msg="Lesson not found",
             raise_if_not_found=True,
@@ -289,43 +151,121 @@ class LessonService(object):
             Subtitle,
             [Subtitle.lesson_id == lesson.id],
             session,
-            order_by=[Subtitle.sequence.asc(), Subtitle.start_ms.asc()],
             raise_if_not_found=False,
         )
         return _build_lesson_detail_response(lesson, subtitles)
 
     @staticmethod
-    async def get_progress(
-        user_id: int, lesson_slug: str, session: AsyncSession
+    async def _build_progress_response(
+        lesson: Lesson,
+        progress: Optional[LessonProgress],
+        session: AsyncSession,
     ) -> LessonProgressResponse:
-        lesson = await LessonService._get_published_lesson(lesson_slug, session)
+        response = (
+            LessonProgressResponse.model_validate(progress)
+            if progress
+            else LessonProgressResponse(
+                lesson_id=lesson.id,
+                last_position_seconds=0,
+                completion_percent=0,
+                completed_at=None,
+                last_watched_at=None,
+            )
+        )
+        subtitles = await async_get_many_records_by(
+            Subtitle,
+            [Subtitle.lesson_id == lesson.id],
+            session,
+            raise_if_not_found=False,
+        )
+        response.subtitle_count = len(subtitles)
+        if response.completed_at is None and response.completion_percent < 100:
+            subtitle = min(
+                (
+                    subtitle for subtitle in subtitles
+                    if subtitle.end_ms > response.last_position_seconds * 1000
+                ),
+                key=lambda item: (item.sequence, item.start_ms),
+                default=None,
+            )
+            if subtitle:
+                response.current_subtitle = LessonSubtitleResponse(
+                    id=subtitle.id,
+                    sequence=subtitle.sequence,
+                    start_ms=subtitle.start_ms,
+                    end_ms=subtitle.end_ms,
+                    content_en=subtitle.content_en,
+                    translation_vi=subtitle.translation_vi,
+                )
+        return response
+
+    @staticmethod
+    async def get_resume(
+        user_id: int, session: AsyncSession
+    ) -> Optional[LessonResumeResponse]:
+        latest_progress_id = (
+            select(LessonProgress.id)
+            .where(
+                LessonProgress.user_id == user_id,
+                LessonProgress.last_watched_at.is_not(None),
+                LessonProgress.completed_at.is_(None),
+                LessonProgress.completion_percent < 100,
+                LessonProgress.lesson.has(Lesson.status == ContentStatus.PUBLISHED.value),
+            )
+            .order_by(LessonProgress.last_watched_at.desc(), LessonProgress.id.desc())
+            .limit(1)
+            .scalar_subquery()
+        )
+        progress = await async_get_one_record_by(
+            LessonProgress,
+            [LessonProgress.id == latest_progress_id],
+            session,
+            raise_if_not_found=False,
+            options=[joinedload(LessonProgress.lesson).joinedload(Lesson.category)],
+        )
+        if progress is None:
+            return None
+        lesson = progress.lesson
+        topic = lesson.category.name if lesson.category else None
+        response = await LessonService._build_progress_response(lesson, progress, session)
+        return LessonResumeResponse(
+            lesson=_build_lesson_summary_response(lesson, response.subtitle_count, topic),
+            progress=response,
+        )
+
+    @classmethod
+    async def get_progress(
+        cls,
+        user_id: int, 
+        lesson_slug: str, 
+        session: AsyncSession
+    ) -> LessonProgressResponse:
+        lesson = await cls._get_published_lesson(lesson_slug, session)
         progress = await async_get_one_record_by(
             LessonProgress,
             [LessonProgress.user_id == user_id, LessonProgress.lesson_id == lesson.id],
             session,
             raise_if_not_found=False,
         )
-        if progress:
-            return LessonProgressResponse.model_validate(progress)
-        return LessonProgressResponse(
-            lesson_id=lesson.id,
-            last_position_seconds=0,
-            completion_percent=0,
-            completed_at=None,
-            last_watched_at=None,
-        )
+        return await cls._build_progress_response(lesson, progress, session)
 
-    @staticmethod
+    @classmethod
     @transactional()
     async def save_progress(
+        cls,
         user_id: int,
         lesson_slug: str,
         data: LessonProgressRequest,
         session: AsyncSession,
     ) -> LessonProgressResponse:
-        lesson = await LessonService._get_published_lesson(lesson_slug, session)
-        if lesson.duration_seconds and data.last_position_seconds > lesson.duration_seconds:
-            raise HTTPException(status_code=422, detail="Position exceeds lesson duration")
+        lesson = await cls._get_published_lesson(lesson_slug, session)
+        if (
+            lesson.duration_seconds
+            and data.last_position_seconds > lesson.duration_seconds
+        ):
+            raise HTTPException(
+                status_code=422, detail="Position exceeds lesson duration"
+            )
 
         now = datetime.now(timezone.utc)
         completion = (
@@ -347,24 +287,27 @@ class LessonService(object):
         if completion >= 100 and not (progress and progress.completed_at):
             values["completed_at"] = now
         if progress:
-            progress = await async_update_one_record(LessonProgress, progress.id, values, session)
+            progress = await async_update_one_record(
+                LessonProgress, progress.id, values, session
+            )
         else:
             progress = await async_create_record(
                 LessonProgress,
                 {"user_id": user_id, "lesson_id": lesson.id, **values},
                 session,
             )
-        return LessonProgressResponse.model_validate(progress)
+        return await cls._build_progress_response(lesson, progress, session)
 
-    @staticmethod
+    @classmethod
     @transactional()
     async def start_session(
+        cls,
         user_id: int,
         lesson_slug: str,
         data: LessonSessionRequest,
         session: AsyncSession,
     ) -> LessonSessionResponse:
-        lesson = await LessonService._get_published_lesson(lesson_slug, session)
+        lesson = await cls._get_published_lesson(lesson_slug, session)
         total_count = (
             await session.exec(
                 select(func.count(Subtitle.id)).where(Subtitle.lesson_id == lesson.id)
@@ -382,19 +325,20 @@ class LessonService(object):
             },
             session,
         )
-        return LessonSessionResponse.model_validate(lesson_session)
+        return cls.model_validate(lesson_session)
 
-    @staticmethod
+    @classmethod
     @transactional()
     async def submit_answer(
+        cls,
         user_id: int,
         lesson_slug: str,
         session_id: int,
         data: LessonAnswerRequest,
         session: AsyncSession,
     ) -> LessonAnswerResponse:
-        lesson = await LessonService._get_published_lesson(lesson_slug, session)
-        lesson_session = await LessonService._get_user_session(
+        lesson = await cls._get_published_lesson(lesson_slug, session)
+        lesson_session = await cls._get_user_session(
             user_id, lesson.id, session_id, session
         )
         if lesson_session.status != LessonSessionStatus.STARTED.value:
@@ -412,7 +356,10 @@ class LessonService(object):
         accuracy = round(SequenceMatcher(None, submitted, expected).ratio() * 100, 2)
         answer = await async_get_one_record_by(
             LessonAnswer,
-            [LessonAnswer.session_id == session_id, LessonAnswer.subtitle_id == subtitle.id],
+            [
+                LessonAnswer.session_id == session_id,
+                LessonAnswer.subtitle_id == subtitle.id,
+            ],
             session,
             raise_if_not_found=False,
         )
@@ -424,7 +371,9 @@ class LessonService(object):
             "answered_at": datetime.now(timezone.utc),
         }
         if answer:
-            answer = await async_update_one_record(LessonAnswer, answer.id, values, session)
+            answer = await async_update_one_record(
+                LessonAnswer, answer.id, values, session
+            )
         else:
             answer = await async_create_record(
                 LessonAnswer,
@@ -445,16 +394,17 @@ class LessonService(object):
         )
         return LessonAnswerResponse.model_validate(answer)
 
-    @staticmethod
+    @classmethod
     @transactional()
     async def complete_session(
+        cls,
         user_id: int,
         lesson_slug: str,
         session_id: int,
         session: AsyncSession,
     ) -> LessonSessionResponse:
-        lesson = await LessonService._get_published_lesson(lesson_slug, session)
-        lesson_session = await LessonService._get_user_session(
+        lesson = await cls._get_published_lesson(lesson_slug, session)
+        lesson_session = await cls._get_user_session(
             user_id, lesson.id, session_id, session
         )
         if lesson_session.status == LessonSessionStatus.STARTED.value:
@@ -464,11 +414,28 @@ class LessonService(object):
                 started_at = started_at.replace(tzinfo=timezone.utc)
             lesson_session.status = LessonSessionStatus.COMPLETED.value
             lesson_session.completed_at = now
-            lesson_session.duration_seconds = max(0, int((now - started_at).total_seconds()))
+            lesson_session.duration_seconds = max(
+                0, int((now - started_at).total_seconds())
+            )
         return LessonSessionResponse.model_validate(lesson_session)
 
     @staticmethod
+    def _build_where_clause(filters: LessonPaginationFilter) -> list:
+        """Build lesson search conditions for both listing and counting."""
+        where_clause = [Lesson.status == ContentStatus.PUBLISHED.value]
+        if filters.keyword:
+            where_clause.append(
+                or_(
+                    Lesson.title.icontains(filters.keyword, autoescape=True),
+                    Lesson.channel_name.icontains(filters.keyword, autoescape=True),
+                    Category.name.icontains(filters.keyword, autoescape=True),
+                )
+            )
+        return where_clause
+
+    @classmethod
     async def list_lessons(
+        cls,
         filters: LessonPaginationFilter,
         session: AsyncSession,
     ) -> tuple[list[LessonSummaryResponse], int, int]:
@@ -483,15 +450,29 @@ class LessonService(object):
             tuple[list[LessonSummaryResponse], int, int]: Page items, total
                 lesson count, and total page count.
         """
-        published_condition = Lesson.status == ContentStatus.PUBLISHED.value
+        where_clause = cls._build_where_clause(filters)
+        sort_column = getattr(Lesson, filters.sort_by)
+        ordering = [
+            sort_column.desc()
+            if filters.sort_order == SortOrder.DESCEND
+            else sort_column.asc()
+        ]
+        if filters.sort_by == "views_count":
+            ordering.append(Lesson.published_at.desc())
+        ordering.append(Lesson.id.desc())
         query = (
-            select(Lesson, func.count(Subtitle.id))
+            select(Lesson, func.count(Subtitle.id), Category.name)
             .outerjoin(Subtitle, Subtitle.lesson_id == Lesson.id)
-            .where(published_condition)
-            .group_by(Lesson.id)
-            .order_by(Lesson.published_at.desc(), Lesson.id.desc())
+            .outerjoin(Category, Category.id == Lesson.category_id)
+            .where(*where_clause)
+            .group_by(Lesson.id, Category.name)
+            .order_by(*ordering)
         )
-        count_query = select(func.count(Lesson.id)).where(published_condition)
+        count_query = (
+            select(func.count(Lesson.id))
+            .outerjoin(Category, Category.id == Lesson.category_id)
+            .where(*where_clause)
+        )
         total = (await session.exec(count_query)).one()
 
         pages = -(-total // filters.page_size) if total else 0
@@ -500,12 +481,13 @@ class LessonService(object):
 
         rows = (await session.exec(query)).all()
         lessons = [
-            _build_lesson_summary_response(lesson, subtitle_count)
-            for lesson, subtitle_count in rows
+            _build_lesson_summary_response(lesson, subtitle_count, topic)
+            for lesson, subtitle_count, topic in rows
         ]
         return lessons, total, pages
 
     @staticmethod
+    @transactional()
     async def import_youtube(
         user_id: int,
         data: YouTubeLessonImportRequest,
@@ -516,12 +498,94 @@ class LessonService(object):
             data.video_url,
             data.translate_to_vi,
         )
-        await _validate_import(source.video_id, data.category_id, session)
-        title = _resolve_title(data.title, source.title)
-        slug = await _create_unique_slug(title, source.video_id, session)
-        lesson = _build_youtube_lesson(user_id, data, source, title, slug)
-        subtitles = _build_subtitles(lesson, source.segments)
-        lesson = await _save_imported_lesson(lesson, subtitles, session)
+        existing_lesson = await async_get_one_record_by(
+            Lesson,
+            [
+                Lesson.video_provider == "youtube",
+                Lesson.video_id == source.video_id,
+            ],
+            session,
+            raise_if_not_found=False,
+        )
+        if existing_lesson is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This YouTube video has already been imported",
+            )
+
+        if data.category_id is not None:
+            category = await async_get_one_record_by_id(
+                Category,
+                data.category_id,
+                session,
+                raise_if_not_found=False,
+            )
+            if category is None:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Category not found",
+                )
+
+        title = data.title or source.title
+        if not title:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The YouTube video has no usable title",
+            )
+
+        slug = (_slugify(title) or f"youtube-{source.video_id}")[:255]
+        slug_exists = await async_get_one_record_by(
+            Lesson,
+            [Lesson.slug == slug],
+            session,
+            raise_if_not_found=False,
+        )
+        if slug_exists is not None:
+            slug = f"{slug[:244].rstrip('-')}-{source.video_id}"
+
+        subtitles = []
+        for sequence, segment in enumerate(source.segments, start=1):
+            start_ms = round(segment.start_seconds * 1000)
+            end_ms = max(round(segment.end_seconds * 1000), start_ms + 1)
+            subtitles.append(
+                Subtitle(
+                    sequence=sequence,
+                    start_ms=start_ms,
+                    end_ms=end_ms,
+                    content_en=segment.content_en,
+                    translation_vi=segment.translation_vi,
+                )
+            )
+
+        try:
+            lesson = await async_create_record(
+                Lesson,
+                {
+                    "category_id": data.category_id,
+                    "title": title,
+                    "slug": slug,
+                    "description": data.description,
+                    "video_provider": "youtube",
+                    "video_id": source.video_id,
+                    "channel_name": source.channel_name,
+                    "video_url": f"https://www.youtube.com/watch?v={source.video_id}",
+                    "thumbnail_url": source.thumbnail_url,
+                    "duration_seconds": math.ceil(source.segments[-1].end_seconds),
+                    "difficulty": data.difficulty.value,
+                    "status": ContentStatus.PUBLISHED.value,
+                    "views_count": 0,
+                    "published_at": datetime.now(timezone.utc),
+                    "created_by": user_id,
+                    "updated_by": user_id,
+                    "subtitles": subtitles,
+                },
+                session,
+            )
+        except IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="The lesson conflicts with an existing record",
+            )
 
         return _build_lesson_detail_response(lesson, subtitles)
 

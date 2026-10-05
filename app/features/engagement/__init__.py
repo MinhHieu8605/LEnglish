@@ -1,1 +1,1 @@
-"""Gamification and user engagement feature."""
+"""Activity tracking, learning statistics, and user engagement feature."""

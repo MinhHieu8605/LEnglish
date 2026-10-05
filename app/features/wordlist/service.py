@@ -18,9 +18,7 @@ from app.features.lesson.model import Subtitle
 from app.features.review.model import ReviewProgress
 from app.features.review.schemas import ReviewWordRequest
 from app.features.review.service import ReviewService
-from app.features.vocabulary.model import (
-    Vocabulary,
-)
+from app.features.vocabulary.model import Vocabulary
 from app.features.wordlist.model import WordList, WordListItem
 from app.features.wordlist.schemas import (
     CreateWordListRequest,
@@ -451,7 +449,7 @@ class WordListService(object):
                 )
             )
         ).first()
-        
+
         if not row:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

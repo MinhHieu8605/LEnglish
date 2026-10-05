@@ -1,17 +1,24 @@
-from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.database.async_db import async_create_record, async_get_one_record_by, async_update_one_record
+from app.database.async_db import (
+    async_create_record,
+    async_get_one_record_by,
+    async_update_one_record,
+)
 from app.features.token.model import Token
 from app.features.token.schemas import AccessTokenPayload
 from app.features.user.model import UserRole
-from app.middleware.security import create_access_token, create_refresh_token, validate_token
+from app.middleware.security import (
+    create_access_token,
+    create_refresh_token,
+    validate_token,
+)
 from app.utils.constants import TokenType
 
 
 async def _build_token_payload(
-    uid: int, 
-    email: str, 
+    uid: int,
+    email: str,
     refresh_token: str,
     session: AsyncSession,
 ) -> tuple[AccessTokenPayload, str]:
@@ -45,13 +52,13 @@ async def generate_tokens(
     """
     Generate access and refresh tokens for a user.
     """
-    criteria = [
-        Token.user_id == uid,
-        Token.token_type == TokenType.REFRESH.value
-    ]
-    statement = select(Token).where(*criteria)
-    result = await session.exec(statement)
-    token = result.first()
+    criteria = [Token.user_id == uid, Token.token_type == TokenType.REFRESH.value]
+    token = await async_get_one_record_by(
+        Token,
+        criteria,
+        session,
+        raise_if_not_found=False,
+    )
 
     if not token:
         refresh_token = create_refresh_token(uid, email)
@@ -60,9 +67,9 @@ async def generate_tokens(
             {
                 "user_id": uid,
                 "token_type": TokenType.REFRESH.value,
-                "token": refresh_token
+                "token": refresh_token,
             },
-            session
+            session,
         )
     else:
         refresh_token = token.token
@@ -75,7 +82,7 @@ async def generate_tokens(
             await async_update_one_record(
                 Token, token.id, {"token": refresh_token}, session
             )
-    
+
     # build access token payload and generate access token
     payload, role = await _build_token_payload(
         uid, email, refresh_token, session

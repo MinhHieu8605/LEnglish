@@ -7,7 +7,6 @@ from typing import Dict
 
 from app.utils.constants import ReviewRating, WordStatus
 
-
 _SRS_INTERVAL_STEPS = [1, 3, 5, 8, 15, 21]
 _MIN_EASE_FACTOR = 1.30
 _MAX_INTERVAL_DAYS = 365
@@ -42,7 +41,10 @@ class ReviewSchedule:
             return int(self.interval_days * 86400)
         return int((self.next_review_at - self._reviewed_at).total_seconds())
 
-def _next_good_interval(repetition_count: int, current_interval: int, ease_factor: float) -> int:
+
+def _next_good_interval(
+    repetition_count: int, current_interval: int, ease_factor: float
+) -> int:
     """Calculate the next interval for a successful review."""
     if repetition_count <= len(_SRS_INTERVAL_STEPS):
         return _SRS_INTERVAL_STEPS[repetition_count - 1]
@@ -142,3 +144,27 @@ def build_review_options(
         rating: calculate_review_schedule(progress, rating, reviewed_at)
         for rating in ReviewRating
     }
+
+
+def classify_progress(
+    status: str | None,
+    next_review_at: datetime | None,
+    now: datetime,
+) -> str:
+    """Classify persisted progress for review-queue filtering and ordering."""
+    if not status or status == WordStatus.NEW.value:
+        return "new"
+    if status == WordStatus.IGNORED.value:
+        return "ignored"
+    if not next_review_at:
+        return "due" if status == WordStatus.LEARNING.value else "future"
+
+    compare_now = now
+    if next_review_at.tzinfo is None and now.tzinfo is not None:
+        compare_now = now.replace(tzinfo=None)
+
+    if next_review_at < compare_now:
+        return "overdue"
+    if next_review_at == compare_now:
+        return "due"
+    return "future"

@@ -18,6 +18,7 @@ class VocabularyBookResponse(BaseModel):
 
 class VocabularyTopicResponse(BaseModel):
     """Response schema for topics within a book with user progress stats."""
+
     id: int
     book_id: int
     name: str
@@ -31,6 +32,7 @@ class VocabularyTopicResponse(BaseModel):
 
 class TopicWordResponse(BaseModel):
     """Response schema for a word inside a topic, including user progress if any."""
+
     id: int
     word: str
     word_type: Optional[str]

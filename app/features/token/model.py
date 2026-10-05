@@ -14,6 +14,7 @@ class Token(Base, TimeStampMixin):
         user_id (int): The unique identifier of the related user.
         token (str): The authentication token value.
     """
+
     __tablename__ = "Token"
     __table_args__ = (UniqueConstraint("token", name="uq_tokens_token"),)
 

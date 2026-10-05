@@ -6,30 +6,30 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "2026_09_29_word_lists_lesson"
-down_revision: Union[str, Sequence[str], None] = "2026_09_28_review_tables"
+revision: str = "1de46002d80e"
+down_revision: Union[str, Sequence[str], None] = "e66fcefb25f6"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
 CONSTRAINT_RENAMES = (
-    ("WordList", "pk_Notebook", "pk_WordList"),
-    ("WordList", "fk_Notebook_user_id_User", "fk_WordList_user_id_User"),
+    ("WordList", "pk_notebooks", "pk_WordList"),
+    ("WordList", "fk_notebooks_user_id_users", "fk_WordList_user_id_User"),
     ("WordList", "uq_notebooks_user_id_name", "uq_word_lists_user_id_name"),
-    ("WordListItem", "pk_NotebookItem", "pk_WordListItem"),
+    ("WordListItem", "pk_notebook_items", "pk_WordListItem"),
     (
         "WordListItem",
-        "fk_NotebookItem_notebook_id_Notebook",
+        "fk_notebook_items_notebook_id_notebooks",
         "fk_WordListItem_word_list_id_WordList",
     ),
     (
         "WordListItem",
-        "fk_NotebookItem_vocabulary_id_Vocabulary",
+        "fk_notebook_items_vocabulary_id_vocabularies",
         "fk_WordListItem_vocabulary_id_Vocabulary",
     ),
     (
         "WordListItem",
-        "fk_NotebookItem_source_subtitle_id_Subtitle",
+        "fk_notebook_items_source_subtitle_id_subtitles",
         "fk_WordListItem_source_subtitle_id_Subtitle",
     ),
     (
@@ -67,7 +67,7 @@ def upgrade() -> None:
         )
 
     op.drop_constraint(
-        "fk_Vocabulary_source_subtitle_id_Subtitle",
+        "fk_vocabularies_source_subtitle_id_subtitles",
         "Vocabulary",
         type_="foreignkey",
     )
@@ -90,7 +90,7 @@ def downgrade() -> None:
         )
     )
     op.create_foreign_key(
-        "fk_Vocabulary_source_subtitle_id_Subtitle",
+        "fk_vocabularies_source_subtitle_id_subtitles",
         "Vocabulary",
         "Subtitle",
         ["source_subtitle_id"],

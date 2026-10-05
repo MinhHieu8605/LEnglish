@@ -1,0 +1,585 @@
+{
+  "checked_at_utc": "2026-10-06T08:04:35.684910+00:00",
+  "authentication": "none",
+  "methods": [
+    "GET"
+  ],
+  "bypass_headers": false,
+  "results": [
+    {
+      "path": "/affiliate/me",
+      "url": "https://api.parroto.app/api/affiliate/me",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/affiliate/packages",
+      "url": "https://api.parroto.app/api/affiliate/packages",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/affiliate/payout-profile",
+      "url": "https://api.parroto.app/api/affiliate/payout-profile",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/community-lessons?limit=1&page=1",
+      "url": "https://api.parroto.app/api/community-lessons?limit=1&page=1",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "success",
+      "message": "OK"
+    },
+    {
+      "path": "/community-stats/my-stats",
+      "url": "https://api.parroto.app/api/community-stats/my-stats",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/dictionary/search?word=hello&locale=en",
+      "url": "https://api.parroto.app/api/dictionary/search?word=hello&locale=en",
+      "status": 200,
+      "top_level_keys": [
+        "encrypted",
+        "data"
+      ]
+    },
+    {
+      "path": "/dictionary/word/hello",
+      "url": "https://api.parroto.app/api/dictionary/word/hello",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message"
+      ],
+      "body_status": "error",
+      "message": "Bearer token is required"
+    },
+    {
+      "path": "/exams/published/sets?limit=1&page=1",
+      "url": "https://api.parroto.app/api/exams/published/sets?limit=1&page=1",
+      "status": 200,
+      "body_format": "non-JSON or truncated JSON"
+    },
+    {
+      "path": "/exams/sessions/analytics",
+      "url": "https://api.parroto.app/api/exams/sessions/analytics",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/exams/sessions/history?limit=1&page=1",
+      "url": "https://api.parroto.app/api/exams/sessions/history?limit=1&page=1",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/feedback/my",
+      "url": "https://api.parroto.app/api/feedback/my",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/games/feed?limit=1&page=1",
+      "url": "https://api.parroto.app/api/games/feed?limit=1&page=1",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "success",
+      "message": "Games feed retrieved successfully"
+    },
+    {
+      "path": "/games/top-players",
+      "url": "https://api.parroto.app/api/games/top-players",
+      "status": 200,
+      "body_format": "non-JSON or truncated JSON"
+    },
+    {
+      "path": "/learning-vocabulary/cards?limit=1&page=1",
+      "url": "https://api.parroto.app/api/learning-vocabulary/cards?limit=1&page=1",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/learning-vocabulary/enc/due?limit=1&page=1",
+      "url": "https://api.parroto.app/api/learning-vocabulary/enc/due?limit=1&page=1",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/learning-vocabulary/enc/new?limit=1&page=1",
+      "url": "https://api.parroto.app/api/learning-vocabulary/enc/new?limit=1&page=1",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/learning-vocabulary/session/current",
+      "url": "https://api.parroto.app/api/learning-vocabulary/session/current",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/learning-vocabulary/session/history?limit=1&page=1",
+      "url": "https://api.parroto.app/api/learning-vocabulary/session/history?limit=1&page=1",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/learning-vocabulary/stats",
+      "url": "https://api.parroto.app/api/learning-vocabulary/stats",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/lessons/daily",
+      "url": "https://api.parroto.app/api/lessons/daily",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data",
+        "meta"
+      ],
+      "body_status": "success",
+      "message": "Daily lessons retrieved successfully"
+    },
+    {
+      "path": "/lessons/progress",
+      "url": "https://api.parroto.app/api/lessons/progress",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/lessons/progress?topic_id=",
+      "url": "https://api.parroto.app/api/lessons/progress?topic_id=",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/lessons/suggest",
+      "url": "https://api.parroto.app/api/lessons/suggest",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/lessons?limit=1&page=1",
+      "url": "https://api.parroto.app/api/lessons?limit=1&page=1",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message"
+      ],
+      "body_status": "error",
+      "message": "Bearer token is required"
+    },
+    {
+      "path": "/level",
+      "url": "https://api.parroto.app/api/level",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/level/config",
+      "url": "https://api.parroto.app/api/level/config",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "success",
+      "message": "OK"
+    },
+    {
+      "path": "/level/milestones",
+      "url": "https://api.parroto.app/api/level/milestones",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/missions/config",
+      "url": "https://api.parroto.app/api/missions/config",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "success",
+      "message": "OK"
+    },
+    {
+      "path": "/missions/today",
+      "url": "https://api.parroto.app/api/missions/today",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/notifications/stats",
+      "url": "https://api.parroto.app/api/notifications/stats",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/notifications?limit=1&page=1",
+      "url": "https://api.parroto.app/api/notifications?limit=1&page=1",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/posts/categories",
+      "url": "https://api.parroto.app/api/posts/categories",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "data",
+        "pagination"
+      ],
+      "body_status": "success"
+    },
+    {
+      "path": "/prices",
+      "url": "https://api.parroto.app/api/prices",
+      "status": 200,
+      "top_level_keys": [
+        "data",
+        "meta"
+      ]
+    },
+    {
+      "path": "/private-chat/unread-count",
+      "url": "https://api.parroto.app/api/private-chat/unread-count",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/sentence-notes",
+      "url": "https://api.parroto.app/api/sentence-notes",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/sentences/review",
+      "url": "https://api.parroto.app/api/sentences/review",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/shop/items",
+      "url": "https://api.parroto.app/api/shop/items",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "data"
+      ],
+      "body_status": "success"
+    },
+    {
+      "path": "/shop/items/purchased/by-type",
+      "url": "https://api.parroto.app/api/shop/items/purchased/by-type",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/streak",
+      "url": "https://api.parroto.app/api/streak",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/streak/config",
+      "url": "https://api.parroto.app/api/streak/config",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "success",
+      "message": "OK"
+    },
+    {
+      "path": "/streak/milestones",
+      "url": "https://api.parroto.app/api/streak/milestones",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/user/info",
+      "url": "https://api.parroto.app/api/user/info",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/user/ranking-history",
+      "url": "https://api.parroto.app/api/user/ranking-history",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/user/stats",
+      "url": "https://api.parroto.app/api/user/stats",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/user/vocabulary/decks?limit=1&page=1",
+      "url": "https://api.parroto.app/api/user/vocabulary/decks?limit=1&page=1",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/user/vocabulary/search",
+      "url": "https://api.parroto.app/api/user/vocabulary/search",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    },
+    {
+      "path": "/vocab-battle/leaderboard",
+      "url": "https://api.parroto.app/api/vocab-battle/leaderboard",
+      "status": 200,
+      "body_format": "non-JSON or truncated JSON"
+    },
+    {
+      "path": "/vocabulary/enc/public/user-published?limit=1&page=1",
+      "url": "https://api.parroto.app/api/vocabulary/enc/public/user-published?limit=1&page=1",
+      "status": 200,
+      "top_level_keys": [
+        "encrypted",
+        "data"
+      ]
+    },
+    {
+      "path": "/vocabulary/enc/public?limit=1&page=1",
+      "url": "https://api.parroto.app/api/vocabulary/enc/public?limit=1&page=1",
+      "status": 200,
+      "body_format": "non-JSON or truncated JSON"
+    },
+    {
+      "path": "/voice-chat/topics",
+      "url": "https://api.parroto.app/api/voice-chat/topics",
+      "status": 200,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "success",
+      "message": "Topics retrieved successfully"
+    },
+    {
+      "path": "/wallet",
+      "url": "https://api.parroto.app/api/wallet",
+      "status": 401,
+      "top_level_keys": [
+        "status",
+        "message",
+        "data"
+      ],
+      "body_status": "error",
+      "message": "Unauthorized: No token provided"
+    }
+  ]
+}

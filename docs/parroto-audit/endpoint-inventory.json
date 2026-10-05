@@ -1,0 +1,4739 @@
+{
+  "scope": "HTTP calls exposed by inspected public web bundles, not private backend inventory",
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/activation-codes/activate",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 309569,
+          "expression": "\"/activation-codes/activate\""
+        }
+      ],
+      "id": "P001",
+      "group": "Kích hoạt",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/affiliate/code",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 293474,
+          "expression": "\"/affiliate/code\""
+        }
+      ],
+      "id": "P002",
+      "group": "Cộng tác viên",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/affiliate/commissions",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 294353,
+          "expression": "\"/affiliate/commissions\".concat(o)"
+        }
+      ],
+      "id": "P003",
+      "group": "Cộng tác viên",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/affiliate/me",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 291192,
+          "expression": "\"/affiliate/me\""
+        }
+      ],
+      "id": "P004",
+      "group": "Cộng tác viên",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/affiliate/packages",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 295675,
+          "expression": "\"/affiliate/packages\""
+        }
+      ],
+      "id": "P005",
+      "group": "Cộng tác viên",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/affiliate/payout-profile",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 294839,
+          "expression": "\"/affiliate/payout-profile\""
+        }
+      ],
+      "id": "P006",
+      "group": "Cộng tác viên",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/affiliate/payout-profile",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 295079,
+          "expression": "\"/affiliate/payout-profile\""
+        }
+      ],
+      "id": "P007",
+      "group": "Cộng tác viên",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/affiliate/payouts",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 295386,
+          "expression": "\"/affiliate/payouts\".concat(o)"
+        }
+      ],
+      "id": "P008",
+      "group": "Cộng tác viên",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/affiliate/payouts",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 295577,
+          "expression": "\"/affiliate/payouts\""
+        }
+      ],
+      "id": "P009",
+      "group": "Cộng tác viên",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/affiliate/prepare-paddle-checkout",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 293566,
+          "expression": "\"/affiliate/prepare-paddle-checkout\""
+        }
+      ],
+      "id": "P010",
+      "group": "Cộng tác viên",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/affiliate/referrals",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 293863,
+          "expression": "\"/affiliate/referrals\".concat(o)"
+        }
+      ],
+      "id": "P011",
+      "group": "Cộng tác viên",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/community-chat",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9009-38caf9c3316e603e.js",
+          "offset": 544,
+          "expression": "a"
+        }
+      ],
+      "id": "P012",
+      "group": "Chat cộng đồng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/community-chat",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9009-38caf9c3316e603e.js",
+          "offset": 764,
+          "expression": "\"/community-chat\""
+        }
+      ],
+      "id": "P013",
+      "group": "Chat cộng đồng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/community-chat/ban/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9009-38caf9c3316e603e.js",
+          "offset": 1096,
+          "expression": "\"/community-chat/ban/\".concat(e)"
+        }
+      ],
+      "id": "P014",
+      "group": "Chat cộng đồng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/community-chat/unban/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9009-38caf9c3316e603e.js",
+          "offset": 1185,
+          "expression": "\"/community-chat/unban/\".concat(e)"
+        }
+      ],
+      "id": "P015",
+      "group": "Chat cộng đồng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PATCH",
+      "path": "/community-chat/{id}/hide",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9009-38caf9c3316e603e.js",
+          "offset": 919,
+          "expression": "\"/community-chat/\".concat(e,\"/hide\")"
+        }
+      ],
+      "id": "P016",
+      "group": "Chat cộng đồng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PATCH",
+      "path": "/community-chat/{id}/unhide",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9009-38caf9c3316e603e.js",
+          "offset": 1012,
+          "expression": "\"/community-chat/\".concat(e,\"/unhide\")"
+        }
+      ],
+      "id": "P017",
+      "group": "Chat cộng đồng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/community-lessons",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 901,
+          "expression": "i"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1029,
+          "expression": "a"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 10655,
+          "expression": "c"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 10648,
+          "expression": "i"
+        }
+      ],
+      "id": "P018",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/community-lessons/from-youtube",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 818,
+          "expression": "\"\".concat(i,\"/from-youtube\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 946,
+          "expression": "\"\".concat(a,\"/from-youtube\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 10572,
+          "expression": "\"\".concat(c,\"/from-youtube\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 10565,
+          "expression": "\"\".concat(i,\"/from-youtube\")"
+        }
+      ],
+      "id": "P019",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "POST object từ caller; khác import admin LEnglish về quyền sở hữu/quota."
+    },
+    {
+      "method": "GET",
+      "path": "/community-lessons/mine",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1297,
+          "expression": "\"\".concat(i,\"/mine\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1425,
+          "expression": "\"\".concat(a,\"/mine\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 11051,
+          "expression": "\"\".concat(c,\"/mine\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 11044,
+          "expression": "\"\".concat(i,\"/mine\")"
+        }
+      ],
+      "id": "P020",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/community-lessons/quota",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1192,
+          "expression": "\"\".concat(i,\"/quota\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1320,
+          "expression": "\"\".concat(a,\"/quota\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 10946,
+          "expression": "\"\".concat(c,\"/quota\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 10939,
+          "expression": "\"\".concat(i,\"/quota\")"
+        }
+      ],
+      "id": "P021",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/community-lessons/shorts",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 26266,
+          "expression": "\"\".concat(N,\"/shorts\")"
+        }
+      ],
+      "id": "P022",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query có exclude từ danh sách excludeIds."
+    },
+    {
+      "method": "GET",
+      "path": "/community-lessons/tags/{id}/lessons",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1017,
+          "expression": "\"\".concat(i,\"/tags/\").concat(encodeURIComponent(e),\"/lessons\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1145,
+          "expression": "\"\".concat(a,\"/tags/\").concat(encodeURIComponent(e),\"/lessons\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 10771,
+          "expression": "\"\".concat(c,\"/tags/\").concat(encodeURIComponent(e),\"/lessons\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 10764,
+          "expression": "\"\".concat(i,\"/tags/\").concat(encodeURIComponent(e),\"/lessons\")"
+        }
+      ],
+      "id": "P023",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/community-lessons/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 2035,
+          "expression": "\"\".concat(i,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 2163,
+          "expression": "\"\".concat(a,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 11789,
+          "expression": "\"\".concat(c,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 11782,
+          "expression": "\"\".concat(i,\"/\").concat(e)"
+        }
+      ],
+      "id": "P024",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/community-lessons/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1406,
+          "expression": "\"\".concat(i,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1534,
+          "expression": "\"\".concat(a,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 11160,
+          "expression": "\"\".concat(c,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 11153,
+          "expression": "\"\".concat(i,\"/\").concat(e)"
+        }
+      ],
+      "id": "P025",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/community-lessons/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1512,
+          "expression": "\"\".concat(i,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1640,
+          "expression": "\"\".concat(a,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 11266,
+          "expression": "\"\".concat(c,\"/\").concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 11259,
+          "expression": "\"\".concat(i,\"/\").concat(e)"
+        }
+      ],
+      "id": "P026",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/community-lessons/{id}/like",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 26477,
+          "expression": "\"\".concat(N,\"/\").concat(e,\"/like\")"
+        }
+      ],
+      "id": "P027",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/community-lessons/{id}/retry",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1952,
+          "expression": "\"\".concat(i,\"/\").concat(e,\"/retry\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 2080,
+          "expression": "\"\".concat(a,\"/\").concat(e,\"/retry\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 11706,
+          "expression": "\"\".concat(c,\"/\").concat(e,\"/retry\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 11699,
+          "expression": "\"\".concat(i,\"/\").concat(e,\"/retry\")"
+        }
+      ],
+      "id": "P028",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/community-lessons/{id}/sentences",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1602,
+          "expression": "\"\".concat(i,\"/\").concat(e,\"/sentences\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1730,
+          "expression": "\"\".concat(a,\"/\").concat(e,\"/sentences\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 11356,
+          "expression": "\"\".concat(c,\"/\").concat(e,\"/sentences\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 11349,
+          "expression": "\"\".concat(i,\"/\").concat(e,\"/sentences\")"
+        }
+      ],
+      "id": "P029",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/community-lessons/{id}/sentences/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1739,
+          "expression": "\"\".concat(i,\"/\").concat(e,\"/sentences/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1867,
+          "expression": "\"\".concat(a,\"/\").concat(e,\"/sentences/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 11493,
+          "expression": "\"\".concat(c,\"/\").concat(e,\"/sentences/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 11486,
+          "expression": "\"\".concat(i,\"/\").concat(e,\"/sentences/\").concat(t)"
+        }
+      ],
+      "id": "P030",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/community-lessons/{id}/submit",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5247-0206db5333cd284f.js",
+          "offset": 1869,
+          "expression": "\"\".concat(i,\"/\").concat(e,\"/submit\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/[id]/edit-b88a317f3604ce7d.js",
+          "offset": 1997,
+          "expression": "\"\".concat(a,\"/\").concat(e,\"/submit\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/channels/[channelId]-27995de10f80c347.js",
+          "offset": 11623,
+          "expression": "\"\".concat(c,\"/\").concat(e,\"/submit\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/community-lessons/tags/[slug]-deca83a427c5fe88.js",
+          "offset": 11616,
+          "expression": "\"\".concat(i,\"/\").concat(e,\"/submit\")"
+        }
+      ],
+      "id": "P031",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/community-lessons/{id}/transcript",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 26775,
+          "expression": "\"\".concat(N,\"/\").concat(e,\"/transcript\")"
+        }
+      ],
+      "id": "P032",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query after_order, limit; caller đọc sentences, has_more và các trường start_ms/end_ms."
+    },
+    {
+      "method": "POST",
+      "path": "/community-lessons/{id}/view",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 27257,
+          "expression": "\"\".concat(N,\"/\").concat(e,\"/view\")"
+        }
+      ],
+      "id": "P033",
+      "group": "Bài học cộng đồng / shorts",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/community-stats/my-stats",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 3873,
+          "expression": "\"/community-stats/my-stats\""
+        }
+      ],
+      "id": "P034",
+      "group": "Thống kê cộng đồng",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/dictionary/search",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 559,
+          "expression": "\"/dictionary/search\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 3511,
+          "expression": "\"/dictionary/search\""
+        }
+      ],
+      "id": "P035",
+      "group": "Từ điển",
+      "verification": "HTTP 200",
+      "note": "Query word, locale; GET hello/locale=en trả 200."
+    },
+    {
+      "method": "GET",
+      "path": "/dictionary/word/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 239,
+          "expression": "\"/dictionary/word/\".concat(r)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 3191,
+          "expression": "\"/dictionary/word/\".concat(t)"
+        }
+      ],
+      "id": "P036",
+      "group": "Từ điển",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Path là word đã normalize; probe /hello trả 401. Wrapper bật generateKey."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/comments/replies/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 4978,
+          "expression": "\"/exams/comments/replies/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 7185,
+          "expression": "\"/exams/comments/replies/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 13444,
+          "expression": "\"/exams/comments/replies/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 4199,
+          "expression": "\"/exams/comments/replies/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 13542,
+          "expression": "\"/exams/comments/replies/\".concat(e)"
+        }
+      ],
+      "id": "P037",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/exams/comments/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 5126,
+          "expression": "\"/exams/comments/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 7333,
+          "expression": "\"/exams/comments/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 13592,
+          "expression": "\"/exams/comments/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 4347,
+          "expression": "\"/exams/comments/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 13690,
+          "expression": "\"/exams/comments/\".concat(e)"
+        }
+      ],
+      "id": "P038",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/published/sets",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 1893,
+          "expression": "\"/exams/published/sets\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 4100,
+          "expression": "\"/exams/published/sets\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 10359,
+          "expression": "\"/exams/published/sets\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 1114,
+          "expression": "\"/exams/published/sets\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 10457,
+          "expression": "\"/exams/published/sets\""
+        }
+      ],
+      "id": "P039",
+      "group": "Đề thi",
+      "verification": "HTTP 200",
+      "note": "Query exam_type_code khi được truyền; không phải chỉ URL factory."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/published/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 2049,
+          "expression": "\"/exams/published/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 4256,
+          "expression": "\"/exams/published/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 10515,
+          "expression": "\"/exams/published/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 1270,
+          "expression": "\"/exams/published/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 10613,
+          "expression": "\"/exams/published/\".concat(e)"
+        }
+      ],
+      "id": "P040",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "getExamOverview nhận path argument; chưa khẳng định ID/slug qua runtime."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/sessions/analytics",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 4514,
+          "expression": "\"/exams/sessions/analytics\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 6721,
+          "expression": "\"/exams/sessions/analytics\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 12980,
+          "expression": "\"/exams/sessions/analytics\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 3735,
+          "expression": "\"/exams/sessions/analytics\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 13078,
+          "expression": "\"/exams/sessions/analytics\""
+        }
+      ],
+      "id": "P041",
+      "group": "Đề thi",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/sessions/history",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 4379,
+          "expression": "\"/exams/sessions/history\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 6586,
+          "expression": "\"/exams/sessions/history\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 12845,
+          "expression": "\"/exams/sessions/history\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 3600,
+          "expression": "\"/exams/sessions/history\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 12943,
+          "expression": "\"/exams/sessions/history\""
+        }
+      ],
+      "id": "P042",
+      "group": "Đề thi",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/exams/sessions/start",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 2186,
+          "expression": "\"/exams/sessions/start\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 4393,
+          "expression": "\"/exams/sessions/start\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 10652,
+          "expression": "\"/exams/sessions/start\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 1407,
+          "expression": "\"/exams/sessions/start\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 10750,
+          "expression": "\"/exams/sessions/start\""
+        }
+      ],
+      "id": "P043",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/sessions/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 2318,
+          "expression": "\"/exams/sessions/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 4525,
+          "expression": "\"/exams/sessions/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 10784,
+          "expression": "\"/exams/sessions/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 1539,
+          "expression": "\"/exams/sessions/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 10882,
+          "expression": "\"/exams/sessions/\".concat(e)"
+        }
+      ],
+      "id": "P044",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/exams/sessions/{id}/abandon",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 3720,
+          "expression": "\"/exams/sessions/\".concat(e,\"/abandon\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 5927,
+          "expression": "\"/exams/sessions/\".concat(e,\"/abandon\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 12186,
+          "expression": "\"/exams/sessions/\".concat(e,\"/abandon\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 2941,
+          "expression": "\"/exams/sessions/\".concat(e,\"/abandon\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 12284,
+          "expression": "\"/exams/sessions/\".concat(e,\"/abandon\")"
+        }
+      ],
+      "id": "P045",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/exams/sessions/{id}/answer",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 3194,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answer\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 5401,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answer\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 11660,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answer\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 2415,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answer\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 11758,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answer\")"
+        }
+      ],
+      "id": "P046",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/exams/sessions/{id}/answers",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 3316,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answers\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 5523,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answers\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 11782,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answers\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 2537,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answers\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 11880,
+          "expression": "\"/exams/sessions/\".concat(e,\"/answers\")"
+        }
+      ],
+      "id": "P047",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/sessions/{id}/check/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 3561,
+          "expression": "\"/exams/sessions/\".concat(e,\"/check/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 5768,
+          "expression": "\"/exams/sessions/\".concat(e,\"/check/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 12027,
+          "expression": "\"/exams/sessions/\".concat(e,\"/check/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 2782,
+          "expression": "\"/exams/sessions/\".concat(e,\"/check/\").concat(s)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 12125,
+          "expression": "\"/exams/sessions/\".concat(e,\"/check/\").concat(t)"
+        }
+      ],
+      "id": "P048",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/exams/sessions/{id}/flag",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 3431,
+          "expression": "\"/exams/sessions/\".concat(e,\"/flag\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 5638,
+          "expression": "\"/exams/sessions/\".concat(e,\"/flag\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 11897,
+          "expression": "\"/exams/sessions/\".concat(e,\"/flag\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 2652,
+          "expression": "\"/exams/sessions/\".concat(e,\"/flag\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 11995,
+          "expression": "\"/exams/sessions/\".concat(e,\"/flag\")"
+        }
+      ],
+      "id": "P049",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/sessions/{id}/questions",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 2544,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 2841,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 4751,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 5048,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 11010,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 11307,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 1765,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 2062,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 11108,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 11405,
+          "expression": "\"/exams/sessions/\".concat(e,\"/questions\")"
+        }
+      ],
+      "id": "P050",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query part khi được truyền."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/sessions/{id}/result",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 3974,
+          "expression": "\"/exams/sessions/\".concat(e,\"/result\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 6181,
+          "expression": "\"/exams/sessions/\".concat(e,\"/result\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 12440,
+          "expression": "\"/exams/sessions/\".concat(e,\"/result\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 3195,
+          "expression": "\"/exams/sessions/\".concat(e,\"/result\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 12538,
+          "expression": "\"/exams/sessions/\".concat(e,\"/result\")"
+        }
+      ],
+      "id": "P051",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/exams/sessions/{id}/submit",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 3830,
+          "expression": "\"/exams/sessions/\".concat(e,\"/submit\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 6037,
+          "expression": "\"/exams/sessions/\".concat(e,\"/submit\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 12296,
+          "expression": "\"/exams/sessions/\".concat(e,\"/submit\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 3051,
+          "expression": "\"/exams/sessions/\".concat(e,\"/submit\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 12394,
+          "expression": "\"/exams/sessions/\".concat(e,\"/submit\")"
+        }
+      ],
+      "id": "P052",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/exams/{id}/comments",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 4683,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 6890,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 13149,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 3904,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 13247,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        }
+      ],
+      "id": "P053",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/exams/{id}/comments",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 4828,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6609-298689079cebb5a6.js",
+          "offset": 7035,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/7236-671db99697508fb7.js",
+          "offset": 13294,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9444-138c98935ace44f0.js",
+          "offset": 4049,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9679-6842e149939ad6c6.js",
+          "offset": 13392,
+          "expression": "\"/exams/\".concat(e,\"/comments\")"
+        }
+      ],
+      "id": "P054",
+      "group": "Đề thi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/feedback",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/feedbacks-e788805ae8b4d23c.js",
+          "offset": 2400,
+          "expression": "\"/feedback\""
+        }
+      ],
+      "id": "P055",
+      "group": "Phản hồi (ngoài phạm vi so sánh)",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/feedback/my",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/feedbacks-e788805ae8b4d23c.js",
+          "offset": 2226,
+          "expression": "\"/feedback/my\""
+        }
+      ],
+      "id": "P056",
+      "group": "Phản hồi (ngoài phạm vi so sánh)",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/feedback/public",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/feedbacks-e788805ae8b4d23c.js",
+          "offset": 1622,
+          "expression": "\"/feedback/public?\".concat(i.toString())"
+        }
+      ],
+      "id": "P057",
+      "group": "Phản hồi (ngoài phạm vi so sánh)",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/friends",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/8506-9e16008f47955a81.js",
+          "offset": 582,
+          "expression": "\"/friends?page=\".concat(e,\"&limit=\").concat(u)"
+        }
+      ],
+      "id": "P058",
+      "group": "Bạn bè",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/friends/accept/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/8506-9e16008f47955a81.js",
+          "offset": 1592,
+          "expression": "\"/friends/accept/\".concat(e)"
+        }
+      ],
+      "id": "P059",
+      "group": "Bạn bè",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/friends/reject/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/8506-9e16008f47955a81.js",
+          "offset": 1662,
+          "expression": "\"/friends/reject/\".concat(e)"
+        }
+      ],
+      "id": "P060",
+      "group": "Bạn bè",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/friends/request",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/8506-9e16008f47955a81.js",
+          "offset": 1516,
+          "expression": "\"/friends/request\""
+        }
+      ],
+      "id": "P061",
+      "group": "Bạn bè",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/friends/requests/incoming",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/8506-9e16008f47955a81.js",
+          "offset": 981,
+          "expression": "\"/friends/requests/incoming?page=\".concat(e,\"&limit=\").concat(u)"
+        }
+      ],
+      "id": "P062",
+      "group": "Bạn bè",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/friends/search",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/8506-9e16008f47955a81.js",
+          "offset": 1312,
+          "expression": "\"/friends/search?q=\".concat(encodeURIComponent(e),\"&page=\").concat(u,\"&limit=\").concat(D)"
+        }
+      ],
+      "id": "P063",
+      "group": "Bạn bè",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/friends/status/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/8506-9e16008f47955a81.js",
+          "offset": 1744,
+          "expression": "\"/friends/status/\".concat(e)"
+        }
+      ],
+      "id": "P064",
+      "group": "Bạn bè",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/friends/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/8506-9e16008f47955a81.js",
+          "offset": 1840,
+          "expression": "\"/friends/\".concat(e)"
+        }
+      ],
+      "id": "P065",
+      "group": "Bạn bè",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/games/feed",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/games-0ac9d52dd6838747.js",
+          "offset": 550,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/bridge-builder-d5f55042fc75401c.js",
+          "offset": 1406,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/bubble-pop-3e7be815fef1ecb6.js",
+          "offset": 1193,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/fruit-toss-7c973e4ded288124.js",
+          "offset": 1396,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/quiz-meteor-3a4ffa702e451172.js",
+          "offset": 997,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/sky-runner-86370b268c5ffa67.js",
+          "offset": 1231,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/spelling-bee-b3beddb4ebc44d5d.js",
+          "offset": 569,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/typing-game-6b737b596b2cd4f1.js",
+          "offset": 567,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-guess-ab59c82dbe83524a.js",
+          "offset": 1106,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-match-bc8ab7b8a6a65548.js",
+          "offset": 1391,
+          "expression": "\"/games/feed\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-rain-02bd6b9cdafd116c.js",
+          "offset": 565,
+          "expression": "\"/games/feed\""
+        }
+      ],
+      "id": "P066",
+      "group": "Trò chơi",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/games/sessions",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/games-0ac9d52dd6838747.js",
+          "offset": 314,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/bridge-builder-d5f55042fc75401c.js",
+          "offset": 1170,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/bubble-pop-3e7be815fef1ecb6.js",
+          "offset": 957,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/fruit-toss-7c973e4ded288124.js",
+          "offset": 1160,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/quiz-meteor-3a4ffa702e451172.js",
+          "offset": 761,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/sky-runner-86370b268c5ffa67.js",
+          "offset": 995,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/spelling-bee-b3beddb4ebc44d5d.js",
+          "offset": 333,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/typing-game-6b737b596b2cd4f1.js",
+          "offset": 331,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-guess-ab59c82dbe83524a.js",
+          "offset": 870,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-match-bc8ab7b8a6a65548.js",
+          "offset": 1155,
+          "expression": "\"/games/sessions\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-rain-02bd6b9cdafd116c.js",
+          "offset": 329,
+          "expression": "\"/games/sessions\""
+        }
+      ],
+      "id": "P067",
+      "group": "Trò chơi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/games/top-players",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/games-0ac9d52dd6838747.js",
+          "offset": 844,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/bridge-builder-d5f55042fc75401c.js",
+          "offset": 1700,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/bubble-pop-3e7be815fef1ecb6.js",
+          "offset": 1487,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/fruit-toss-7c973e4ded288124.js",
+          "offset": 1690,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/quiz-meteor-3a4ffa702e451172.js",
+          "offset": 1291,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/sky-runner-86370b268c5ffa67.js",
+          "offset": 1525,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/spelling-bee-b3beddb4ebc44d5d.js",
+          "offset": 863,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/typing-game-6b737b596b2cd4f1.js",
+          "offset": 861,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-guess-ab59c82dbe83524a.js",
+          "offset": 1400,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-match-bc8ab7b8a6a65548.js",
+          "offset": 1685,
+          "expression": "\"/games/top-players\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/word-rain-02bd6b9cdafd116c.js",
+          "offset": 859,
+          "expression": "\"/games/top-players\""
+        }
+      ],
+      "id": "P068",
+      "group": "Trò chơi",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/grammar/comments/replies/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9893-a13a51e75c0c9e8b.js",
+          "offset": 37274,
+          "expression": "\"\".concat(basePath(e),\"/comments/replies/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 20526,
+          "expression": "\"\".concat(basePath(e),\"/comments/replies/\").concat(t)"
+        }
+      ],
+      "id": "P069",
+      "group": "Comments qua wrapper generic",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/grammar/comments/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9893-a13a51e75c0c9e8b.js",
+          "offset": 37486,
+          "expression": "\"\".concat(basePath(e),\"/comments/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 20738,
+          "expression": "\"\".concat(basePath(e),\"/comments/\").concat(t)"
+        }
+      ],
+      "id": "P070",
+      "group": "Comments qua wrapper generic",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/grammar/{id}/comments",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9893-a13a51e75c0c9e8b.js",
+          "offset": 37104,
+          "expression": "\"\".concat(basePath(e),\"/\").concat(t,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 20356,
+          "expression": "\"\".concat(basePath(e),\"/\").concat(t,\"/comments\")"
+        }
+      ],
+      "id": "P071",
+      "group": "Comments qua wrapper generic",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/grammar/{id}/comments",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9893-a13a51e75c0c9e8b.js",
+          "offset": 37386,
+          "expression": "\"\".concat(basePath(e),\"/\").concat(t,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 20638,
+          "expression": "\"\".concat(basePath(e),\"/\").concat(t,\"/comments\")"
+        }
+      ],
+      "id": "P072",
+      "group": "Comments qua wrapper generic",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/leaderboard/home",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/2189-4fe1fa23085f5ad2.js",
+          "offset": 1411,
+          "expression": "\"/leaderboard/home?\".concat(s.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 5746,
+          "expression": "\"/leaderboard/home?\".concat(r.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/dashboard-f538a46934399769.js",
+          "offset": 10216,
+          "expression": "\"/leaderboard/home?\".concat(r.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/leaderboard-f0fffefaab5af8ee.js",
+          "offset": 744,
+          "expression": "\"/leaderboard/home?\".concat(r.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary-63d1fd8bafc84e26.js",
+          "offset": 2147,
+          "expression": "\"/leaderboard/home?\".concat(t.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 1545,
+          "expression": "\"/leaderboard/home?\".concat(t.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 1622,
+          "expression": "\"/leaderboard/home?\".concat(s.toString())"
+        }
+      ],
+      "id": "P073",
+      "group": "Xếp hạng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query period, metric, limit."
+    },
+    {
+      "method": "GET",
+      "path": "/leaderboard/monthly",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/2189-4fe1fa23085f5ad2.js",
+          "offset": 1040,
+          "expression": "\"/leaderboard/monthly?\".concat(r.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 5375,
+          "expression": "\"/leaderboard/monthly?\".concat(s.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/dashboard-f538a46934399769.js",
+          "offset": 9845,
+          "expression": "\"/leaderboard/monthly?\".concat(t.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/leaderboard-f0fffefaab5af8ee.js",
+          "offset": 373,
+          "expression": "\"/leaderboard/monthly?\".concat(t.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary-63d1fd8bafc84e26.js",
+          "offset": 1776,
+          "expression": "\"/leaderboard/monthly?\".concat(r.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 1174,
+          "expression": "\"/leaderboard/monthly?\".concat(a.toString())"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 1251,
+          "expression": "\"/leaderboard/monthly?\".concat(a.toString())"
+        }
+      ],
+      "id": "P074",
+      "group": "Xếp hạng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query month, sortBy."
+    },
+    {
+      "method": "POST",
+      "path": "/learning-time/end",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 573130,
+          "expression": "\"/learning-time/end\""
+        }
+      ],
+      "id": "P075",
+      "group": "Thời gian học",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON có session_id, final_delta_seconds; có xử lý end khi rời trang."
+    },
+    {
+      "method": "POST",
+      "path": "/learning-time/heartbeat",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 573083,
+          "expression": "\"/learning-time/heartbeat\""
+        }
+      ],
+      "id": "P076",
+      "group": "Thời gian học",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {session_id, sequence, delta_seconds}; FE mặc định heartbeat 240 giây."
+    },
+    {
+      "method": "POST",
+      "path": "/learning-time/start",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 573034,
+          "expression": "\"/learning-time/start\""
+        }
+      ],
+      "id": "P077",
+      "group": "Thời gian học",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Caller có activity_type, source và ref_id khi có."
+    },
+    {
+      "method": "DELETE",
+      "path": "/learning-vocabulary/card/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296263,
+          "expression": "\"/learning-vocabulary/card/\".concat(e)"
+        }
+      ],
+      "id": "P078",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/learning-vocabulary/card/{id}/master",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296721,
+          "expression": "\"/learning-vocabulary/card/\".concat(e,\"/master\")"
+        }
+      ],
+      "id": "P079",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/learning-vocabulary/cards",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296895,
+          "expression": "\"/learning-vocabulary/cards\""
+        }
+      ],
+      "id": "P080",
+      "group": "Học / ôn từ",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/learning-vocabulary/cards/remove",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296956,
+          "expression": "\"/learning-vocabulary/cards/remove\""
+        }
+      ],
+      "id": "P081",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {cardIds: [...]}."
+    },
+    {
+      "method": "POST",
+      "path": "/learning-vocabulary/cards/reset",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 297034,
+          "expression": "\"/learning-vocabulary/cards/reset\""
+        }
+      ],
+      "id": "P082",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {cardIds: [...]}."
+    },
+    {
+      "method": "DELETE",
+      "path": "/learning-vocabulary/deck/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296341,
+          "expression": "\"/learning-vocabulary/deck/\".concat(e)"
+        }
+      ],
+      "id": "P083",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/learning-vocabulary/enc/due",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296072,
+          "expression": "\"/learning-vocabulary/enc/due\""
+        }
+      ],
+      "id": "P084",
+      "group": "Học / ôn từ",
+      "verification": "HTTP 401",
+      "note": "Wrapper nhận object query; route thực dùng, không đồng nhất cache key /cards/due."
+    },
+    {
+      "method": "GET",
+      "path": "/learning-vocabulary/enc/new",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296009,
+          "expression": "\"/learning-vocabulary/enc/new\""
+        }
+      ],
+      "id": "P085",
+      "group": "Học / ôn từ",
+      "verification": "HTTP 401",
+      "note": "Wrapper nhận object query; route thực dùng, không đồng nhất cache key /cards/new."
+    },
+    {
+      "method": "DELETE",
+      "path": "/learning-vocabulary/group/{id}/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296810,
+          "expression": "\"/learning-vocabulary/group/\".concat(e,\"/\").concat(t)"
+        }
+      ],
+      "id": "P086",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Hai {id} lần lượt là deck_id, group_id."
+    },
+    {
+      "method": "GET",
+      "path": "/learning-vocabulary/groups-progress/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296642,
+          "expression": "\"/learning-vocabulary/groups-progress/\".concat(e)"
+        }
+      ],
+      "id": "P087",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/learning-vocabulary/session/current",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296490,
+          "expression": "\"/learning-vocabulary/session/current\""
+        }
+      ],
+      "id": "P088",
+      "group": "Học / ôn từ",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/learning-vocabulary/session/history",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296565,
+          "expression": "\"/learning-vocabulary/session/history\""
+        }
+      ],
+      "id": "P089",
+      "group": "Học / ôn từ",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/learning-vocabulary/session/start",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296414,
+          "expression": "\"/learning-vocabulary/session/start\""
+        }
+      ],
+      "id": "P090",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON từ caller; không tự suy ra payload tương đương LEnglish."
+    },
+    {
+      "method": "GET",
+      "path": "/learning-vocabulary/stats",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296196,
+          "expression": "\"/learning-vocabulary/stats\""
+        }
+      ],
+      "id": "P091",
+      "group": "Học / ôn từ",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/learning-vocabulary/submit",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 296136,
+          "expression": "\"/learning-vocabulary/submit\""
+        }
+      ],
+      "id": "P092",
+      "group": "Học / ôn từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON từ caller; có lời gọi submitReview, chưa xác minh contract runtime."
+    },
+    {
+      "method": "GET",
+      "path": "/lessons",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 297784,
+          "expression": "\"/lessons\""
+        }
+      ],
+      "id": "P093",
+      "group": "Bài học",
+      "verification": "HTTP 401",
+      "note": "Query: topic_slug, difficulty, title, page, limit, sort_by=order. Có cơ chế token do client sinh; probe không có token trả 401."
+    },
+    {
+      "method": "GET",
+      "path": "/lessons/comments/replies/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9893-a13a51e75c0c9e8b.js",
+          "offset": 37274,
+          "expression": "\"\".concat(basePath(e),\"/comments/replies/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 20526,
+          "expression": "\"\".concat(basePath(e),\"/comments/replies/\").concat(t)"
+        }
+      ],
+      "id": "P094",
+      "group": "Bài học",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/lessons/comments/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9893-a13a51e75c0c9e8b.js",
+          "offset": 37486,
+          "expression": "\"\".concat(basePath(e),\"/comments/\").concat(t)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 20738,
+          "expression": "\"\".concat(basePath(e),\"/comments/\").concat(t)"
+        }
+      ],
+      "id": "P095",
+      "group": "Bài học",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/lessons/complete",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 298387,
+          "expression": "\"/lessons/complete\""
+        }
+      ],
+      "id": "P096",
+      "group": "Bài học",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {data: ...} qua helper đóng gói; chưa xác minh đầy đủ nội dung nghiệp vụ."
+    },
+    {
+      "method": "GET",
+      "path": "/lessons/daily",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 298939,
+          "expression": "\"/lessons/daily\""
+        }
+      ],
+      "id": "P097",
+      "group": "Bài học",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/lessons/progress",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 298694,
+          "expression": "\"/lessons/progress\""
+        }
+      ],
+      "id": "P098",
+      "group": "Bài học",
+      "verification": "HTTP 401",
+      "note": "Query topic_id; tiến độ bài theo chủ đề, khác vị trí phát video."
+    },
+    {
+      "method": "POST",
+      "path": "/lessons/reset",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 298542,
+          "expression": "\"/lessons/reset\""
+        }
+      ],
+      "id": "P099",
+      "group": "Bài học",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {lesson_id, type}."
+    },
+    {
+      "method": "GET",
+      "path": "/lessons/suggest",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 299119,
+          "expression": "\"/lessons/suggest\""
+        }
+      ],
+      "id": "P100",
+      "group": "Bài học",
+      "verification": "HTTP 401",
+      "note": "Query lesson_id."
+    },
+    {
+      "method": "GET",
+      "path": "/lessons/{id}/comments",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9893-a13a51e75c0c9e8b.js",
+          "offset": 37104,
+          "expression": "\"\".concat(basePath(e),\"/\").concat(t,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 20356,
+          "expression": "\"\".concat(basePath(e),\"/\").concat(t,\"/comments\")"
+        }
+      ],
+      "id": "P101",
+      "group": "Bài học",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/lessons/{id}/comments",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/9893-a13a51e75c0c9e8b.js",
+          "offset": 37386,
+          "expression": "\"\".concat(basePath(e),\"/\").concat(t,\"/comments\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shorts-61a1af84b72b95ca.js",
+          "offset": 20638,
+          "expression": "\"\".concat(basePath(e),\"/\").concat(t,\"/comments\")"
+        }
+      ],
+      "id": "P102",
+      "group": "Bài học",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/level",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 205,
+          "expression": "\"/level\""
+        }
+      ],
+      "id": "P103",
+      "group": "Level và XP",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/level/config",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 167,
+          "expression": "\"/level/config\""
+        }
+      ],
+      "id": "P104",
+      "group": "Level và XP",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/level/milestones",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 241,
+          "expression": "\"/level/milestones\""
+        }
+      ],
+      "id": "P105",
+      "group": "Level và XP",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/level/milestones/{id}/claim",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 288,
+          "expression": "\"/level/milestones/\".concat(e,\"/claim\")"
+        }
+      ],
+      "id": "P106",
+      "group": "Level và XP",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/missions/config",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 700,
+          "expression": "\"/missions/config\""
+        }
+      ],
+      "id": "P107",
+      "group": "Nhiệm vụ",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/missions/dictation/submit",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 1080,
+          "expression": "\"/missions/dictation/submit\""
+        }
+      ],
+      "id": "P108",
+      "group": "Nhiệm vụ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/missions/feed",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 1485,
+          "expression": "\"/missions/feed\".concat(a)"
+        }
+      ],
+      "id": "P109",
+      "group": "Nhiệm vụ",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/missions/shadowing/submit",
+      "multipart": true,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 787,
+          "expression": "\"/missions/shadowing/submit\""
+        }
+      ],
+      "id": "P110",
+      "group": "Nhiệm vụ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "POST multipart/form-data được xác nhận trong wrapper."
+    },
+    {
+      "method": "GET",
+      "path": "/missions/today",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 741,
+          "expression": "\"/missions/today\""
+        }
+      ],
+      "id": "P111",
+      "group": "Nhiệm vụ",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/missions/vocabulary/submit",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 939,
+          "expression": "\"/missions/vocabulary/submit\""
+        }
+      ],
+      "id": "P112",
+      "group": "Nhiệm vụ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/missions/{id}/claim",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/7963-55e712e1e6908b46.js",
+          "offset": 1131,
+          "expression": "\"/missions/\".concat(e,\"/claim\")"
+        }
+      ],
+      "id": "P113",
+      "group": "Nhiệm vụ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/notifications",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 411210,
+          "expression": "\"/notifications\""
+        }
+      ],
+      "id": "P114",
+      "group": "Thông báo",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/notifications/read-all",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 411384,
+          "expression": "\"/notifications/read-all\""
+        }
+      ],
+      "id": "P115",
+      "group": "Thông báo",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Wrapper dùng DELETE cho thao tác đọc tất cả."
+    },
+    {
+      "method": "GET",
+      "path": "/notifications/stats",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 411269,
+          "expression": "\"/notifications/stats\""
+        }
+      ],
+      "id": "P116",
+      "group": "Thông báo",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/notifications/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 411321,
+          "expression": "\"/notifications/\".concat(e)"
+        }
+      ],
+      "id": "P117",
+      "group": "Thông báo",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Wrapper đặt tên markAsRead nhưng dùng DELETE; cần đọc semantics, không suy ra xóa dữ liệu."
+    },
+    {
+      "method": "GET",
+      "path": "/posts",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 1399,
+          "expression": "l?\"/posts?\".concat(l):\"/posts\""
+        }
+      ],
+      "id": "P118",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/posts",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 1130,
+          "expression": "\"/posts\""
+        }
+      ],
+      "id": "P119",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/posts/categories",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 1760,
+          "expression": "\"/posts/categories\""
+        }
+      ],
+      "id": "P120",
+      "group": "Diễn đàn",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/posts/comments",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 1910,
+          "expression": "\"/posts/comments\""
+        }
+      ],
+      "id": "P121",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/posts/comments/post/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 2326,
+          "expression": "n"
+        }
+      ],
+      "id": "P122",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query page, limit, ...; ID của post."
+    },
+    {
+      "method": "DELETE",
+      "path": "/posts/comments/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 3113,
+          "expression": "\"/posts/comments/\".concat(e)"
+        }
+      ],
+      "id": "P123",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/posts/comments/{id}/replies",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 2764,
+          "expression": "n"
+        }
+      ],
+      "id": "P124",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query page, limit, ...; ID của comment."
+    },
+    {
+      "method": "POST",
+      "path": "/posts/comments/{id}/vote",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 2958,
+          "expression": "\"/posts/comments/\".concat(e,\"/vote\")"
+        }
+      ],
+      "id": "P125",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/posts/reports",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 3394,
+          "expression": "\"/posts/reports\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 3565,
+          "expression": "\"/posts/reports\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9009-38caf9c3316e603e.js",
+          "offset": 43691,
+          "expression": "\"/posts/reports\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/3421.f6dda72de716f38c.js",
+          "offset": 5908,
+          "expression": "\"/posts/reports\""
+        }
+      ],
+      "id": "P126",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/posts/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 3736,
+          "expression": "\"/posts/\".concat(e)"
+        }
+      ],
+      "id": "P127",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/posts/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 1608,
+          "expression": "\"/posts/\".concat(e)"
+        }
+      ],
+      "id": "P128",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/posts/{id}/vote",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6114-76e464e05e385b43.js",
+          "offset": 3251,
+          "expression": "\"/posts/\".concat(e,\"/vote\")"
+        }
+      ],
+      "id": "P129",
+      "group": "Diễn đàn",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/prices",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 449120,
+          "expression": "\"/prices\""
+        }
+      ],
+      "id": "P130",
+      "group": "Giá",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/private-chat",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 299834,
+          "expression": "\"/private-chat\""
+        }
+      ],
+      "id": "P131",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {partner_id}."
+    },
+    {
+      "method": "GET",
+      "path": "/private-chat/block",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 301275,
+          "expression": "\"/private-chat/block?page=\".concat(e,\"&limit=\").concat(t)"
+        }
+      ],
+      "id": "P132",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "POST {blocked_id}; GET query page, limit."
+    },
+    {
+      "method": "POST",
+      "path": "/private-chat/block",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 300981,
+          "expression": "\"/private-chat/block\""
+        }
+      ],
+      "id": "P133",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "POST {blocked_id}; GET query page, limit."
+    },
+    {
+      "method": "GET",
+      "path": "/private-chat/block/check/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 301514,
+          "expression": "\"/private-chat/block/check/\".concat(e)"
+        }
+      ],
+      "id": "P134",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/private-chat/block/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 301057,
+          "expression": "\"/private-chat/block/\".concat(e)"
+        }
+      ],
+      "id": "P135",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/private-chat/conversations",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 300184,
+          "expression": "\"/private-chat/conversations?page=\".concat(e,\"&limit=\").concat(t)"
+        }
+      ],
+      "id": "P136",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/private-chat/messages",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 299934,
+          "expression": "\"/private-chat/messages\""
+        }
+      ],
+      "id": "P137",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {conversation_id, text}."
+    },
+    {
+      "method": "DELETE",
+      "path": "/private-chat/messages/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 300906,
+          "expression": "\"/private-chat/messages/\".concat(e)"
+        }
+      ],
+      "id": "P138",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/private-chat/unread-count",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 301618,
+          "expression": "\"/private-chat/unread-count\""
+        }
+      ],
+      "id": "P139",
+      "group": "Chat riêng",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/private-chat/{id}/messages",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 300635,
+          "expression": "\"/private-chat/\".concat(e,\"/messages?\").concat(o.toString())"
+        }
+      ],
+      "id": "P140",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/private-chat/{id}/read",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 300830,
+          "expression": "\"/private-chat/\".concat(e,\"/read\")"
+        }
+      ],
+      "id": "P141",
+      "group": "Chat riêng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/promo/active",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 302304,
+          "expression": "\"/promo/active\".concat(n)"
+        }
+      ],
+      "id": "P142",
+      "group": "Khuyến mãi",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/promo/validate",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 303448,
+          "expression": "\"/promo/validate\""
+        }
+      ],
+      "id": "P143",
+      "group": "Khuyến mãi",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/sentence-errors",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5385-0712f564b7d3daea.js",
+          "offset": 1111,
+          "expression": "\"/sentence-errors\""
+        }
+      ],
+      "id": "P144",
+      "group": "Báo lỗi câu",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/sentence-notes",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5385-0712f564b7d3daea.js",
+          "offset": 347,
+          "expression": "\"/sentence-notes\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-notes-b5607e012c829ed3.js",
+          "offset": 456,
+          "expression": "\"/sentence-notes\""
+        }
+      ],
+      "id": "P145",
+      "group": "Ghi chú câu",
+      "verification": "HTTP 401",
+      "note": "GET có thể lọc lesson_id."
+    },
+    {
+      "method": "DELETE",
+      "path": "/sentence-notes/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5385-0712f564b7d3daea.js",
+          "offset": 708,
+          "expression": "\"/sentence-notes/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-notes-b5607e012c829ed3.js",
+          "offset": 817,
+          "expression": "\"/sentence-notes/\".concat(e)"
+        }
+      ],
+      "id": "P146",
+      "group": "Ghi chú câu",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/sentence-notes/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5385-0712f564b7d3daea.js",
+          "offset": 523,
+          "expression": "\"/sentence-notes/\".concat(null==e?void 0:e.sentence_id)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-notes-b5607e012c829ed3.js",
+          "offset": 632,
+          "expression": "\"/sentence-notes/\".concat(null==e?void 0:e.sentence_id)"
+        }
+      ],
+      "id": "P147",
+      "group": "Ghi chú câu",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/sentence-notes/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5385-0712f564b7d3daea.js",
+          "offset": 869,
+          "expression": "\"/sentence-notes/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-notes-b5607e012c829ed3.js",
+          "offset": 978,
+          "expression": "\"/sentence-notes/\".concat(e)"
+        }
+      ],
+      "id": "P148",
+      "group": "Ghi chú câu",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/sentences/review",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 305115,
+          "expression": "\"/sentences/review\""
+        }
+      ],
+      "id": "P149",
+      "group": "Chấm và ôn câu",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/sentences/review/submit",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 305306,
+          "expression": "\"sentences/review/submit\""
+        }
+      ],
+      "id": "P150",
+      "group": "Chấm và ôn câu",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {data: ...}; source dùng đường dẫn không có slash đầu, đã chuẩn hóa theo baseURL."
+    },
+    {
+      "method": "POST",
+      "path": "/sentences/review/submit-shadowing",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 305475,
+          "expression": "\"sentences/review/submit-shadowing\""
+        }
+      ],
+      "id": "P151",
+      "group": "Chấm và ôn câu",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {data: ...}; source dùng đường dẫn không có slash đầu."
+    },
+    {
+      "method": "POST",
+      "path": "/sentences/submit",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 298068,
+          "expression": "\"/sentences/submit\""
+        }
+      ],
+      "id": "P152",
+      "group": "Chấm và ôn câu",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {data: ...} qua helper đóng gói."
+    },
+    {
+      "method": "POST",
+      "path": "/sentences/submit-shadowing",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 298223,
+          "expression": "\"/sentences/submit-shadowing\""
+        }
+      ],
+      "id": "P153",
+      "group": "Chấm và ôn câu",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "JSON {data: ...}; wrapper này không dùng postWithFormData."
+    },
+    {
+      "method": "GET",
+      "path": "/shop/items",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shop-1f9804bb2dd0ea93.js",
+          "offset": 1666,
+          "expression": "\"/shop/items\""
+        }
+      ],
+      "id": "P154",
+      "group": "Cửa hàng",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/shop/items/purchase",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shop-1f9804bb2dd0ea93.js",
+          "offset": 1996,
+          "expression": "\"/shop/items/purchase\""
+        }
+      ],
+      "id": "P155",
+      "group": "Cửa hàng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/shop/items/purchased/by-type",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shop-1f9804bb2dd0ea93.js",
+          "offset": 1818,
+          "expression": "\"/shop/items/purchased/by-type\""
+        }
+      ],
+      "id": "P156",
+      "group": "Cửa hàng",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PATCH",
+      "path": "/shop/items/purchased/{id}/toggle",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/shop-1f9804bb2dd0ea93.js",
+          "offset": 2156,
+          "expression": "\"/shop/items/purchased/\".concat(e,\"/toggle\")"
+        }
+      ],
+      "id": "P157",
+      "group": "Cửa hàng",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/streak",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 602,
+          "expression": "\"/streak\""
+        }
+      ],
+      "id": "P158",
+      "group": "Streak",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/streak/calendar",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 763,
+          "expression": "\"/streak/calendar\".concat(s)"
+        }
+      ],
+      "id": "P159",
+      "group": "Streak",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query from, to."
+    },
+    {
+      "method": "POST",
+      "path": "/streak/checkin",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 862,
+          "expression": "\"/streak/checkin\""
+        }
+      ],
+      "id": "P160",
+      "group": "Streak",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/streak/config",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 563,
+          "expression": "\"/streak/config\""
+        }
+      ],
+      "id": "P161",
+      "group": "Streak",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/streak/freeze/buy",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 1094,
+          "expression": "\"/streak/freeze/buy\""
+        }
+      ],
+      "id": "P162",
+      "group": "Streak",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/streak/milestones",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 820,
+          "expression": "\"/streak/milestones\""
+        }
+      ],
+      "id": "P163",
+      "group": "Streak",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/streak/milestones/{id}/claim",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 1012,
+          "expression": "\"/streak/milestones/\".concat(e,\"/claim?cycle=\").concat(t)"
+        }
+      ],
+      "id": "P164",
+      "group": "Streak",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Query cycle."
+    },
+    {
+      "method": "PUT",
+      "path": "/user/birthday",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 301777,
+          "expression": "\"/user/birthday\""
+        }
+      ],
+      "id": "P165",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/completed-sentences/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 308415,
+          "expression": "\"/user/completed-sentences/\".concat(e)"
+        }
+      ],
+      "id": "P166",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/info",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 306319,
+          "expression": "\"/user/info\""
+        }
+      ],
+      "id": "P167",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "HTTP 401",
+      "note": "GET hồ sơ; PUT multipart cập nhật thông tin. Một số setting học được lưu ở đây."
+    },
+    {
+      "method": "PUT",
+      "path": "/user/info",
+      "multipart": true,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 308313,
+          "expression": "\"/user/info\""
+        }
+      ],
+      "id": "P168",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "GET hồ sơ; PUT multipart cập nhật thông tin. Một số setting học được lưu ở đây."
+    },
+    {
+      "method": "GET",
+      "path": "/user/info/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 306759,
+          "expression": "\"/user/info/\".concat(e)"
+        }
+      ],
+      "id": "P169",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/user/lesson-progress",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 307386,
+          "expression": "\"/user/lesson-progress\""
+        }
+      ],
+      "id": "P170",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "POST JSON {lessonIds: [...]}; đọc batch tiến độ, không phải lưu vị trí xem."
+    },
+    {
+      "method": "GET",
+      "path": "/user/ranking-history",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 307198,
+          "expression": "\"/user/ranking-history\""
+        }
+      ],
+      "id": "P171",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/user/selected-item",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 307636,
+          "expression": "\"/user/selected-item\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 307788,
+          "expression": "\"/user/selected-item\""
+        }
+      ],
+      "id": "P172",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/stats",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 307050,
+          "expression": "\"/user/stats\""
+        }
+      ],
+      "id": "P173",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/user/username",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 306455,
+          "expression": "\"/user/username\""
+        }
+      ],
+      "id": "P174",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/username/check",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 306561,
+          "expression": "\"/user/username/check?username=\".concat(encodeURIComponent(e))"
+        }
+      ],
+      "id": "P175",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/vocabulary-review",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 308843,
+          "expression": "\"/user/vocabulary-review?page=\".concat(e,\"&limit=\").concat(t)"
+        }
+      ],
+      "id": "P176",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/user/vocabulary-review",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 308549,
+          "expression": "\"/user/vocabulary-review\""
+        }
+      ],
+      "id": "P177",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/user/vocabulary-review/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 309468,
+          "expression": "\"/user/vocabulary-review/\".concat(e)"
+        }
+      ],
+      "id": "P178",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/user/vocabulary/cards",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3581,
+          "expression": "\"/user/vocabulary/cards\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3311,
+          "expression": "\"/user/vocabulary/cards\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2625,
+          "expression": "\"/user/vocabulary/cards\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2689,
+          "expression": "\"/user/vocabulary/cards\""
+        }
+      ],
+      "id": "P179",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/user/vocabulary/cards/import",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 4064,
+          "expression": "\"/user/vocabulary/cards/import\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3794,
+          "expression": "\"/user/vocabulary/cards/import\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 3108,
+          "expression": "\"/user/vocabulary/cards/import\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 3172,
+          "expression": "\"/user/vocabulary/cards/import\""
+        }
+      ],
+      "id": "P180",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/user/vocabulary/cards/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3847,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3577,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2891,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2955,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        }
+      ],
+      "id": "P181",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/vocabulary/cards/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3712,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3442,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2756,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2820,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        }
+      ],
+      "id": "P182",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/user/vocabulary/cards/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3780,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3510,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2824,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2888,
+          "expression": "\"/user/vocabulary/cards/\".concat(e)"
+        }
+      ],
+      "id": "P183",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/vocabulary/decks",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 2719,
+          "expression": "\"/user/vocabulary/decks\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2449,
+          "expression": "\"/user/vocabulary/decks\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 1763,
+          "expression": "\"/user/vocabulary/decks\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 1827,
+          "expression": "\"/user/vocabulary/decks\""
+        }
+      ],
+      "id": "P184",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/user/vocabulary/decks",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 2664,
+          "expression": "\"/user/vocabulary/decks\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2394,
+          "expression": "\"/user/vocabulary/decks\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 1708,
+          "expression": "\"/user/vocabulary/decks\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 1772,
+          "expression": "\"/user/vocabulary/decks\""
+        }
+      ],
+      "id": "P185",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/user/vocabulary/decks/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 2932,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2662,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 1976,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2040,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        }
+      ],
+      "id": "P186",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/vocabulary/decks/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 2779,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2509,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 1823,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 1887,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        }
+      ],
+      "id": "P187",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/user/vocabulary/decks/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 2865,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2595,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 1909,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 1973,
+          "expression": "\"/user/vocabulary/decks/\".concat(e)"
+        }
+      ],
+      "id": "P188",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/vocabulary/decks/{id}/groups",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3296,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/groups\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3026,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/groups\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2340,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/groups\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2404,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/groups\")"
+        }
+      ],
+      "id": "P189",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/user/vocabulary/decks/{id}/publish",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3001,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/publish\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2731,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/publish\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2045,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/publish\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2109,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/publish\")"
+        }
+      ],
+      "id": "P190",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/user/vocabulary/decks/{id}/unpublish",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3081,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/unpublish\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2811,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/unpublish\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2125,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/unpublish\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2189,
+          "expression": "\"/user/vocabulary/decks/\".concat(e,\"/unpublish\")"
+        }
+      ],
+      "id": "P191",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/user/vocabulary/groups",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3239,
+          "expression": "\"/user/vocabulary/groups\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2969,
+          "expression": "\"/user/vocabulary/groups\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2283,
+          "expression": "\"/user/vocabulary/groups\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2347,
+          "expression": "\"/user/vocabulary/groups\""
+        }
+      ],
+      "id": "P192",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "DELETE",
+      "path": "/user/vocabulary/groups/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3512,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3242,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2556,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2620,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        }
+      ],
+      "id": "P193",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/vocabulary/groups/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3373,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3103,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2417,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2481,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        }
+      ],
+      "id": "P194",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "PUT",
+      "path": "/user/vocabulary/groups/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3443,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3173,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2487,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2551,
+          "expression": "\"/user/vocabulary/groups/\".concat(e)"
+        }
+      ],
+      "id": "P195",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/vocabulary/groups/{id}/cards",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3636,
+          "expression": "\"/user/vocabulary/groups/\".concat(e,\"/cards\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3366,
+          "expression": "\"/user/vocabulary/groups/\".concat(e,\"/cards\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2680,
+          "expression": "\"/user/vocabulary/groups/\".concat(e,\"/cards\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2744,
+          "expression": "\"/user/vocabulary/groups/\".concat(e,\"/cards\")"
+        }
+      ],
+      "id": "P196",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/user/vocabulary/search",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3989,
+          "expression": "\"/user/vocabulary/search\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 3719,
+          "expression": "\"/user/vocabulary/search\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 3033,
+          "expression": "\"/user/vocabulary/search\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 3097,
+          "expression": "\"/user/vocabulary/search\""
+        }
+      ],
+      "id": "P197",
+      "group": "Hồ sơ / từ cá nhân / thống kê",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/vocab-battle/activity/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/4793.a02c947aba75f9e0.js",
+          "offset": 3473,
+          "expression": "\"/vocab-battle/activity/\".concat(e)"
+        }
+      ],
+      "id": "P198",
+      "group": "Vocab battle",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/vocab-battle/leaderboard",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/4793.a02c947aba75f9e0.js",
+          "offset": 3670,
+          "expression": "\"/vocab-battle/leaderboard\""
+        }
+      ],
+      "id": "P199",
+      "group": "Vocab battle",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/vocabulary/enc/public",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/2189-4fe1fa23085f5ad2.js",
+          "offset": 254,
+          "expression": "\"/vocabulary/enc/public\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 254,
+          "expression": "\"/vocabulary/enc/public\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/dashboard-f538a46934399769.js",
+          "offset": 9046,
+          "expression": "\"/vocabulary/enc/public\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary-63d1fd8bafc84e26.js",
+          "offset": 977,
+          "expression": "\"/vocabulary/enc/public\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 375,
+          "expression": "\"/vocabulary/enc/public\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 465,
+          "expression": "\"/vocabulary/enc/public\""
+        }
+      ],
+      "id": "P200",
+      "group": "Catalog từ công khai",
+      "verification": "HTTP 200",
+      "note": "GET catalog; wrapper truyền object query; có thể trả envelope mã hóa."
+    },
+    {
+      "method": "GET",
+      "path": "/vocabulary/enc/public/by-slug/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/2189-4fe1fa23085f5ad2.js",
+          "offset": 453,
+          "expression": "\"/vocabulary/enc/public/by-slug/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 453,
+          "expression": "\"/vocabulary/enc/public/by-slug/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/dashboard-f538a46934399769.js",
+          "offset": 9245,
+          "expression": "\"/vocabulary/enc/public/by-slug/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary-63d1fd8bafc84e26.js",
+          "offset": 1176,
+          "expression": "\"/vocabulary/enc/public/by-slug/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 574,
+          "expression": "\"/vocabulary/enc/public/by-slug/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 664,
+          "expression": "\"/vocabulary/enc/public/by-slug/\".concat(e)"
+        }
+      ],
+      "id": "P201",
+      "group": "Catalog từ công khai",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Tham số path là slug; query incrementView."
+    },
+    {
+      "method": "GET",
+      "path": "/vocabulary/enc/public/user-published",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/5829-72dd29a9dd78041d.js",
+          "offset": 3167,
+          "expression": "\"/vocabulary/enc/public/user-published\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/my-vocabulary-fcdae95c1ec6c299.js",
+          "offset": 2897,
+          "expression": "\"/vocabulary/enc/public/user-published\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 2211,
+          "expression": "\"/vocabulary/enc/public/user-published\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 2275,
+          "expression": "\"/vocabulary/enc/public/user-published\""
+        }
+      ],
+      "id": "P202",
+      "group": "Catalog từ công khai",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/vocabulary/enc/public/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/2189-4fe1fa23085f5ad2.js",
+          "offset": 339,
+          "expression": "\"/vocabulary/enc/public/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 339,
+          "expression": "\"/vocabulary/enc/public/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/dashboard-f538a46934399769.js",
+          "offset": 9131,
+          "expression": "\"/vocabulary/enc/public/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary-63d1fd8bafc84e26.js",
+          "offset": 1062,
+          "expression": "\"/vocabulary/enc/public/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 460,
+          "expression": "\"/vocabulary/enc/public/\".concat(e)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 550,
+          "expression": "\"/vocabulary/enc/public/\".concat(e)"
+        }
+      ],
+      "id": "P203",
+      "group": "Catalog từ công khai",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Query incrementView."
+    },
+    {
+      "method": "GET",
+      "path": "/vocabulary/enc/public/{id}/groups",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/2189-4fe1fa23085f5ad2.js",
+          "offset": 632,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 632,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/dashboard-f538a46934399769.js",
+          "offset": 9424,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary-63d1fd8bafc84e26.js",
+          "offset": 1355,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 753,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 843,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups\")"
+        }
+      ],
+      "id": "P204",
+      "group": "Catalog từ công khai",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/vocabulary/enc/public/{id}/groups/{id}/cards",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/2189-4fe1fa23085f5ad2.js",
+          "offset": 747,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups/\").concat(t,\"/cards\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 747,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups/\").concat(t,\"/cards\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/dashboard-f538a46934399769.js",
+          "offset": 9539,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups/\").concat(a,\"/cards\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary-63d1fd8bafc84e26.js",
+          "offset": 1470,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups/\").concat(a,\"/cards\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 868,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups/\").concat(s,\"/cards\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 958,
+          "expression": "\"/vocabulary/enc/public/\".concat(e,\"/groups/\").concat(r,\"/cards\")"
+        }
+      ],
+      "id": "P205",
+      "group": "Catalog từ công khai",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Hai {id} lần lượt là deck_id, group_id."
+    },
+    {
+      "method": "POST",
+      "path": "/vocabulary/{id}/study",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/2189-4fe1fa23085f5ad2.js",
+          "offset": 569,
+          "expression": "\"/vocabulary/\".concat(e,\"/study\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/5554-67f09283b16fe43c.js",
+          "offset": 569,
+          "expression": "\"/vocabulary/\".concat(e,\"/study\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/dashboard-f538a46934399769.js",
+          "offset": 9361,
+          "expression": "\"/vocabulary/\".concat(e,\"/study\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary-63d1fd8bafc84e26.js",
+          "offset": 1292,
+          "expression": "\"/vocabulary/\".concat(e,\"/study\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/vocabulary/published-4b88daa96177478b.js",
+          "offset": 690,
+          "expression": "\"/vocabulary/\".concat(e,\"/study\")"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/9193.c9a22775d10fc2f7.js",
+          "offset": 780,
+          "expression": "\"/vocabulary/\".concat(e,\"/study\")"
+        }
+      ],
+      "id": "P206",
+      "group": "Catalog từ công khai",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/vocabulary-errors",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/6178-b8cb8f9b923191e8.js",
+          "offset": 208,
+          "expression": "\"/vocabulary-errors\""
+        }
+      ],
+      "id": "P207",
+      "group": "Báo lỗi từ",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/voice-chat/activity/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3421.f6dda72de716f38c.js",
+          "offset": 5725,
+          "expression": "\"/voice-chat/activity/\".concat(e)"
+        }
+      ],
+      "id": "P208",
+      "group": "Luyện nói cộng đồng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/voice-chat/topics",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3421.f6dda72de716f38c.js",
+          "offset": 5403,
+          "expression": "\"/voice-chat/topics\""
+        }
+      ],
+      "id": "P209",
+      "group": "Luyện nói cộng đồng",
+      "verification": "HTTP 200",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/voice-chat/topics/{id}",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3421.f6dda72de716f38c.js",
+          "offset": 5553,
+          "expression": "\"/voice-chat/topics/\".concat(e)"
+        }
+      ],
+      "id": "P210",
+      "group": "Luyện nói cộng đồng",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/wallet",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/3480-e7911994a3ddca99.js",
+          "offset": 1149,
+          "expression": "\"/wallet\""
+        }
+      ],
+      "id": "P211",
+      "group": "Ví điểm",
+      "verification": "HTTP 401",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "POST",
+      "path": "/webhooks/sepay/generate-code",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 532957,
+          "expression": "\"/webhooks/sepay/generate-code\""
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/checkout-0a9138d1604406a3.js",
+          "offset": 4638,
+          "expression": "\"/webhooks/sepay/generate-code\""
+        }
+      ],
+      "id": "P212",
+      "group": "Thanh toán",
+      "verification": "Client xác nhận; chưa gửi request ghi",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    },
+    {
+      "method": "GET",
+      "path": "/webhooks/sepay/payment-status",
+      "multipart": false,
+      "evidence": [
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/_app-6589d8431d4dbd84.js",
+          "offset": 535212,
+          "expression": "\"/webhooks/sepay/payment-status?code=\".concat(ea)"
+        },
+        {
+          "source": "https://parroto.app/_next/static/chunks/pages/checkout-0a9138d1604406a3.js",
+          "offset": 5388,
+          "expression": "\"/webhooks/sepay/payment-status?code=\".concat(ea)"
+        }
+      ],
+      "id": "P213",
+      "group": "Thanh toán",
+      "verification": "Client xác nhận; chưa thử GET của route này",
+      "note": "Có method/path trong service client; schema đầy đủ và response nghiệp vụ chưa được kiểm tra."
+    }
+  ],
+  "unresolved_calls": []
+}

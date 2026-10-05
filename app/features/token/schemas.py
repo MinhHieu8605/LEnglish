@@ -3,10 +3,11 @@ from pydantic import BaseModel
 
 class AccessTokenPayload(BaseModel):
     """Payload encoded into the access token."""
+
     model_config = {
         "json_schemas_extra": {
             "example": [
-                    {
+                {
                     "user_id": 1,
                     "user_email": "test@example.com",
                     "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.......",

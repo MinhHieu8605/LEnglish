@@ -1,32 +1,37 @@
-from datetime import datetime, timedelta, timezone
 import math
 import secrets
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
+import httpx
 from fastapi import HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
-import httpx
 from sqlalchemy.exc import SQLAlchemyError
-from sqlmodel import asc
-from sqlmodel import case
-from sqlmodel import desc
-from sqlmodel import func, or_, select
+from sqlmodel import asc, case, desc, func, or_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import (
     async_create_bulk_records,
+    async_create_record,
     async_get_many_records_by,
     async_get_one_record_by,
+    async_get_one_record_by_id,
+    async_update_one_record,
+    transactional,
 )
-from app.database.async_db import async_create_record, async_get_one_record_by_id, async_update_one_record
-from app.database.async_db import transactional
 from app.features.token.service import generate_tokens
 from app.features.user.model import User, UserRole
-from app.features.user.schemas import Login, Register, UserCreate, UserPaginationFilter, UserResponse, UserUpdate
+from app.features.user.schemas import (
+    Login,
+    Register,
+    UserCreate,
+    UserPaginationFilter,
+    UserResponse,
+    UserUpdate,
+)
 from app.middleware.security import get_password_hash
 from app.utils.common import page_size_to_offset_limit
 from app.utils.constants import Message, Role, UserStatus
-
 
 # ========================
 # HELPER
@@ -117,10 +122,10 @@ class UserService(object):
             user_in (Register): The new user data containing email, full name, and password.
             session (AsyncSession): The database session for performing operations.
             request (Request): The HTTP request object (unused in this method).
-        
+
         Returns:
             User: The newly created User object.
-        
+
         Raises:
             HTTPException: If there is an error during the user creation or role assignment process.
         """
@@ -139,7 +144,7 @@ class UserService(object):
                     column.name: getattr(user, column.name)
                     for column in User.__table__.columns
                 },
-                session
+                session,
             )
 
             # Assign default role to the new user
@@ -149,7 +154,7 @@ class UserService(object):
             await session.refresh(user_create)
 
             return user_create
-        
+
         except SQLAlchemyError as db_error:
             await session.rollback()
             raise HTTPException(
@@ -157,7 +162,7 @@ class UserService(object):
                 detail=(
                     f"Encounter database error while trying create new user. "
                     f"Detail: {db_error}"
-                )
+                ),
             )
         except Exception as e:
             await session.rollback()
@@ -166,7 +171,7 @@ class UserService(object):
                 detail=(
                     f"Encounter error while trying create new user. "
                     f"Detail: {str(e)}"
-                )
+                ),
             )
 
     @staticmethod
@@ -178,29 +183,29 @@ class UserService(object):
         """
         Create one or more users accounts with the specified details.
         """
-        
+
         # Validate the number of emails / full names
         if len(data.email) != len(data.full_name):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Number of emails must match number of full names",
             )
-        
-        # Check email 
+
+        # Check email
         existing_users = await async_get_many_records_by(
             User,
             [User.email.in_(data.email)],
             session,
             raise_if_not_found=False,
         )
-        
+
         if existing_users:
             conflicts = [u.email for u in existing_users]
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"User with email {conflicts} already exist"
+                detail=f"User with email {conflicts} already exist",
             )
-        
+
         # Bulk-create all User rows in one transaction
         user_data_list = [
             {
@@ -208,7 +213,7 @@ class UserService(object):
                 "full_name": full_name,
                 "deleted": False,
                 **(
-                    {"password": get_password_hash(data.password)} 
+                    {"password": get_password_hash(data.password)}
                     if data.password is not None
                     else {}
                 ),
@@ -216,7 +221,9 @@ class UserService(object):
             for email, full_name in zip(data.email, data.full_name)
         ]
         users: List[User] = await async_create_bulk_records(
-            User, user_data_list, session,
+            User,
+            user_data_list,
+            session,
         )
 
         # Create UserRole
@@ -227,12 +234,9 @@ class UserService(object):
         )
 
         return [await _build_user_response(user, session) for user in users]
-        
+
     @staticmethod
-    async def _handle_credentials_login(
-        user_in: Login,
-        session: AsyncSession
-    ) -> User:
+    async def _handle_credentials_login(user_in: Login, session: AsyncSession) -> User:
         """
         Process email and password login credentials.
         """
@@ -246,15 +250,15 @@ class UserService(object):
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=Message.MSG_LOGIN_WRONG_EMAIL
+                detail=Message.MSG_LOGIN_WRONG_EMAIL,
             )
 
         if not user_in.password or not user.check_password(user_in.password):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=Message.MSG_LOGIN_WRONG_PASSWORD
+                detail=Message.MSG_LOGIN_WRONG_PASSWORD,
             )
-        
+
         return user
 
     @classmethod
@@ -270,10 +274,10 @@ class UserService(object):
 
         Args:
             user_in (Login): The user login credentials.
-            session (AsyncSession): The database session for performing operations.        
+            session (AsyncSession): The database session for performing operations.
         Returns:
             dict: A dictionary containing the access token and its expiration time.
-        
+
         Raises:
             HTTPException: If the login credentials are invalid or if there is an error during the login process.
         """
@@ -286,13 +290,13 @@ class UserService(object):
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=Message.MSG_LOGIN_INVALID_TOKEN_UNAUTHORIZED
+                detail=Message.MSG_LOGIN_INVALID_TOKEN_UNAUTHORIZED,
             )
 
         response = await cls._prepare_login_response(user, session)
-        
+
         return response
-    
+
     @staticmethod
     async def _login_with_google(token: str) -> str:
         """
@@ -397,9 +401,7 @@ class UserService(object):
     async def _prepare_login_response(user, session: AsyncSession):
         """Prepare login response with token."""
         access_token, refresh_token, role = await generate_tokens(
-            session=session,
-            uid=user.id,
-            email=user.email
+            session=session, uid=user.id, email=user.email
         )
         return {
             "id": user.id,
@@ -451,10 +453,10 @@ class UserService(object):
         Args:
             user_in (Register): The user registration data.
             session (AsyncSession): The database session for performing operations.
-        
+
         Returns:
             dict: A dictionary containing the access token and its expiration time.
-        
+
         Raises:
             HTTPException: If the registration data is invalid or if there is an error during the registration process.
         """
@@ -468,14 +470,14 @@ class UserService(object):
             if is_user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=Message.MSG_REGISTER_EMAIL_EXIST
+                    detail=Message.MSG_REGISTER_EMAIL_EXIST,
                 )
-            
+
             # create user
             dbuser = await cls.create_new_user_info(user_in, session)
 
             return await _build_user_response(dbuser, session)
-        
+
         except HTTPException:
             raise
         except SQLAlchemyError as db_error:
@@ -484,7 +486,7 @@ class UserService(object):
                 detail=(
                     f"Encounter database error while trying add role when create new user. "
                     f"Detail: {db_error}"
-                )
+                ),
             )
         except Exception as e:
             raise HTTPException(
@@ -492,7 +494,7 @@ class UserService(object):
                 detail=(
                     f"Encounter error while trying add role when create new user. "
                     f"Detail: {str(e)}"
-                )
+                ),
             )
 
     @staticmethod
@@ -503,24 +505,26 @@ class UserService(object):
         Args:
             filters (UserPaginationFilter): An object containing filter criteria for querying users.
             active_status (bool, optional): A SQLAlchemy case expression for checking active status.
-        
+
         Returns:
             list: A list of SQLAlchemy filter conditions to be used in a query.
         """
         where_clause = [User.deleted.is_(False)]
         for key, value in filters.model_dump(
-            exclude_unset=True, exclude_none=True,
+            exclude_unset=True,
+            exclude_none=True,
         ).items():
             if key == "keyword":
-                where_clause.append(User.email.ilike(f"%{value.strip()}%") | User.full_name.ilike(f"%{value.strip()}%"))
+                where_clause.append(
+                    User.email.ilike(f"%{value.strip()}%")
+                    | User.full_name.ilike(f"%{value.strip()}%")
+                )
             elif key == "role":
                 where_clause.append(UserRole.role == value.value)
             elif key == "status" and active_status is not None:
-                where_clause.append(
-                    active_status.is_(value = UserStatus.ACTIVE.value)
-                )
+                where_clause.append(active_status.is_(value=UserStatus.ACTIVE.value))
         return where_clause
-    
+
     @staticmethod
     def _process_user_record(
         data: list[Tuple[User, str, bool]],
@@ -549,7 +553,7 @@ class UserService(object):
             }
             for item in data
         ]
-    
+
     @staticmethod
     async def _count_users_by_role(session: AsyncSession) -> Dict[str, int]:
         """
@@ -578,9 +582,9 @@ class UserService(object):
                 detail=(
                     f"Encounter database error while trying count users by role. "
                     f"Detail: {db_error}"
-                )
+                ),
             )
-    
+
     @staticmethod
     async def _count_active_users(session: AsyncSession) -> int:
         """
@@ -613,14 +617,12 @@ class UserService(object):
                 detail=(
                     f"Encounter database error while trying to count active users. "
                     f"Detail: {db_error}"
-                )
+                ),
             )
 
     @classmethod
     async def _get_user_statistics_data(
-        cls, 
-        request: Request, 
-        session: AsyncSession
+        cls, request: Request, session: AsyncSession
     ) -> Dict[str, Any]:
         """
         Asynchronously retrieves statistical data about users in the system.
@@ -671,7 +673,7 @@ class UserService(object):
                 detail=(
                     f"Encountered database error while trying to get user statistics"
                     f"Detail: {db_error}"
-                )
+                ),
             )
         except Exception as e:
             raise HTTPException(
@@ -679,7 +681,7 @@ class UserService(object):
                 detail=(
                     f"Encountered error while trying to get user statistics"
                     f"Detail: {e}"
-                )
+                ),
             )
 
     @classmethod
@@ -717,7 +719,7 @@ class UserService(object):
         try:
             # Get statistical data
             statistical_summary = await cls._get_user_statistics_data(request, session)
-            
+
             # Check if user is active or not
             time_threshold = _active_user_threshold()
             active_status = case(
@@ -726,9 +728,9 @@ class UserService(object):
                         User.lastest_login >= time_threshold,
                         User.lastest_request >= time_threshold,
                     ),
-                    True
+                    True,
                 ),
-                else_=False
+                else_=False,
             )
 
             # Build where clauses and query
@@ -738,7 +740,7 @@ class UserService(object):
                 .join(UserRole, User.email == UserRole.email, isouter=True)
                 .where(*where_clauses)
             )
-            
+
             # Total users matching filters
             count_query = (
                 select(func.count(User.id))
@@ -756,40 +758,42 @@ class UserService(object):
                         if filters.sorted_order == "descend"
                         else asc(sort_column)
                     )
-            
+
             # Pagination
             pages = None
             if filters.page_size and filters.page:
                 pages = -(-total_users // filters.page_size)
-                offset, limit = page_size_to_offset_limit(filters.page, filters.page_size)
+                offset, limit = page_size_to_offset_limit(
+                    filters.page, filters.page_size
+                )
                 query = query.offset(offset).limit(limit)
             result = await session.exec(query)
             users = result.all()
 
-            # Process data and return 
+            # Process data and return
             processed_users = cls._process_user_record(users)
 
             return (
-                processed_users, 
+                processed_users,
                 total_users,
                 pages,
                 {
-                    "total_user" : statistical_summary["total_user"],
-                    "user_by_role" : statistical_summary["user_by_role"],
-                    "number_active" : statistical_summary["number_active"],
-                    "number_inactive" : statistical_summary["number_inactive"],
-                }
+                    "total_user": statistical_summary["total_user"],
+                    "user_by_role": statistical_summary["user_by_role"],
+                    "number_active": statistical_summary["number_active"],
+                    "number_inactive": statistical_summary["number_inactive"],
+                },
             )
-            
+
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=(
                     f"Encountered error while trying to get user management "
                     f"Detail: {e}"
-                )
+                ),
             )
-    
+
     @staticmethod
     async def get_user_by_id(user_id: int, session: AsyncSession) -> UserResponse:
         """
@@ -814,14 +818,16 @@ class UserService(object):
         if user is None or user.deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User with id {user_id} not found"
+                detail=f"User with id {user_id} not found",
             )
-        
+
         return await _build_user_response(user, session)
 
     @staticmethod
     @transactional()
-    async def update_user(user_id: int, data: UserUpdate, session: AsyncSession) -> UserResponse:
+    async def update_user(
+        user_id: int, data: UserUpdate, session: AsyncSession
+    ) -> UserResponse:
         """
         Update a user's information.
 
@@ -845,9 +851,9 @@ class UserService(object):
         if user is None or user.deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User with id {user_id} not found"
+                detail=f"User with id {user_id} not found",
             )
-        
+
         update_fields: dict = {}
 
         if data.role is not None:
@@ -872,8 +878,8 @@ class UserService(object):
     @staticmethod
     @transactional()
     async def delete_user(
-        user_id: int, 
-        session: AsyncSession, 
+        user_id: int,
+        session: AsyncSession,
         current_user_id: Optional[int] = None,
     ) -> None:
         """
@@ -890,7 +896,7 @@ class UserService(object):
         if current_user_id is not None and user_id == current_user_id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You cannot delete your own account"
+                detail="You cannot delete your own account",
             )
 
         user = await async_get_one_record_by_id(
@@ -902,9 +908,9 @@ class UserService(object):
         if user is None or user.deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User with id {user_id} not found"
+                detail=f"User with id {user_id} not found",
             )
-        
+
         await async_update_one_record(
             User,
             user_id,

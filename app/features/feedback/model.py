@@ -1,7 +1,16 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import ARRAY, Boolean, DateTime, ForeignKey, Index, Integer, String, text
+from sqlalchemy import (
+    ARRAY,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.model import Base, TimeStampMixin
@@ -20,7 +29,7 @@ class Feedback(Base, TimeStampMixin):
     Inherits from:
         Base: The base class for SQLAlchemy models.
         TimeStampMixin: A mixin that adds created_at and updated_at timestamp columns.
-    
+
     Attributes:
         id (int): The unique identifier of the feedback.
         user_id (int): The ID of the user who submitted the feedback.
@@ -53,7 +62,7 @@ class Feedback(Base, TimeStampMixin):
     )
     response_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
-    ) 
+    )
     deleted: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default=text("false")
     )
@@ -73,7 +82,7 @@ class FeedbackAttachment(Base):
 
     Inherits from:
         Base: The base class for SQLAlchemy models.
-    
+
     Attributes:
         id (int): The unique identifier of the attachment.
         feedback_id (int): The ID of the feedback to which the attachment belongs.

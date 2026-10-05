@@ -1,8 +1,19 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from app.database.model import Base, TimeStampMixin
-from app.utils.constants import ReviewScope, ReviewMode, WordStatus
+from app.utils.constants import ReviewMode, ReviewScope, WordStatus
 
 
 class ReviewProgress(Base, TimeStampMixin):
@@ -32,9 +43,7 @@ class ReviewProgress(Base, TimeStampMixin):
     personal_note = Column(Text)
 
     user = relationship("User", back_populates="review_progress")
-    vocabulary = relationship(
-        "Vocabulary", back_populates="review_progress_entries"
-    )
+    vocabulary = relationship("Vocabulary", back_populates="review_progress_entries")
     attempts = relationship(
         "ReviewAttempt",
         back_populates="review_progress",
@@ -75,7 +84,9 @@ class ReviewSession(Base, TimeStampMixin):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
-    topic_id = Column(Integer, ForeignKey("VocabularyTopic.id", ondelete="CASCADE"), nullable=False)
+    topic_id = Column(
+        Integer, ForeignKey("VocabularyTopic.id", ondelete="CASCADE"), nullable=False
+    )
     scope = Column(String, nullable=False, default=ReviewScope.DUE.value)
     initial_mode = Column(String, nullable=False, default=ReviewMode.FLASHCARD.value)
     status = Column(String, nullable=False, default="started")
@@ -99,13 +110,21 @@ class ReviewSessionItem(Base, TimeStampMixin):
 
     __tablename__ = "ReviewSessionItem"
     __table_args__ = (
-        UniqueConstraint("session_id", "vocabulary_id", name="uq_review_session_items_session_vocab"),
-        UniqueConstraint("session_id", "order_num", name="uq_review_session_items_session_order"),
+        UniqueConstraint(
+            "session_id", "vocabulary_id", name="uq_review_session_items_session_vocab"
+        ),
+        UniqueConstraint(
+            "session_id", "order_num", name="uq_review_session_items_session_order"
+        ),
     )
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    session_id = Column(Integer, ForeignKey("ReviewSession.id", ondelete="CASCADE"), nullable=False)
-    vocabulary_id = Column(Integer, ForeignKey("Vocabulary.id", ondelete="CASCADE"), nullable=False)
+    session_id = Column(
+        Integer, ForeignKey("ReviewSession.id", ondelete="CASCADE"), nullable=False
+    )
+    vocabulary_id = Column(
+        Integer, ForeignKey("Vocabulary.id", ondelete="CASCADE"), nullable=False
+    )
     order_num = Column(Integer, nullable=False)
     completed_at = Column(DateTime(timezone=True), nullable=True)
     last_attempt_id = Column(String, nullable=True)

@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer
 
 from app.api.v1.endpoint import (
     dictionary,
+    engagement,
     feedback,
     lesson,
     preferences,
@@ -18,7 +19,6 @@ from app.middleware.auth import get_current_user
 _bearer_auth = HTTPBearer(
     bearerFormat="JWT",
     scheme_name="BearerAuth",
-    description="Enter the access token only. Swagger adds the Bearer prefix.",
     auto_error=False,
 )
 
@@ -36,6 +36,11 @@ authentication_api_router.include_router(wordlist.router, prefix="/word-lists", 
 authentication_api_router.include_router(vocabulary.router, prefix="/vocabulary", tags=["Vocabulary"])
 authentication_api_router.include_router(review.router, prefix="/review", tags=["Review"])
 authentication_api_router.include_router(lesson.router, prefix="/lessons", tags=["Lessons"])
+authentication_api_router.include_router(
+    engagement.router,
+    prefix="/engagement",
+    tags=["Engagement"],
+)
 authentication_api_router.include_router(
     preferences.router,
     prefix="/preferences",

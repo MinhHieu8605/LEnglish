@@ -19,6 +19,7 @@ class DictionaryLookup(Base, TimeStampMixin):
         context_sentence (str): Context sentence for the lookup.
         result (dict): Lookup result data in JSON format.
     """
+
     __tablename__ = "DictionaryLookup"
     __table_args__ = (Index("dictionary_lookups_idx", "user_id", "created_time"),)
 

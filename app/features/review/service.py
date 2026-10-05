@@ -1,6 +1,6 @@
-from datetime import datetime, time, timedelta, timezone
 import json
 import re
+from datetime import datetime, time, timedelta, timezone
 from typing import List, Optional
 from zoneinfo import ZoneInfo
 
@@ -26,18 +26,18 @@ from app.features.review.model import (
     ReviewSessionItem,
 )
 from app.features.review.schemas import (
-    ReviewClozeResponse,
     GeneratedCloze,
     ReviewCheckRequest,
     ReviewCheckResponse,
-    ReviewQueueResponse,
+    ReviewClozeResponse,
     ReviewItemResponse,
+    ReviewOptionResponse,
+    ReviewQueueResponse,
+    ReviewSessionAttemptRequest,
     ReviewSessionItemResponse,
     ReviewSessionResponse,
-    ReviewSessionAttemptRequest,
     ReviewSessionStartRequest,
     ReviewSummaryResponse,
-    ReviewOptionResponse,
     ReviewWordRequest,
     ReviewWordResponse,
 )
@@ -45,17 +45,15 @@ from app.features.review.srs import (
     ReviewProgressState,
     build_review_options,
     calculate_review_schedule,
+    classify_progress,
 )
-from app.features.vocabulary.model import (
-    Vocabulary,
-    VocabularyBook,
-    VocabularyTopic,
-    VocabularyTopicWord,
+from app.features.vocabulary.model import Vocabulary, VocabularyTopic, VocabularyTopicWord
+from app.features.vocabulary.queries import (
+    get_active_topic,
+    get_topic_words_with_progress,
 )
-from app.features.vocabulary.queries import get_topic_words_with_progress
 from app.utils.ai_client import call_ai
-from app.utils.constants import ReviewScope, ReviewRating, ReviewMode, WordStatus
-
+from app.utils.constants import ReviewMode, ReviewRating, ReviewScope, WordStatus
 
 _CLOZE_CACHE: TTLCache = TTLCache(maxsize=1000, ttl=1800)
 
@@ -119,8 +117,7 @@ class ReviewService(object):
                     ReviewAttempt.reviewed_at < next_day_start_utc,
                     ~select(ReviewAttempt.id)
                     .where(
-                        ReviewAttempt.review_progress_id
-                        == ReviewProgress.id,
+                        ReviewAttempt.review_progress_id == ReviewProgress.id,
                         ReviewAttempt.reviewed_at < day_start_utc,
                     )
                     .correlate(ReviewProgress)
@@ -151,8 +148,7 @@ class ReviewService(object):
 
     @staticmethod
     def _review_options(
-        progress: Optional[ReviewProgress], 
-        reviewed_at: datetime
+        progress: Optional[ReviewProgress], reviewed_at: datetime
     ) -> List[ReviewOptionResponse]:
         """Build the review options for all supported ratings."""
         return [
@@ -161,44 +157,12 @@ class ReviewService(object):
                 interval_seconds=schedule.interval_seconds,
                 next_review_at=schedule.next_review_at,
             )
-            for rating, schedule in build_review_options(ReviewService._state(progress), reviewed_at).items()
+            for rating, schedule in build_review_options(
+                ReviewService._state(progress), reviewed_at
+            ).items()
         ]
 
     @staticmethod
-    async def _get_topic(
-        book_slug: str, 
-        topic_slug: str, 
-        session: AsyncSession
-    ) -> VocabularyTopic:
-        """Load an active vocabulary topic belonging to a book.
-
-        Args:
-            book_slug (str): URL slug of the vocabulary book.
-            topic_slug (str): URL slug of the vocabulary topic.
-            session (AsyncSession): Active database session.
-
-        Returns:
-            VocabularyTopic: The matching active topic.
-
-        Raises:
-            HTTPException: If the topic is not found in the active book.
-        """
-        return await async_get_one_record_by(
-            VocabularyTopic,
-            [
-                VocabularyTopic.slug == topic_slug,
-                VocabularyTopic.book.has(
-                    and_(
-                        VocabularyBook.slug == book_slug,
-                        VocabularyBook.deleted.is_(False),
-                    )
-                ),
-            ],
-            session,
-            not_found_msg="Vocabulary topic not found",
-            raise_if_not_found=True,
-        )
-
     @staticmethod
     async def ensure_topic_vocabulary(
         book_slug: str,
@@ -217,7 +181,7 @@ class ReviewService(object):
         Raises:
             HTTPException: If the topic or vocabulary entry is not found.
         """
-        topic = await ReviewService._get_topic(book_slug, topic_slug, session)
+        topic = await get_active_topic(book_slug, topic_slug, session)
         linked = await async_get_one_record_by(
             VocabularyTopicWord,
             [
@@ -259,35 +223,18 @@ class ReviewService(object):
         Raises:
             HTTPException: If the requested topic cannot be found.
         """
-        topic = await ReviewService._get_topic(book_slug, topic_slug, session)
+        topic = await get_active_topic(book_slug, topic_slug, session)
 
         rows = await get_topic_words_with_progress(topic.id, user_id, session)
-    
+
         now = datetime.now(timezone.utc)
         classified = []
         for vocab, topic_word, progress in rows:
-            if not progress or progress.status == WordStatus.NEW.value:
-                progress_status = "new"
-            elif progress.status == WordStatus.IGNORED.value:
-                progress_status = "ignored"
-            elif not progress.next_review_at: 
-                progress_status = (
-                    "due"
-                    if progress.status == WordStatus.LEARNING.value
-                    else "future"
-                )
-            else:
-                review_at = progress.next_review_at
-                compare_now = now
-                if review_at.tzinfo is None and now.tzinfo is not None:
-                    compare_now = now.replace(tzinfo=None)
-
-                if review_at < compare_now:
-                    progress_status = "overdue"
-                elif review_at == compare_now:
-                    progress_status = "due"
-                else:
-                    progress_status = "future"
+            progress_status = classify_progress(
+                progress.status if progress else None,
+                progress.next_review_at if progress else None,
+                now,
+            )
 
             classified.append((vocab, topic_word, progress, progress_status))
 
@@ -333,14 +280,8 @@ class ReviewService(object):
             mode=mode,
             scope=scope,
             total_word_count=len(items),
-            due_count=sum(
-                row[3] in {"overdue", "due"}
-                for row in classified
-            ),
-            new_count=sum(
-                row[3] == "new"
-                for row in classified
-            ),
+            due_count=sum(row[3] in {"overdue", "due"} for row in classified),
+            new_count=sum(row[3] == "new" for row in classified),
             items=items,
         )
 
@@ -406,8 +347,8 @@ class ReviewService(object):
         )
         if vocab is None:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                detail="Vocabulary word not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Vocabulary word not found",
             )
         progress = await async_get_one_record_by(
             ReviewProgress,
@@ -450,7 +391,7 @@ class ReviewService(object):
                 selectinload(ReviewSession.topic),
                 selectinload(ReviewSession.items),
             ],
-                not_found_msg="Review session not found",
+            not_found_msg="Review session not found",
             raise_if_not_found=True,
         )
 
@@ -537,7 +478,7 @@ class ReviewService(object):
         try:
             raw = await call_ai(
                 prompt=(
-                    f'Create one English cloze sentence using the exact '
+                    f"Create one English cloze sentence using the exact "
                     f'target word "{vocab.word}" once. '
                     "Return JSON only with sentence, translation_vi, and hint_vi. "
                     "Keep the sentence under 160 characters."
@@ -633,7 +574,9 @@ class ReviewService(object):
                 attempt.reviewed_at,
             )
 
-        vocab, progress = await ReviewService._get_vocab_and_progress(user_id, vocabulary_id, session)
+        vocab, progress = await ReviewService._get_vocab_and_progress(
+            user_id, vocabulary_id, session
+        )
 
         if not progress:
             progress = await async_create_record(
@@ -748,8 +691,7 @@ class ReviewService(object):
         interval_seconds = (
             int(
                 (
-                    progress.next_review_at
-                    - (progress.last_reviewed_at or reviewed_at)
+                    progress.next_review_at - (progress.last_reviewed_at or reviewed_at)
                 ).total_seconds()
             )
             if progress.next_review_at
@@ -803,10 +745,7 @@ class ReviewService(object):
         if not deck.items:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=(
-                    "No vocabulary words are available "
-                    "for this review scope"
-                ),
+                detail=("No vocabulary words are available " "for this review scope"),
             )
 
         review_session = await async_create_record(
@@ -890,9 +829,7 @@ class ReviewService(object):
         if review_session.status != "completed":
             review_session.status = "completed"
             review_session.completed_at = datetime.now(timezone.utc)
-            review_session.current_position = (
-                review_session.total_items
-            )
+            review_session.current_position = review_session.total_items
         return ReviewService._session_response(review_session)
 
     @staticmethod
@@ -964,7 +901,9 @@ class ReviewService(object):
         item.completed_at = item.completed_at or datetime.now(timezone.utc)
         item.last_attempt_id = data.attempt_id
 
-        review_session.current_position = sum(bool(item.completed_at) for item in review_session.items)
+        review_session.current_position = sum(
+            bool(item.completed_at) for item in review_session.items
+        )
 
         return ReviewService._session_response(review_session)
 
@@ -976,22 +915,16 @@ class ReviewService(object):
         Convert a persisted review session into its API response.
 
         Args:
-            review_session (ReviewSession): The persisted review session.   
+            review_session (ReviewSession): The persisted review session.
 
         Returns:
             ReviewSessionResponse: The API response representation of the session.
         """
         return ReviewSessionResponse(
             id=review_session.id,
-            topic_slug=(
-                review_session.topic.slug
-                if review_session.topic
-                else ""
-            ),
+            topic_slug=(review_session.topic.slug if review_session.topic else ""),
             scope=ReviewScope(review_session.scope),
-            initial_mode=ReviewMode(
-                review_session.initial_mode
-            ),
+            initial_mode=ReviewMode(review_session.initial_mode),
             status=review_session.status,
             current_position=review_session.current_position,
             total_items=review_session.total_items,

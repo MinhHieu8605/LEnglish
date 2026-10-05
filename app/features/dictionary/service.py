@@ -3,8 +3,8 @@ import json
 import re
 from urllib.parse import quote
 
-from fastapi import HTTPException, status
 import httpx
+from fastapi import HTTPException, status
 from loguru import logger
 from pydantic import ValidationError
 from sqlmodel import func
@@ -12,14 +12,13 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import async_get_many_records_by
 from app.features.dictionary.schemas import (
-    DictionaryLookupResponse,
     DefinitionItem,
+    DictionaryLookupResponse,
     MeaningItem,
     PhoneticItem,
 )
 from app.features.vocabulary.model import Vocabulary
 from app.utils.ai_client import call_ai
-
 
 FREE_DICT_URL = "https://api.dictionaryapi.dev/api/v2/entries/en"
 _SOURCE_DB = "local-database"
@@ -48,6 +47,7 @@ _AI_DICTIONARY_SYSTEM_PROMPT = (
     "empty meanings array and do not invent a definition.\n"
     "8. Always respond with valid JSON only. Do not wrap inside markdown blocks."
 )
+
 
 class DictionaryService(object):
     """
@@ -98,23 +98,23 @@ class DictionaryService(object):
         return (
             f"Provide a complete dictionary entry for: '{word}'\n\n"
             f"Return a JSON object matching this exact structure:\n"
-            f'{{\n'
+            f"{{\n"
             f'  "word": {json.dumps(word, ensure_ascii=False)},\n'
             f'  "meanings": [\n'
-            f'    {{\n'
+            f"    {{\n"
             f'      "part_of_speech": "noun/verb/adjective/etc.",\n'
             f'      "ipa": "IPA for this part of speech",\n'
             f'      "audio_url": null,\n'
             f'      "definitions": [\n'
-            f'        {{\n'
+            f"        {{\n"
             f'          "definition_vi": "Vietnamese translation",\n'
             f'          "example": "English example sentence",\n'
             f'          "example_vi": "Vietnamese example translation"\n'
-            f'        }}\n'
-            f'      ]\n'
-            f'    }}\n'
-            f'  ]\n'
-            f'}}\n\n'
+            f"        }}\n"
+            f"      ]\n"
+            f"    }}\n"
+            f"  ]\n"
+            f"}}\n\n"
             f"For an invalid or misspelled input, return an empty meanings array. "
             f"Never invent a definition or suggest a replacement word.\n"
             f"Include all common parts of speech. For each part of speech, include "
@@ -187,16 +187,20 @@ class DictionaryService(object):
         for item in records:
             if not item.definition_vi or not item.word_type:
                 continue
-            meanings.append({
-                "part_of_speech": item.word_type,
-                "ipa": item.ipa,
-                "audio_url": item.audio_url,
-                "definitions": [{
-                    "definition_vi": item.definition_vi,
-                    "example": item.example_sentence,
-                    "example_vi": item.example_translation_vi,
-                }],
-            })
+            meanings.append(
+                {
+                    "part_of_speech": item.word_type,
+                    "ipa": item.ipa,
+                    "audio_url": item.audio_url,
+                    "definitions": [
+                        {
+                            "definition_vi": item.definition_vi,
+                            "example": item.example_sentence,
+                            "example_vi": item.example_translation_vi,
+                        }
+                    ],
+                }
+            )
 
         if not meanings:
             return None
@@ -208,11 +212,7 @@ class DictionaryService(object):
 
     @classmethod
     def _build_response(
-        cls,
-        word: str,
-        data: dict,
-        free_phonetics: list,
-        sources: list[str]
+        cls, word: str, data: dict, free_phonetics: list, sources: list[str]
     ) -> DictionaryLookupResponse:
         """
         Build a response with pronunciation attached to each meaning.
@@ -233,7 +233,10 @@ class DictionaryService(object):
                         "part_of_speech": meaning.get("part_of_speech", "unknown"),
                         "ipa": meaning.get("ipa"),
                         "audio_url": meaning.get("audio_url"),
-                        "definitions": [DefinitionItem.model_validate(definition) for definition in meaning.get("definitions") or []],
+                        "definitions": [
+                            DefinitionItem.model_validate(definition)
+                            for definition in meaning.get("definitions") or []
+                        ],
                     }
                 )
                 for meaning in data.get("meanings") or []
@@ -241,9 +244,7 @@ class DictionaryService(object):
             ]
 
             if len(meanings) == 1:
-                phonetic = next(
-                    (item for item in free_phonetics if item.audio), None
-                )
+                phonetic = next((item for item in free_phonetics if item.audio), None)
                 if phonetic is None:
                     phonetic = next(iter(free_phonetics), None)
                 if phonetic:
@@ -279,7 +280,9 @@ class DictionaryService(object):
         )
 
     @classmethod
-    async def lookup(cls, word: str, session: AsyncSession | None = None) -> DictionaryLookupResponse:
+    async def lookup(
+        cls, word: str, session: AsyncSession | None = None
+    ) -> DictionaryLookupResponse:
         """
         Look up a word using AI as the primary dictionary source,
         with Free Dictionary API providing phonetics/audio.

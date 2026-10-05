@@ -16,6 +16,7 @@ class FeedbackCreate(BaseModel):
         title (str): The title of the feedback.
         description (Optional[str]): An optional detailed description of the feedback.
     """
+
     type: FeedbackType
     title: str = Field(..., min_length=1, max_length=255)
     description: Optional[str] = None
@@ -31,6 +32,7 @@ class FeedbackUpdate(BaseModel):
         title (Optional[str]): The updated title of the feedback.
         description (Optional[str]): An optional updated detailed description of the feedback.
     """
+
     type: Optional[FeedbackType] = None
     title: Optional[str] = Field(default=None, min_length=1, max_length=255)
     description: Optional[str] = Field(default=None, max_length=5000)
@@ -113,6 +115,7 @@ class FeedbackPaginationFilter(BaseModel):
     sort_by: Optional[str] = "created_time"
     sort_order: SortOrder = SortOrder.DESCEND
 
+
 class FeedbackResponseMetadata(BaseModel):
     """
     Schema for feedback response metadata.
@@ -123,6 +126,7 @@ class FeedbackResponseMetadata(BaseModel):
         page_size (int): The number of items per page.
         pages (int): The total number of pages.
     """
+
     total: int
     page: Optional[int] = None
     page_size: Optional[int] = None
@@ -137,6 +141,7 @@ class PaginatedFeedbackResponse(BaseModel):
         metadata (FeedbackResponseMetadata): Metadata about the paginated response.
         feedbacks (List[FeedbackResponse]): A list of feedback responses.
     """
+
     feedbacks: List[FeedbackResponse]
     metadata: FeedbackResponseMetadata
 
@@ -149,8 +154,9 @@ class ResponseFeedback(BaseModel):
         response (str): The response to the feedback.
         response_attachments (Optional[List[str]]): A list of attachments provided in the response.
     """
+
     status: Optional[FeedbackStatus] = None
-    response: Optional[str] = None 
+    response: Optional[str] = None
     response_attachments: Optional[List[str]] = None
 
 
@@ -162,6 +168,7 @@ class FeedbackAttachmentUploadResponse(BaseModel):
         file_name (str): The name of the attachment file.
         local_path (str): The local path where the attachment is stored.
     """
+
     file_name: str = Field(serializer_alias="filename")
     local_path: str = Field(serializer_alias="localPath")
 
@@ -174,6 +181,7 @@ class FeedbackDeleteResponse(BaseModel):
         deleted_ids (list[int]): A list of the IDs of the deleted feedback items.
         deleted_count (int): The number of feedback items that were deleted.
     """
+
     deleted_ids: list[int]
     deleted_count: int
 
@@ -185,4 +193,5 @@ class FeedbackBulkDeleteRequest(BaseModel):
     Atributes:
         feedback_ids (List[int]): A list of feedback IDs to be deleted.
     """
+
     feedback_ids: List[int] = Field(..., min_items=1, max_items=100)

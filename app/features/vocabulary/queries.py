@@ -1,11 +1,40 @@
 from typing import Optional
 
+from sqlalchemy import and_
 from sqlalchemy.orm import joinedload
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.database.async_db import async_get_many_records_by
+from app.database.async_db import async_get_many_records_by, async_get_one_record_by
 from app.features.review.model import ReviewProgress
-from app.features.vocabulary.model import Vocabulary, VocabularyTopicWord
+from app.features.vocabulary.model import (
+    Vocabulary,
+    VocabularyBook,
+    VocabularyTopic,
+    VocabularyTopicWord,
+)
+
+
+async def get_active_topic(
+    book_slug: str,
+    topic_slug: str,
+    session: AsyncSession,
+) -> VocabularyTopic:
+    """Load a topic only when it belongs to an active vocabulary book."""
+    return await async_get_one_record_by(
+        VocabularyTopic,
+        [
+            VocabularyTopic.slug == topic_slug,
+            VocabularyTopic.book.has(
+                and_(
+                    VocabularyBook.slug == book_slug,
+                    VocabularyBook.deleted.is_(False),
+                )
+            ),
+        ],
+        session,
+        not_found_msg="Vocabulary topic not found",
+        raise_if_not_found=True,
+    )
 
 
 async def get_topic_words_with_progress(

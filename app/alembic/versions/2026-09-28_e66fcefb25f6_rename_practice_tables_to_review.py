@@ -6,18 +6,18 @@ from alembic import op
 import sqlalchemy as sa
 
 
-revision: str = "2026_09_28_review_tables"
-down_revision: Union[str, Sequence[str], None] = "2026_09_27_id_init_database"
+revision: str = "e66fcefb25f6"
+down_revision: Union[str, Sequence[str], None] = "e1f2a3b4c5d6"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 CONSTRAINT_RENAMES = (
-    ("ReviewProgress", "pk_PracticeProgress", "pk_ReviewProgress"),
-    ("ReviewProgress", "fk_PracticeProgress_user_id_User", "fk_ReviewProgress_user_id_User"),
-    ("ReviewProgress", "fk_PracticeProgress_vocabulary_id_Vocabulary", "fk_ReviewProgress_vocabulary_id_Vocabulary"),
+    ("ReviewProgress", "pk_practice_progress", "pk_ReviewProgress"),
+    ("ReviewProgress", "fk_practice_progress_user_id_users", "fk_ReviewProgress_user_id_User"),
+    ("ReviewProgress", "fk_practice_progress_vocabulary_id_vocabularies", "fk_ReviewProgress_vocabulary_id_Vocabulary"),
     ("ReviewProgress", "uq_practice_progress_user_id_vocabulary_id", "uq_review_progress_user_id_vocabulary_id"),
-    ("ReviewAttempt", "pk_PracticeAttempt", "pk_ReviewAttempt"),
-    ("ReviewAttempt", "fk_PracticeAttempt_practice_progress_id_PracticeProgress", "fk_ReviewAttempt_review_progress_id_ReviewProgress"),
+    ("ReviewAttempt", "pk_practice_attempt", "pk_ReviewAttempt"),
+    ("ReviewAttempt", "fk_practice_attempt_practice_progress_id_practice_progress", "fk_ReviewAttempt_review_progress_id_ReviewProgress"),
     ("ReviewSession", "pk_PracticeSession", "pk_ReviewSession"),
     ("ReviewSession", "fk_PracticeSession_user_id_User", "fk_ReviewSession_user_id_User"),
     ("ReviewSession", "fk_PracticeSession_topic_id_VocabularyTopic", "fk_ReviewSession_topic_id_VocabularyTopic"),

@@ -1,7 +1,5 @@
 from datetime import datetime
-from typing import Dict
-from typing import List, Optional
-from typing import Literal
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
@@ -18,6 +16,7 @@ class UserCreate(BaseModel):
         password (Optional[str]): Password for new users. Must be at least 8 characters.
         role (Role): Role assigned to the users. Defaults to USER.
     """
+
     model_config = {
         "json_schemas_extra": {
             "example": {
@@ -31,24 +30,18 @@ class UserCreate(BaseModel):
     email: List[EmailStr] = Field(
         min_length=1,
         max_length=5,
-        description=(
-            "One or more email address to create account"
-        )
+        description=("One or more email address to create account"),
     )
     full_name: List[str] = Field(
         min_length=1,
         max_length=5,
-        description=(
-            "One or more full name to create account"
-        )
+        description=("One or more full name to create account"),
     )
     password: Optional[str] = Field(
-        default=None,
-        description="Password for new user. Must 8 characters"
+        default=None, description="Password for new user. Must 8 characters"
     )
     role: Role = Field(
-        default=Role.USER,
-        description="Top-level role assigned to the user."
+        default=Role.USER, description="Top-level role assigned to the user."
     )
 
     @field_validator("email", mode="before")
@@ -59,7 +52,7 @@ class UserCreate(BaseModel):
         if not isinstance(email, list):
             raise ValueError("Must be a list of email addresses")
         return [e.lower() if isinstance(e, str) else e for e in email]
-    
+
     @field_validator("password", mode="before")
     @classmethod
     def validate_password(cls, password):
@@ -77,26 +70,22 @@ class UserUpdate(BaseModel):
         role (Optional[Role]): Updated role assignment for the user.
         password (Optional[str]): Updated password. Must be at least 8 characters if provided.
     """
+
     model_config = {
         "json_schemas_extra": {
             "example": {
                 "full_name": "Nguyễn Văn A",
                 "role": "user",
-                "password": "newpassword123"
+                "password": "newpassword123",
             }
         }
     }
     full_name: Optional[str] = Field(
-        default=None,
-        description="Updated full name of the user"
+        default=None, description="Updated full name of the user"
     )
-    role: Optional[Role] = Field(
-        default=None,
-        description="Updated role for the user"
-    )
+    role: Optional[Role] = Field(default=None, description="Updated role for the user")
     password: Optional[str] = Field(
-        default=None,
-        description="Updated password. Must be at least 8 characters"
+        default=None, description="Updated password. Must be at least 8 characters"
     )
     deleted: Optional[bool] = None
 
@@ -121,6 +110,7 @@ class UserResponse(BaseModel):
         created_time (Optional[datetime]): Timestamp when the user was created.
         updated_time (Optional[datetime]): Timestamp when the user was last updated.
     """
+
     model_config = {
         "from_attributes": True,
         "json_schemas_extra": {
@@ -132,9 +122,9 @@ class UserResponse(BaseModel):
                 "role": "user",
                 "deleted": False,
                 "created_time": "2024-01-01T00:00:00Z",
-                "updated_time": "2024-01-01T00:00:00Z"
+                "updated_time": "2024-01-01T00:00:00Z",
             }
-        }
+        },
     }
     id: int
     email: EmailStr
@@ -154,6 +144,7 @@ class Login(BaseModel):
         email (Optional[str]): User's email address (for credentials login).
         password (Optional[str]): User's password (for credentials login).
     """
+
     email: Optional[str] = None
     password: Optional[str] = None
 
@@ -167,6 +158,7 @@ class Register(BaseModel):
         full_name (str): User's full name.
         password (str): User's password.
     """
+
     email: EmailStr
     full_name: str
     password: str = Field(..., min_length=8)
@@ -204,6 +196,7 @@ class DefaultFilterModel(BaseModel):
         page (int): Page number for pagination. Defaults to 1.
         page_size (int): Number of items per page. Defaults to 10.
     """
+
     page: int = 1
     page_size: int = 10
 
@@ -219,10 +212,13 @@ class UserPaginationFilter(DefaultFilterModel):
         keyword (Optional[str]): Search keyword.
         sorted_order (Optional[str]): Order of sorting.
     """
+
     role: Optional[Role] = None
     status: Optional[bool] = None
     sorted_by: Optional[str] = None
-    keyword: Optional[str] = Field(default=None, description="Search keyword", max_length=100)
+    keyword: Optional[str] = Field(
+        default=None, description="Search keyword", max_length=100
+    )
     sorted_order: Optional[Literal["ascend", "descend"]] = "ascend"
 
 
@@ -230,6 +226,7 @@ class UserStatisticSummaryResponse(BaseModel):
     """
     Represents a paginated response for user data with statistical summary.
     """
+
     total_user: int
     user_by_role: Dict[str, int]
     number_active: int
@@ -239,13 +236,14 @@ class UserStatisticSummaryResponse(BaseModel):
 class ManagementResponseMetadata(BaseModel):
     """
     Metadata for user management response.
-    
+
     Attributes:
         total (int): Total number of users.
         page (int): Current page number.
         page_size (int): Number of items per page.
         pages (int): Total number of pages.
     """
+
     total: int
     page: Optional[int] = None
     page_size: Optional[int] = None
@@ -255,7 +253,7 @@ class ManagementResponseMetadata(BaseModel):
 class UserManagementItemResponse(BaseModel):
     """
     Represents a user in the user management response.
-    
+
     Attributes:
         id (int): Unique identifier of the user.
         email (str): Email address of the user.
@@ -266,6 +264,7 @@ class UserManagementItemResponse(BaseModel):
         lastest_login (Optional[datetime]): Timestamp of the user's last login.
         lastest_request (Optional[datetime]): Timestamp of the user's last request.
     """
+
     id: int
     email: str
     full_name: str
@@ -279,11 +278,12 @@ class UserManagementItemResponse(BaseModel):
 class PaginatedUserListResponse(BaseModel):
     """
     Response model for paginated user list.
-    
+
     Attributes:
         meta (ManagementResponseMetadata): Metadata for user management.
         data (List[UserManagementItemResponse]): List of user data.
     """
+
     data: List[UserManagementItemResponse]
     statistic_summary: UserStatisticSummaryResponse
     metadata: ManagementResponseMetadata

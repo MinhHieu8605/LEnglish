@@ -3,7 +3,7 @@ from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from app.utils.constants import ReviewScope, ReviewRating, ReviewMode
+from app.utils.constants import ReviewMode, ReviewRating, ReviewScope
 
 
 class ReviewOptionResponse(BaseModel):

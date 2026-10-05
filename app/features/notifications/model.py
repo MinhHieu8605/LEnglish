@@ -1,4 +1,13 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -20,6 +29,7 @@ class Notification(Base, TimeStampMixin):
         is_read (bool): Whether the notification has been read.
         read_at (datetime): When the notification was read.
     """
+
     __tablename__ = "Notification"
     __table_args__ = (Index("notifications_idx", "user_id", "is_read", "created_time"),)
 

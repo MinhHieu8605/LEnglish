@@ -1,4 +1,13 @@
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, UnicodeText, UniqueConstraint
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UnicodeText,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from app.database.model import Base, TimeStampMixin
@@ -20,6 +29,7 @@ class User(Base, TimeStampMixin):
         lastest_request (datetime): The timestamp of the user's last request.
         deleted (bool): Indicates whether the user has been deleted.
     """
+
     __tablename__ = "User"
     __table_args__ = (UniqueConstraint("email", name="uq_users_email"),)
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -53,15 +63,36 @@ class User(Base, TimeStampMixin):
         self.password = get_password_hash(password)
 
     tokens = relationship("Token", back_populates="user", cascade="all, delete-orphan")
-    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
-    preferences = relationship("UserPreferences", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    lesson_progress = relationship("LessonProgress", back_populates="user", cascade="all, delete-orphan")
-    lesson_sessions = relationship("LessonSession", back_populates="user", cascade="all, delete-orphan")
-    conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
-    word_lists = relationship("WordList", back_populates="user", cascade="all, delete-orphan")
-    review_progress = relationship("ReviewProgress", back_populates="user", cascade="all, delete-orphan")
-    review_sessions = relationship("ReviewSession", back_populates="user", cascade="all, delete-orphan")
-    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    roles = relationship(
+        "UserRole", back_populates="user", cascade="all, delete-orphan"
+    )
+    preferences = relationship(
+        "UserPreferences",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+    lesson_progress = relationship(
+        "LessonProgress", back_populates="user", cascade="all, delete-orphan"
+    )
+    lesson_sessions = relationship(
+        "LessonSession", back_populates="user", cascade="all, delete-orphan"
+    )
+    conversations = relationship(
+        "Conversation", back_populates="user", cascade="all, delete-orphan"
+    )
+    word_lists = relationship(
+        "WordList", back_populates="user", cascade="all, delete-orphan"
+    )
+    review_progress = relationship(
+        "ReviewProgress", back_populates="user", cascade="all, delete-orphan"
+    )
+    review_sessions = relationship(
+        "ReviewSession", back_populates="user", cascade="all, delete-orphan"
+    )
+    notifications = relationship(
+        "Notification", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class UserRole(Base, TimeStampMixin):
@@ -73,10 +104,15 @@ class UserRole(Base, TimeStampMixin):
         email (str): The email address of the related user.
         role (str): The role assigned to the user.
     """
+
     __tablename__ = "UserRole"
-    __table_args__ = (UniqueConstraint("email", "role", name="uq_user_roles_email_role"),)
+    __table_args__ = (
+        UniqueConstraint("email", "role", name="uq_user_roles_email_role"),
+    )
     id = Column(Integer, autoincrement=True, primary_key=True)
-    email = Column(UnicodeText, ForeignKey("User.email", ondelete="CASCADE"), nullable=False)
+    email = Column(
+        UnicodeText, ForeignKey("User.email", ondelete="CASCADE"), nullable=False
+    )
     role = Column(String, nullable=False, default=Role.USER.value)
 
     user = relationship("User", back_populates="roles")

@@ -9,6 +9,7 @@ from app.features.lesson.schemas import (
     LessonPaginationFilter,
     LessonProgressRequest,
     LessonProgressResponse,
+    LessonResumeResponse,
     LessonSessionRequest,
     LessonSessionResponse,
     LessonAnswerRequest,
@@ -62,6 +63,19 @@ async def import_youtube_lesson(
         )
     user_id = get_user_id_from_request(request)
     return await LessonService.import_youtube(user_id, data, session)
+
+
+@router.get(
+    "/resume",
+    response_model=LessonResumeResponse | None,
+    summary="Get the most recently watched unfinished lesson",
+)
+async def get_lesson_resume(
+    request: Request,
+    session: AsyncSession = Depends(get_session),
+):
+    user_id = get_user_id_from_request(request)
+    return await LessonService.get_resume(user_id, session)
 
 
 @router.get(

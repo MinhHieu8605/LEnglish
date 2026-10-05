@@ -29,12 +29,9 @@ class R2StorageService(object):
                 s3={"addressing_style": "path"},
             ),
         }
-    
+
     async def upload_file(
-        self,
-        file_path: str, 
-        object_name: str,
-        content_type: Optional[str] = None
+        self, file_path: str, object_name: str, content_type: Optional[str] = None
     ) -> str:
         """
         Upload a file to R2 storage.
@@ -56,14 +53,10 @@ class R2StorageService(object):
 
         async with self.session.client(**self._client_kwargs()) as client:
             await client.upload_file(
-                file_path,
-                r2_config.bucket_name,
-                object_name,
-                extra_args
+                file_path, r2_config.bucket_name, object_name, extra_args
             )
 
         return f"r2://{r2_config.bucket_name}/{object_name}"
-
 
     async def generate_signed_url(
         self,
@@ -80,11 +73,15 @@ class R2StorageService(object):
         """
         parsed_uri = urlparse(storage_uri)
         if parsed_uri.scheme != "r2":
-            raise ValueError(f"Invalid storage URI scheme: {parsed_uri.scheme}. Expected 'r2'.")
+            raise ValueError(
+                f"Invalid storage URI scheme: {parsed_uri.scheme}. Expected 'r2'."
+            )
 
         if parsed_uri.netloc != r2_config.bucket_name:
-            raise ValueError(f"Invalid bucket name in storage URI: {parsed_uri.netloc}. Expected '{r2_config.bucket_name}'.")
-        
+            raise ValueError(
+                f"Invalid bucket name in storage URI: {parsed_uri.netloc}. Expected '{r2_config.bucket_name}'."
+            )
+
         # Extract the object name from the storage URI
         object_name = parsed_uri.path.lstrip("/")  # Remove leading slash
 
@@ -95,7 +92,7 @@ class R2StorageService(object):
                     "Bucket": r2_config.bucket_name,
                     "Key": object_name,
                 },
-                ExpiresIn=r2_config.signed_url_expiration_seconds
+                ExpiresIn=r2_config.signed_url_expiration_seconds,
             )
 
         return signed_url

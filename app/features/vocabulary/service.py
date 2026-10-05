@@ -1,7 +1,6 @@
 from typing import List, Optional
 
-from fastapi import HTTPException, status
-from sqlalchemy import and_, case, func
+from sqlalchemy import case, func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -13,11 +12,11 @@ from app.features.vocabulary.model import (
     VocabularyTopic,
     VocabularyTopicWord,
 )
-from app.features.vocabulary.queries import get_topic_words_with_progress
-from app.features.vocabulary.schemas import (
-    TopicWordResponse,
-    VocabularyTopicResponse,
+from app.features.vocabulary.queries import (
+    get_active_topic,
+    get_topic_words_with_progress,
 )
+from app.features.vocabulary.schemas import TopicWordResponse, VocabularyTopicResponse
 from app.utils.constants import WordStatus
 
 
@@ -127,10 +126,7 @@ class VocabularyService(object):
                 )
                 .join(
                     ReviewProgress,
-                    (
-                        ReviewProgress.vocabulary_id
-                        == VocabularyTopicWord.vocabulary_id
-                    )
+                    (ReviewProgress.vocabulary_id == VocabularyTopicWord.vocabulary_id)
                     & (ReviewProgress.user_id == user_id),
                 )
                 .group_by(VocabularyTopic.id)
@@ -174,22 +170,18 @@ class VocabularyService(object):
         Returns:
             List[TopicWordResponse]: A list of words in the topic with user progress.
         """
-        book_conditions = [VocabularyBook.deleted.is_(False)]
         if book_slug:
-            book_conditions.append(VocabularyBook.slug == book_slug)
-        topic = await async_get_one_record_by(
-            VocabularyTopic,
-            [
-                VocabularyTopic.slug == topic_slug,
-                VocabularyTopic.book.has(and_(*book_conditions)),
-            ],
-            session,
-            raise_if_not_found=False,
-        )
-        if not topic:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Vocabulary topic not found",
+            topic = await get_active_topic(book_slug, topic_slug, session)
+        else:
+            topic = await async_get_one_record_by(
+                VocabularyTopic,
+                [
+                    VocabularyTopic.slug == topic_slug,
+                    VocabularyTopic.book.has(VocabularyBook.deleted.is_(False)),
+                ],
+                session,
+                not_found_msg="Vocabulary topic not found",
+                raise_if_not_found=True,
             )
 
         rows = await get_topic_words_with_progress(topic.id, user_id, session)

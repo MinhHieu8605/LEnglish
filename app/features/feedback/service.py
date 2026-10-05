@@ -1,14 +1,14 @@
 import asyncio
-from datetime import date, datetime, time, timezone
 import mimetypes
 import os
 import shutil
+from datetime import date, datetime, time, timezone
 from typing import Any, Dict, List, Optional, Union
 
 from fastapi import HTTPException, Request, UploadFile, status
 from loguru import logger
 from slugify import slugify
-from sqlalchemy import select
+from sqlalchemy import or_
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.config.settings import SystemConfig
@@ -37,24 +37,27 @@ from app.features.feedback.schemas import (
 from app.features.r2_storage.service import R2StorageService
 from app.features.user.model import User
 from app.utils.common import (
-    append_short_uuid_to_filename, 
-    get_user_email_from_request, 
-    get_user_id_from_request, 
-    get_user_role_from_request, 
-    page_size_to_offset_limit, 
-    remove_domain_from_email
+    append_short_uuid_to_filename,
+    get_user_email_from_request,
+    get_user_id_from_request,
+    get_user_role_from_request,
+    page_size_to_offset_limit,
+    remove_domain_from_email,
 )
 from app.utils.constants import (
-    FeedbackAttachmentType, 
-    FeedbackFilter, 
-    FileConstants, 
-    FileMode, 
-    FileSizeLimit, 
-    FileType, 
-    Role, 
-     SortOrder
+    FeedbackAttachmentType,
+    FeedbackFilter,
+    FileConstants,
+    FileMode,
+    FileSizeLimit,
+    FileType,
+    Role,
+    SortOrder,
 )
-from app.utils.email_constants import BODY_NOTI_ADMIN_FEEDBACK, SUBJECT_NOTI_ADMIN_FEEDBACK
+from app.utils.email_constants import (
+    BODY_NOTI_ADMIN_FEEDBACK,
+    SUBJECT_NOTI_ADMIN_FEEDBACK,
+)
 from app.utils.util import check_user_id_match
 
 r2_service = R2StorageService()
@@ -64,8 +67,11 @@ class FeedbackService(object):
     """
     FeedbackService class is responsible for handling feedback-related operations.
     """
+
     @staticmethod
-    def _normalize_date_filters(value: Union[date, datetime], end_of_day: bool = False) -> datetime:
+    def _normalize_date_filters(
+        value: Union[date, datetime], end_of_day: bool = False
+    ) -> datetime:
         """
         Normalize a date or datetime value to a datetime object.
 
@@ -85,15 +91,14 @@ class FeedbackService(object):
             normalized_value = normalized_value.replace(tzinfo=timezone.utc)
 
         return (
-            normalized_value.replace(hour=23, minute=59, second=59, microsecond=999999) 
+            normalized_value.replace(hour=23, minute=59, second=59, microsecond=999999)
             if end_of_day
             else normalized_value
         )
 
     @staticmethod
     def _process_feedback_response(
-        feedbacks,
-        user_email: Dict[int, Optional[str]]
+        feedbacks, user_email: Dict[int, Optional[str]]
     ) -> list[FeedbackListItemResponse]:
         """
         Process feedback records and return a list of FeedbackListItemResponse.
@@ -114,13 +119,15 @@ class FeedbackService(object):
                     type=getattr(item, "type", ""),
                     title=getattr(item, "title", ""),
                     status=getattr(item, "status", None),
-                    created_time=getattr(item, "created_time", None)
+                    created_time=getattr(item, "created_time", None),
                 )
             )
         return processed
 
     @staticmethod
-    async def _refresh_attachment_urls(urls: Optional[List[str]]) -> Optional[List[str]]:
+    async def _refresh_attachment_urls(
+        urls: Optional[List[str]],
+    ) -> Optional[List[str]]:
         """
         Refresh the attachment URLs by removing any query parameters.
 
@@ -136,9 +143,7 @@ class FeedbackService(object):
         refreshed_urls = []
         for url in urls:
             try:
-                refreshed_urls.append(
-                    await r2_service.generate_signed_url(url)
-                )
+                refreshed_urls.append(await r2_service.generate_signed_url(url))
             except Exception as e:
                 logger.error(f"Error refreshing URL {url}: {e}")
                 refreshed_urls.append(url)
@@ -239,18 +244,16 @@ class FeedbackService(object):
 
         return FeedbackAttachmentUploadResponse(
             file_name=upload_file.filename,
-            local_path=os.path.relpath(
-                file_local_path, "local_files"
-            ).replace("\\", "/"),
+            local_path=os.path.relpath(file_local_path, "local_files").replace(
+                "\\", "/"
+            ),
         )
 
     @classmethod
     def _validate_feedback_file_path(cls, file_path: str) -> str:
         """Validate and resolve a path previously returned by local upload."""
         base_path = os.path.abspath("local_files")
-        resolved_path = os.path.abspath(
-            os.path.join("local_files", file_path)
-        )
+        resolved_path = os.path.abspath(os.path.join("local_files", file_path))
 
         if os.path.commonpath(
             [base_path, resolved_path]
@@ -389,9 +392,7 @@ class FeedbackService(object):
         Returns:
             str: The modified email subject with environment prefix if applicable.
         """
-        if (
-            SystemConfig.ENV
-        ):
+        if SystemConfig.ENV:
             return f"[{SystemConfig.ENV.upper()}] - {subject}"
         return subject
 
@@ -463,20 +464,18 @@ class FeedbackService(object):
                     if os.path.exists(file_path):
                         os.remove(file_path)
                 except Exception as exc:
-                    logger.warning( 
+                    logger.warning(
                         "Failed to delete temporary attachment file "
                         f"'{file_path}': {exc}"
                     )
 
     @staticmethod
-    def _build_where_clause(filters: FeedbackPaginationFilter, request: Request) -> list:
+    def _build_where_clause(filters: FeedbackPaginationFilter) -> list:
         """
         Build the WHERE clause for SQL queries based on provided filters.
 
         Args:
             filters (FeedbackPaginationFilter): The pagination and filtering criteria.
-            request (Request): The incoming request object.
-
         Returns:
             list: A list of SQLAlchemy filter conditions.
         """
@@ -492,13 +491,19 @@ class FeedbackService(object):
                     Feedback.created_time
                     >= FeedbackService._normalize_date_filters(value)
                 )
-            elif key == FeedbackFilter.TO_DATE: 
+            elif key == FeedbackFilter.TO_DATE:
                 where_clause.append(
-                    Feedback.created_time 
+                    Feedback.created_time
                     <= FeedbackService._normalize_date_filters(value, end_of_day=True)
                 )
             elif key == FeedbackFilter.KEYWORD:
-                where_clause.append(Feedback.title.ilike(f"%{value}%"))
+                keyword = f"%{value}%"
+                where_clause.append(
+                    or_(
+                        Feedback.title.ilike(keyword),
+                        Feedback.user.has(User.email.ilike(keyword)),
+                    )
+                )
         return where_clause
 
     @classmethod
@@ -524,9 +529,7 @@ class FeedbackService(object):
         """
         where_clause = cls._build_where_clause(filters, request)
         if filters.page_size and filters.page:
-            skip, limit = page_size_to_offset_limit(
-                filters.page, filters.page_size
-            )
+            skip, limit = page_size_to_offset_limit(filters.page, filters.page_size)
 
         feedbacks, total = await async_get_paginated_records(
             Feedback,
@@ -545,12 +548,13 @@ class FeedbackService(object):
         user_ids = {item.user_id for item in feedbacks}
         user_emails: Dict[int, Optional[str]] = {}
         if user_ids:
-            user_results = await session.exec(
-                select(User.id, User.email).where(User.id.in_(user_ids))
+            users = await async_get_many_records_by(
+                User,
+                [User.id.in_(user_ids)],
+                session,
+                raise_if_not_found=False,
             )
-            user_emails = {
-                user_id: email for user_id, email in user_results.all()
-            }
+            user_emails = {user.id: user.email for user in users}
 
         data = cls._process_feedback_response(feedbacks, user_emails)
 
@@ -588,15 +592,14 @@ class FeedbackService(object):
         )
 
         feedback_data = {
-            col.name: getattr(feedback, col.name) 
-            for col in Feedback.__table__.columns
+            col.name: getattr(feedback, col.name) for col in Feedback.__table__.columns
         }
         feedback_data["user_email"] = feedback_user.email if feedback_user else None
-        feedback_data["user_attachments"] = (
-            await cls._refresh_attachment_urls(feedback_data.get("user_attachments"))
+        feedback_data["user_attachments"] = await cls._refresh_attachment_urls(
+            feedback_data.get("user_attachments")
         )
-        feedback_data["response_attachments"] = (
-            await cls._refresh_attachment_urls(feedback_data.get("response_attachments"))
+        feedback_data["response_attachments"] = await cls._refresh_attachment_urls(
+            feedback_data.get("response_attachments")
         )
         return FeedbackResponse(**feedback_data)
 
@@ -641,8 +644,7 @@ class FeedbackService(object):
         )[1]
 
         feedback_data = {
-            col.name: getattr(record, col.name)
-            for col in Feedback.__table__.columns
+            col.name: getattr(record, col.name) for col in Feedback.__table__.columns
         }
         feedback_data["user_email"] = user_email
 
@@ -662,7 +664,7 @@ class FeedbackService(object):
                 ),
                 SystemConfig.ADMIN_EMAILS_FEEDBACK,
                 [],
-                attachment_paths=attachemnt_paths
+                attachment_paths=attachemnt_paths,
             )
         )
         return response
@@ -701,10 +703,7 @@ class FeedbackService(object):
             feedback_id,
             feedback_in,
             session,
-            search_criteria=[
-                Feedback.id == feedback_id,
-                Feedback.deleted.is_(False)
-            ],
+            search_criteria=[Feedback.id == feedback_id, Feedback.deleted.is_(False)],
         )
         logger.info(f"Updated feedback with ID {feedback_id} for user_id {user_id}")
 
@@ -712,8 +711,7 @@ class FeedbackService(object):
             User, record.user_id, session, raise_if_not_found=False
         )
         feedback_data = {
-            col.name: getattr(record, col.name)
-            for col in Feedback.__table__.columns
+            col.name: getattr(record, col.name) for col in Feedback.__table__.columns
         }
         feedback_data["user_email"] = feedback_user.email if feedback_user else None
         feedback_data["user_attachments"] = await cls._refresh_attachment_urls(
@@ -753,7 +751,7 @@ class FeedbackService(object):
                 detail=f"Feedback with id {feedback_id} not found.",
             )
 
-        _,processed_paths = await cls.process_feedback_attachment_paths(
+        _, processed_paths = await cls.process_feedback_attachment_paths(
             feedback_id,
             attachment_paths,
             FeedbackAttachmentType.RESPONSE,
@@ -782,8 +780,7 @@ class FeedbackService(object):
         logger.info(f"Responded to feedback with ID {feedback_id}")
 
         feedback_data = {
-            col.name: getattr(record, col.name)
-            for col in Feedback.__table__.columns
+            col.name: getattr(record, col.name) for col in Feedback.__table__.columns
         }
         feedback_user = await async_get_one_record_by_id(
             User, feedback.user_id, session, raise_if_not_found=False
@@ -823,16 +820,10 @@ class FeedbackService(object):
             feedback_id,
             {"deleted": True},
             session,
-            search_criteria=[
-                Feedback.id == feedback_id,
-                Feedback.deleted.is_(False)
-            ],
+            search_criteria=[Feedback.id == feedback_id, Feedback.deleted.is_(False)],
         )
         logger.info(f"Deleted feedback with ID {feedback_id}")
-        return FeedbackDeleteResponse(
-            deleted_ids=[feedback_id], 
-            deleted_count=1
-        )  
+        return FeedbackDeleteResponse(deleted_ids=[feedback_id], deleted_count=1)
 
     @classmethod
     @transactional()
@@ -853,7 +844,9 @@ class FeedbackService(object):
             FeedbackDeleteResponse: The response indicating the result of the bulk deletion operation.
         """
         unique_feedback_ids = list(dict.fromkeys(feedback_ids))
-        logger.info(f"Attempting to bulk delete feedback with IDs: {unique_feedback_ids}")
+        logger.info(
+            f"Attempting to bulk delete feedback with IDs: {unique_feedback_ids}"
+        )
 
         records = await async_get_many_records_by(
             Feedback,
@@ -866,10 +859,10 @@ class FeedbackService(object):
             Feedback,
             search_criteria=[
                 Feedback.id.in_(unique_feedback_ids),
-                Feedback.deleted.is_(False)
+                Feedback.deleted.is_(False),
             ],
             data={"deleted": True},
-            session=session,   
+            session=session,
         )
 
         deleted_ids = [record.id for record in records]
@@ -877,6 +870,5 @@ class FeedbackService(object):
         logger.info(f"Successfully bulk deleted feedback with IDs: {deleted_ids}")
 
         return FeedbackDeleteResponse(
-            deleted_ids=feedback_ids, 
-            deleted_count=len(deleted_ids)
+            deleted_ids=feedback_ids, deleted_count=len(deleted_ids)
         )

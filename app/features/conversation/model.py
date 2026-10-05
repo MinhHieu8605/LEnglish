@@ -1,4 +1,12 @@
-from sqlalchemy import Column, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import (
+    Column,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -23,6 +31,7 @@ class Scenario(Base, TimeStampMixin):
         status (str): Content status (draft, published, archived).
         display_order (int): Display order for sorting.
     """
+
     __tablename__ = "Scenario"
     __table_args__ = (UniqueConstraint("slug", name="uq_scenarios_slug"),)
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -52,18 +61,28 @@ class Conversation(Base, TimeStampMixin):
         lesson_id (int): The lesson identifier (if type is lesson).
         title (str): The conversation title.
     """
+
     __tablename__ = "Conversation"
     id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("User.id", ondelete="CASCADE"), nullable=False)
     type = Column(String, nullable=False, default=ConversationType.FREE.value)
-    scenario_id = Column(Integer, ForeignKey("Scenario.id", ondelete="SET NULL"), nullable=True)
-    lesson_id = Column(Integer, ForeignKey("Lesson.id", ondelete="SET NULL"), nullable=True)
+    scenario_id = Column(
+        Integer, ForeignKey("Scenario.id", ondelete="SET NULL"), nullable=True
+    )
+    lesson_id = Column(
+        Integer, ForeignKey("Lesson.id", ondelete="SET NULL"), nullable=True
+    )
     title = Column(String)
 
     user = relationship("User", back_populates="conversations")
     scenario = relationship("Scenario", back_populates="conversations")
     lesson = relationship("Lesson", back_populates="conversations")
-    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_time")
+    messages = relationship(
+        "Message",
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+        order_by="Message.created_time",
+    )
 
 
 class Message(Base, TimeStampMixin):
@@ -79,11 +98,14 @@ class Message(Base, TimeStampMixin):
         suggestions (dict): Suggestions data in JSON format.
         correction (dict): Correction data in JSON format.
     """
+
     __tablename__ = "Message"
     __table_args__ = (Index("messages_idx", "conversation_id", "created_time"),)
 
     id = Column(Integer, autoincrement=True, primary_key=True)
-    conversation_id = Column(Integer, ForeignKey("Conversation.id", ondelete="CASCADE"), nullable=False)
+    conversation_id = Column(
+        Integer, ForeignKey("Conversation.id", ondelete="CASCADE"), nullable=False
+    )
     role = Column(String, nullable=False, default=MessageRole.USER.value)
     content = Column(Text, nullable=False)
     translation_vi = Column(Text)

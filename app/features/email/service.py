@@ -1,7 +1,7 @@
-from email.message import EmailMessage
-from email.utils import formataddr
 import mimetypes
 import os
+from email.message import EmailMessage
+from email.utils import formataddr
 
 import aiofiles
 import aiosmtplib
@@ -34,10 +34,7 @@ class EmailService(object):
         if not content:
             raise ValueError(f"The file {file_path} is empty.")
 
-        content_type = (
-            mimetypes.guess_type(file_path)[0] 
-            or "application/octet-stream"
-        )
+        content_type = mimetypes.guess_type(file_path)[0] or "application/octet-stream"
         maintype, subtype = content_type.split("/", maxsplit=1)
 
         return {
@@ -46,7 +43,6 @@ class EmailService(object):
             "subtype": subtype,
             "filename": os.path.basename(file_path),
         }
-
 
     async def send_email(self, payload: dict) -> None:
         """
@@ -86,5 +82,6 @@ class EmailService(object):
             use_tls=use_tls,
             start_tls=email_config.smtp_use_tls and not use_tls,
         )
+
 
 email_service = EmailService()

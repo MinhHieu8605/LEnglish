@@ -1,10 +1,10 @@
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.utils.constants import DifficultyLevel, LessonSessionMode
+from app.utils.constants import DifficultyLevel, LessonSessionMode, SortOrder
 
 
 class YouTubeLessonImportRequest(BaseModel):
@@ -63,13 +63,26 @@ class LessonSummaryResponse(BaseModel):
     duration_seconds: int
     difficulty: str
     subtitle_count: int
+    views_count: int
+    channel_name: Optional[str]
+    topic: Optional[str]
 
 
 class LessonPaginationFilter(BaseModel):
-    """Pagination parameters for the lesson catalog."""
+    """Pagination, search, and ordering for the lesson catalog."""
 
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=20, ge=1, le=100)
+    keyword: Optional[str] = Field(default=None, max_length=100)
+    sort_by: Literal["published_at", "views_count"] = "published_at"
+    sort_order: SortOrder = SortOrder.DESCEND
+
+    @field_validator("keyword")
+    @classmethod
+    def strip_keyword(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        return value.strip() or None
 
 
 class LessonListMeta(BaseModel):
@@ -96,6 +109,13 @@ class LessonProgressResponse(BaseModel):
     completion_percent: Decimal
     completed_at: Optional[datetime]
     last_watched_at: Optional[datetime]
+    subtitle_count: int = 0
+    current_subtitle: Optional[LessonSubtitleResponse] = None
+
+
+class LessonResumeResponse(BaseModel):
+    lesson: LessonSummaryResponse
+    progress: LessonProgressResponse
 
 
 class LessonSessionRequest(BaseModel):
