@@ -12,8 +12,7 @@ from app.features.lesson.schemas import (
     LessonResumeResponse,
     LessonSessionRequest,
     LessonSessionResponse,
-    LessonAnswerRequest,
-    LessonAnswerResponse,
+    LessonCompleteRequest,
     YouTubeLessonImportRequest,
 )
 from app.features.lesson.service import LessonService
@@ -46,7 +45,7 @@ async def list_lessons(
 
 
 @router.post(
-    "/import/youtube",
+    "/from-youtube",
     response_model=LessonDetailResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Import a YouTube video and all available English captions",
@@ -130,33 +129,16 @@ async def start_lesson_session(
 
 
 @router.post(
-    "/{lesson_slug}/sessions/{session_id}/answers",
-    response_model=LessonAnswerResponse,
-)
-async def submit_lesson_answer(
-    lesson_slug: str,
-    session_id: int,
-    data: LessonAnswerRequest,
-    request: Request,
-    session: AsyncSession = Depends(get_session),
-):
-    return await LessonService.submit_answer(
-        get_user_id_from_request(request), lesson_slug, session_id, data, session
-    )
-
-
-@router.post(
-    "/{lesson_slug}/sessions/{session_id}/complete",
+    "/complete",
     response_model=LessonSessionResponse,
 )
 async def complete_lesson_session(
-    lesson_slug: str,
-    session_id: int,
+    data: LessonCompleteRequest,
     request: Request,
     session: AsyncSession = Depends(get_session),
 ):
     return await LessonService.complete_session(
-        get_user_id_from_request(request), lesson_slug, session_id, session
+        get_user_id_from_request(request), data.lesson_slug, data.session_id, session
     )
 
 

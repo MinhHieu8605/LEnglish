@@ -17,7 +17,29 @@ from app.utils.constants import ReviewMode, ReviewScope, WordStatus
 
 
 class ReviewProgress(Base, TimeStampMixin):
-    """A user's spaced-repetition state for one vocabulary entry."""
+    """
+    A user's spaced-repetition state for one vocabulary entry.
+
+    Attributes:
+        id (int): The unique identifier of the record.
+        user_id (int): The identifier of the user who owns the record.
+        vocabulary_id (int): The identifier of the associated vocabulary entry.
+        status (str): The current learning or session state.
+        ease_factor (Decimal): The multiplier used to calculate future successful-review
+            intervals.
+        repetition_count (int): The number of successful repetitions in the current
+            review state.
+        interval_days (int): The scheduled review interval in whole days.
+        next_review_at (Optional[datetime]): The timestamp when the next review becomes
+            due.
+        last_reviewed_at (Optional[datetime]): The timestamp of the most recent recorded
+            review, if any.
+        personal_note (Optional[str]): The user's personal vocabulary note.
+        user (User): The user account that owns the record.
+        vocabulary (Vocabulary): The vocabulary entry associated with the record.
+        attempts (List[ReviewAttempt]): The attempts recorded against this review
+            progress.
+    """
 
     __tablename__ = "ReviewProgress"
     __table_args__ = (
@@ -52,7 +74,28 @@ class ReviewProgress(Base, TimeStampMixin):
 
 
 class ReviewAttempt(Base, TimeStampMixin):
-    """One submitted vocabulary review attempt."""
+    """
+    One submitted vocabulary review attempt.
+
+    Attributes:
+        id (int): The unique identifier of the record.
+        review_progress_id (int): The identifier of the review progress updated by this
+            attempt.
+        attempt_id (Optional[str]): The client-provided identifier used to deduplicate
+            the review attempt.
+        mode (Optional[str]): The practice mode used for this review attempt.
+        correct (Optional[bool]): Whether the submitted answer was correct, if recorded.
+        used_hint (bool): Whether the user requested a hint during the attempt.
+        revealed_answer (bool): Whether the correct answer was shown before submission.
+        submitted_answer (Optional[str]): The answer text recorded with the attempt, if
+            supplied.
+        rating (str): The user's selected recall rating.
+        response_ms (Optional[int]): The time taken to answer in milliseconds, if
+            supplied.
+        reviewed_at (datetime): The timestamp when the review was recorded.
+        review_progress (ReviewProgress): The user's review state associated with the
+            attempt.
+    """
 
     __tablename__ = "ReviewAttempt"
     __table_args__ = (
@@ -77,7 +120,26 @@ class ReviewAttempt(Base, TimeStampMixin):
 
 
 class ReviewSession(Base, TimeStampMixin):
-    """A snapshot of one user's vocabulary review queue."""
+    """
+    A snapshot of one user's vocabulary review queue.
+
+    Attributes:
+        id (int): The unique identifier of the record.
+        user_id (int): The identifier of the user who owns the record.
+        topic_id (int): The identifier of the vocabulary topic being reviewed.
+        scope (str): Whether the review session includes due words or all words.
+        initial_mode (str): The practice mode selected when the session starts.
+        status (str): The current learning or session state.
+        current_position (int): The current position in the ordered review queue.
+        total_items (int): The number of words included in the session.
+        started_at (datetime): The timestamp when the session started.
+        completed_at (Optional[datetime]): The completion timestamp, or None while
+            unfinished.
+        user (User): The user account that owns the record.
+        topic (VocabularyTopic): The topic associated with the lesson or review session.
+        items (List[ReviewSessionItem]): The entries belonging to this collection or
+            session.
+    """
 
     __tablename__ = "ReviewSession"
     __table_args__ = (Index("review_sessions_user_status_idx", "user_id", "status"),)
@@ -106,7 +168,21 @@ class ReviewSession(Base, TimeStampMixin):
 
 
 class ReviewSessionItem(Base, TimeStampMixin):
-    """One vocabulary entry in a fixed review session."""
+    """
+    One vocabulary entry in a fixed review session.
+
+    Attributes:
+        id (int): The unique identifier of the record.
+        session_id (int): The identifier of the review session containing the item.
+        vocabulary_id (int): The identifier of the associated vocabulary entry.
+        order_num (int): The position of the word or topic in the ordered collection.
+        completed_at (Optional[datetime]): The completion timestamp, or None while
+            unfinished.
+        last_attempt_id (Optional[str]): The identifier of the item's most recent
+            attempt, if any.
+        session (ReviewSession): The session associated with this review queue item.
+        vocabulary (Vocabulary): The vocabulary entry associated with the record.
+    """
 
     __tablename__ = "ReviewSessionItem"
     __table_args__ = (

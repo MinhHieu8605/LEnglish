@@ -230,6 +230,25 @@ class Subtitle(Base, TimeStampMixin):
 
 
 class LessonProgress(Base, TimeStampMixin):
+    """
+    Represents a user's saved playback position and completion for a lesson.
+
+    Attributes:
+        id (int): The unique record identifier.
+        user_id (int): The identifier of the user who owns the record.
+        lesson_id (int): The identifier of the associated lesson.
+        last_position_seconds (int): The saved playback position in seconds from the
+            start of the lesson.
+        completion_percent (Decimal): The percentage of the lesson duration reached by
+            the saved position.
+        completed_at (Optional[datetime]): The completion timestamp, or None while
+            unfinished.
+        last_watched_at (Optional[datetime]): The timestamp of the user's latest saved
+            playback position.
+        user (User): The user account associated with the record.
+        lesson (Lesson): The associated lesson.
+    """
+
     __tablename__ = "LessonProgress"
     __table_args__ = (
         UniqueConstraint(
@@ -257,6 +276,29 @@ class LessonProgress(Base, TimeStampMixin):
 
 
 class LessonSession(Base, TimeStampMixin):
+    """
+    Represents a user's lesson practice session and aggregate results.
+
+    Attributes:
+        id (int): The unique record identifier.
+        user_id (int): The identifier of the user who owns the record.
+        lesson_id (int): The identifier of the associated lesson.
+        mode (str): The selected practice mode.
+        status (str): The current lifecycle state.
+        score (Optional[Decimal]): The session's aggregate answer accuracy percentage,
+            if available.
+        correct_count (int): The number of correctly answered subtitles.
+        total_count (int): The total number of subtitles in the session.
+        duration_seconds (int): The elapsed session duration in seconds.
+        started_at (datetime): The timestamp when the session started.
+        completed_at (Optional[datetime]): The completion timestamp, or None while
+            unfinished.
+        user (User): The user account associated with the record.
+        lesson (Lesson): The associated lesson.
+        answers (List[LessonAnswer]): The recorded subtitle answers belonging to the
+            session.
+    """
+
     __tablename__ = "LessonSession"
 
     id = Column(Integer, autoincrement=True, primary_key=True)
@@ -281,6 +323,25 @@ class LessonSession(Base, TimeStampMixin):
 
 
 class LessonAnswer(Base, TimeStampMixin):
+    """
+    Represents the latest answer and attempt count for a session subtitle.
+
+    Attributes:
+        id (int): The unique record identifier.
+        session_id (int): The identifier of the lesson practice session.
+        subtitle_id (int): The identifier of the subtitle being answered.
+        user_input (str): The text submitted by the user for the subtitle.
+        accuracy_score (Optional[Decimal]): The answer's similarity to the expected text
+            as a percentage.
+        is_correct (bool): Whether normalized submitted text matches the expected
+            answer.
+        attempt_count (int): The number of submissions recorded for this subtitle and
+            session.
+        answered_at (datetime): The timestamp of the latest answer submission.
+        session (LessonSession): The practice session owning the answer.
+        subtitle (Subtitle): The subtitle associated with the answer.
+    """
+
     __tablename__ = "LessonAnswer"
     __table_args__ = (
         UniqueConstraint(

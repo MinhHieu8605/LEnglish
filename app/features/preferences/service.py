@@ -14,16 +14,40 @@ from app.features.preferences.schemas import (
 
 
 def _default_preferences(user_id: int) -> UserPreferencesResponse:
+    """
+    Build default learning preferences without writing to the database.
+
+    Args:
+        user_id (int): The identifier of the user who owns the record.
+
+    Returns:
+        UserPreferencesResponse: Default preferences for the specified user.
+    """
     return UserPreferencesResponse(user_id=user_id)
 
 
 class UserPreferencesService:
-    """Read and update per-user learning preferences."""
+    """
+    Read and update per-user learning preferences.
+
+    Returns defaults for users without saved settings and persists explicitly supplied
+    preference changes.
+    """
 
     @staticmethod
     async def get_preferences(
         user_id: int, session: AsyncSession
     ) -> UserPreferencesResponse:
+        """
+        Retrieve saved preferences or return defaults without creating a row.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            UserPreferencesResponse: The user's saved or default preferences.
+        """
         preferences = await async_get_one_record_by(
             UserPreferences,
             [UserPreferences.user_id == user_id],
@@ -41,6 +65,18 @@ class UserPreferencesService:
         data: UserPreferencesUpdate,
         session: AsyncSession,
     ) -> UserPreferencesResponse:
+        """
+        Create or update the user's explicitly supplied preference fields.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            data (UserPreferencesUpdate): The explicitly supplied preference fields to
+                create or update.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            UserPreferencesResponse: The persisted learning preferences.
+        """
         preferences = await async_get_one_record_by(
             UserPreferences,
             [UserPreferences.user_id == user_id],

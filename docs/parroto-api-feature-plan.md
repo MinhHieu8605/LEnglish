@@ -1,5 +1,7 @@
 # Đối chiếu Parroto với LEnglish: API, database và tính năng
 
+> Kế hoạch này dùng tên endpoint trước đợt đổi URL. Xem [bảng chuyển đổi và endpoint hiện tại](endpoint-renames.md) khi triển khai hoặc gọi API.
+
 Ngày khảo sát: 06/10/2026. Trạng thái: bản khảo sát và thiết kế, chưa triển khai thay đổi runtime hoặc migration.
 
 ## 1. Bằng chứng cập nhật sau khi kiểm tra lại

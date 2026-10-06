@@ -8,6 +8,7 @@ from app.api.v1.endpoint import (
     lesson,
     preferences,
     review,
+    sentence,
     token,
     user,
     vocabulary,
@@ -36,6 +37,7 @@ authentication_api_router.include_router(wordlist.router, prefix="/word-lists", 
 authentication_api_router.include_router(vocabulary.router, prefix="/vocabulary", tags=["Vocabulary"])
 authentication_api_router.include_router(review.router, prefix="/review", tags=["Review"])
 authentication_api_router.include_router(lesson.router, prefix="/lessons", tags=["Lessons"])
+authentication_api_router.include_router(sentence.router, prefix="/sentences", tags=["Sentences"])
 authentication_api_router.include_router(
     engagement.router,
     prefix="/engagement",

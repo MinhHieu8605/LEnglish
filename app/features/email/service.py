@@ -13,7 +13,12 @@ email_config = SmtpEmailConfig()
 
 
 class EmailService(object):
-    """Service class for sending emails using an email provider."""
+    """
+    Service class for sending emails using an email provider.
+
+    Builds file attachments and delivers feedback messages through the configured SMTP
+    server.
+    """
 
     async def create_attachment(self, file_path: str) -> dict:
         """

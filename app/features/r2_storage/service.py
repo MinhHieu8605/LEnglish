@@ -11,13 +11,33 @@ r2_config = R2StorageConfig()
 
 
 class R2StorageService(object):
-    """Cloudflare R2 Storage Service Class."""
+    """
+    Cloudflare R2 Storage Service Class.
+
+    Uploads local files and generates temporary signed URLs for stored objects.
+
+    Attributes:
+        session (aioboto3.Session): The AWS session used to create asynchronous R2
+            clients.
+    """
 
     def __init__(self) -> None:
+        """
+        Initialize the asynchronous AWS session used for R2 storage operations.
+
+        The session is reused to create clients for file uploads and signed URL
+        generation.
+        """
         self.session = aioboto3.Session()
 
     def _client_kwargs(self) -> dict:
-        """Return the keyword arguments for creating an R2 client."""
+        """
+        Return the keyword arguments for creating an R2 client.
+
+        Returns:
+            dict: S3 client credentials, endpoint, region, and signature configuration
+                for R2.
+        """
         return {
             "service_name": "s3",
             "aws_access_key_id": r2_config.access_key_id,

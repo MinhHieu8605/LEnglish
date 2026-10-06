@@ -26,6 +26,15 @@ _SOURCE_AI = "ai-dictionary"
 
 
 def _normalize_ipa(value: str | None) -> str:
+    """
+    Remove whitespace, periods, and slashes before comparing IPA transcriptions.
+
+    Args:
+        value (str | None): The IPA transcription to normalize, or None.
+
+    Returns:
+        str: The normalized transcription, or an empty string for None.
+    """
     return re.sub(r"[\s./]", "", value or "")
 
 
@@ -94,7 +103,15 @@ class DictionaryService(object):
 
     @classmethod
     def _build_prompt(cls, word: str) -> str:
-        """Build user prompt for AI dictionary lookup."""
+        """
+        Build user prompt for AI dictionary lookup.
+
+        Args:
+            word (str): The vocabulary word to look up.
+
+        Returns:
+            str: The dictionary lookup prompt specifying the required JSON structure.
+        """
         return (
             f"Provide a complete dictionary entry for: '{word}'\n\n"
             f"Return a JSON object matching this exact structure:\n"
@@ -123,7 +140,8 @@ class DictionaryService(object):
 
     @classmethod
     async def _call_ai_api(cls, prompt: str) -> str:
-        """Call external AI API and return raw response content.
+        """
+        Call external AI API and return raw response content.
 
         Raises:
             HTTPException 503: If API is unavailable.
@@ -137,7 +155,18 @@ class DictionaryService(object):
 
     @classmethod
     def _parse_ai_response(cls, content: str) -> dict:
-        """Parse AI response, stripping markdown fences if present."""
+        """
+        Parse AI response, stripping markdown fences if present.
+
+        Args:
+            content (str): The raw AI response to parse.
+
+        Returns:
+            dict: The parsed JSON response after removing any Markdown code fence.
+
+        Raises:
+            JSONDecodeError: If the extracted response is not valid JSON.
+        """
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
@@ -146,7 +175,8 @@ class DictionaryService(object):
 
     @classmethod
     async def _ai_lookup(cls, word: str) -> dict:
-        """Use AI to generate a complete dictionary entry.
+        """
+        Use AI to generate a complete dictionary entry.
 
         Returns:
             dict: Parsed AI response with meanings.
@@ -170,7 +200,8 @@ class DictionaryService(object):
 
     @classmethod
     async def _db_lookup(cls, word: str, session: AsyncSession) -> dict | None:
-        """Look up word in local vocabulary database.
+        """
+        Look up word in local vocabulary database.
 
         Returns parsed AI-style dict if found with definition data, else None.
         """

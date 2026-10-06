@@ -70,6 +70,12 @@ class Feedback(Base, TimeStampMixin):
     user: Mapped["User"] = relationship(lazy="noload")
 
     def __repr__(self) -> str:
+        """
+        Represent feedback with its identifier, owner, and status.
+
+        Returns:
+            str: A concise representation of the feedback record.
+        """
         return (
             f"Feedback(id={self.id!r}, user_id={self.user_id!r}, "
             f"status={self.status!r})"

@@ -254,7 +254,7 @@ def test_import_persists_transcript_and_rejects_duplicate_video(
         "category_id": 1,
         "translate_to_vi": False,
     }
-    response = progress_client.post("/api/v1/lessons/import/youtube", json=payload)
+    response = progress_client.post("/api/v1/lessons/from-youtube", json=payload)
     assert response.status_code == 201
     result = response.json()
     assert result["title"] == "New lesson"
@@ -273,7 +273,7 @@ def test_import_persists_transcript_and_rejects_duplicate_video(
         subtitle["id"] for subtitle in result["subtitles"]
     }
     assert progress_client.post(
-        "/api/v1/lessons/import/youtube", json=payload
+        "/api/v1/lessons/from-youtube", json=payload
     ).status_code == 409
     assert len(progress_session.test_session.exec(
         select(Subtitle).where(Subtitle.lesson_id == result["id"])

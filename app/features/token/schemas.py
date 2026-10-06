@@ -2,7 +2,16 @@ from pydantic import BaseModel
 
 
 class AccessTokenPayload(BaseModel):
-    """Payload encoded into the access token."""
+    """
+    Payload encoded into the access token.
+
+    Attributes:
+        user_id (int): The identifier of the user who owns the record.
+        user_email (str): The user's email address.
+        refresh_token (str): The refresh token used to obtain a replacement access
+            token.
+        role (str): The user's assigned role.
+    """
 
     model_config = {
         "json_schemas_extra": {
@@ -24,7 +33,17 @@ class AccessTokenPayload(BaseModel):
 
 
 class AccessTokenResponse(BaseModel):
-    """Response model for access token."""
+    """
+    Response model for access token.
+
+    Attributes:
+        id (int): The unique identifier of the record.
+        email (str): The user's email address.
+        access_token (str): The access token used to authenticate API requests.
+        refresh_token (str): The refresh token used to obtain a replacement access
+            token.
+        role (str): The user's assigned role.
+    """
 
     id: int
     email: str

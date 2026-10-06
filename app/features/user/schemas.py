@@ -47,6 +47,19 @@ class UserCreate(BaseModel):
     @field_validator("email", mode="before")
     @classmethod
     def normalise_email_list(cls, email):
+        """
+        Convert a single email to a list and lowercase its string entries.
+
+        Args:
+            email (str | list): The email value or list supplied before field
+                validation.
+
+        Returns:
+            list: Email values prepared for subsequent field validation.
+
+        Raises:
+            ValueError: If the input is neither a string nor a list.
+        """
         if isinstance(email, str):
             email = [email]
         if not isinstance(email, list):
@@ -56,6 +69,18 @@ class UserCreate(BaseModel):
     @field_validator("password", mode="before")
     @classmethod
     def validate_password(cls, password):
+        """
+        Require at least eight characters when a password is supplied.
+
+        Args:
+            password (Optional[str]): The optional plain-text password to validate.
+
+        Returns:
+            Optional[str]: The validated password, or None when omitted.
+
+        Raises:
+            ValueError: If a supplied password contains fewer than eight characters.
+        """
         if password is not None and len(password) < 8:
             raise ValueError("Password must be at least 8 characters")
         return password
@@ -92,6 +117,18 @@ class UserUpdate(BaseModel):
     @field_validator("password", mode="before")
     @classmethod
     def validate_password(cls, password):
+        """
+        Require at least eight characters when a replacement password is supplied.
+
+        Args:
+            password (Optional[str]): The optional plain-text password to validate.
+
+        Returns:
+            Optional[str]: The validated password, or None when omitted.
+
+        Raises:
+            ValueError: If a supplied password contains fewer than eight characters.
+        """
         if password is not None and len(password) < 8:
             raise ValueError("Password must be at least 8 characters")
         return password
@@ -166,6 +203,19 @@ class Register(BaseModel):
     @field_validator("email", mode="before")
     @classmethod
     def normalize_email(cls, email):
+        """
+        Extract the first email from list input, trim it, and lowercase it.
+
+        Args:
+            email (str | list): The email value or list supplied before field
+                validation.
+
+        Returns:
+            str: The normalized email address.
+
+        Raises:
+            ValueError: If the list is empty or the selected value is not a string.
+        """
         if isinstance(email, list):
             if len(email) > 0:
                 email = email[0]
@@ -178,6 +228,19 @@ class Register(BaseModel):
     @field_validator("full_name", mode="before")
     @classmethod
     def normalize_fullname(cls, full_name):
+        """
+        Extract the first full name from list input and validate its type.
+
+        Args:
+            full_name (str | list): The full name value or list supplied before field
+                validation.
+
+        Returns:
+            str: The supplied full name, preserving its whitespace.
+
+        Raises:
+            ValueError: If the list is empty or the selected value is not a string.
+        """
         if isinstance(full_name, list):
             if len(full_name) > 0:
                 full_name = full_name[0]
@@ -225,6 +288,12 @@ class UserPaginationFilter(DefaultFilterModel):
 class UserStatisticSummaryResponse(BaseModel):
     """
     Represents a paginated response for user data with statistical summary.
+
+    Attributes:
+        total_user (int): The total number of users matching the management query.
+        user_by_role (Dict[str, int]): The number of matching users grouped by role.
+        number_active (int): The number of matching users classified as active.
+        number_inactive (int): The number of matching users classified as inactive.
     """
 
     total_user: int

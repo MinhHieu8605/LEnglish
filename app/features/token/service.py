@@ -51,6 +51,15 @@ async def generate_tokens(
 ) -> tuple[str, str, str]:
     """
     Generate access and refresh tokens for a user.
+
+    Args:
+        session (AsyncSession): The database session used for record operations.
+        uid (int): The identifier of the user receiving the tokens.
+        email (str): The email address encoded in the user's access token.
+
+    Returns:
+        tuple[str, str, str]: The access token, the valid refresh token, and the user's
+            role name.
     """
     criteria = [Token.user_id == uid, Token.token_type == TokenType.REFRESH.value]
     token = await async_get_one_record_by(

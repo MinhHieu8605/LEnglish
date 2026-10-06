@@ -59,6 +59,16 @@ _AI_TRANSLATION_SYSTEM_PROMPT = (  # Enforce ordered JSON translations.
 
 @dataclass(frozen=True)
 class TranscriptSegment:
+    """
+    A timed transcript cue with English text and an optional translation.
+
+    Attributes:
+        start_seconds (float): The cue's starting time in seconds.
+        end_seconds (float): The cue's ending time in seconds.
+        content_en (str): The cue's English transcript text.
+        translation_vi (str | None): The Vietnamese translation of the source text.
+    """
+
     start_seconds: float
     end_seconds: float
     content_en: str
@@ -67,6 +77,17 @@ class TranscriptSegment:
 
 @dataclass(frozen=True)
 class YouTubeLessonSource:
+    """
+    Video metadata and transcript segments used to import a YouTube lesson.
+
+    Attributes:
+        video_id (str): The YouTube video identifier.
+        title (str): The video's display title.
+        thumbnail_url (str | None): The video thumbnail URL, if available.
+        segments (list[TranscriptSegment]): The timed transcript cues in source order.
+        channel_name (str | None): The video's source channel name, if available.
+    """
+
     video_id: str
     title: str
     thumbnail_url: str | None
@@ -76,13 +97,35 @@ class YouTubeLessonSource:
 
 @dataclass(frozen=True)
 class _CaptionTextSpan:
+    """
+    Character offsets that associate combined caption text with its source cue.
+
+    Attributes:
+        start_offset (int): The inclusive character offset where the source cue starts.
+        end_offset (int): The exclusive character offset where the source cue ends.
+        cue (TranscriptSegment): The original timed transcript cue for this character
+            span.
+    """
+
     start_offset: int
     end_offset: int
     cue: TranscriptSegment
 
 
 def _extract_youtube_video_id(video_url: str) -> str:
-    """Extract a video ID while rejecting non-YouTube hosts."""
+    """
+    Extract a video ID while rejecting non-YouTube hosts.
+
+    Args:
+        video_url (str): The YouTube video URL to load or validate.
+
+    Returns:
+        str: The validated eleven-character YouTube video identifier.
+
+    Raises:
+        ValueError: If the URL has an unsupported scheme or host, or lacks a valid video
+            ID.
+    """
     parsed = urlparse(video_url)
     # parsed.scheme   # "https"
     # parsed.hostname # "www.youtube.com"
@@ -109,7 +152,15 @@ def _extract_youtube_video_id(video_url: str) -> str:
 
 
 def _normalize_caption_text(text: str) -> str:
-    """Remove HTML tags, decode HTML entities, and collapse whitespace in caption text."""
+    """
+    Remove HTML tags, decode HTML entities, and collapse whitespace in caption text.
+
+    Args:
+        text (str): The caption or combined transcript text to process.
+
+    Returns:
+        str: Plain caption text with decoded entities and collapsed whitespace.
+    """
     if not text:
         return ""
 
@@ -120,7 +171,16 @@ def _normalize_caption_text(text: str) -> str:
 
 
 def _remove_repeated_prefix(previous_text: str, current_text: str) -> str:
-    """Remove words repeated by overlapping auto-generated caption cues."""
+    """
+    Remove words repeated by overlapping auto-generated caption cues.
+
+    Args:
+        previous_text (str): The caption text from the preceding cue.
+        current_text (str): The caption text whose repeated prefix should be removed.
+
+    Returns:
+        str: The current cue's text with any overlapping word prefix removed.
+    """
     prev_words = previous_text.split()
     curr_words = current_text.split()
 
@@ -139,7 +199,17 @@ def _remove_repeated_prefix(previous_text: str, current_text: str) -> str:
 def _trim_overlapping_segment_ends(
     segments: list[TranscriptSegment],
 ) -> list[TranscriptSegment]:
-    """Trim a segment if it overlaps the next segment."""
+    """
+    Trim a segment if it overlaps the next segment.
+
+    Args:
+        segments (list[TranscriptSegment]): The timed transcript segments in source
+            order.
+
+    Returns:
+        list[TranscriptSegment]: Segments whose ends are shortened when the next segment
+            starts inside them.
+    """
     if not segments:
         return []
 
@@ -161,7 +231,17 @@ def _trim_overlapping_segment_ends(
 def _prepare_transcript_cues(
     raw_snippets: list[dict[str, Any]],
 ) -> list[TranscriptSegment]:
-    """Clean YouTube snippets and remove repeated text from rolling captions."""
+    """
+    Clean YouTube snippets and remove repeated text from rolling captions.
+
+    Args:
+        raw_snippets (list[dict[str, Any]]): The raw YouTube caption dictionaries
+            containing text, start, and duration.
+
+    Returns:
+        list[TranscriptSegment]: Cleaned, timed cues with repeated rolling-caption text
+            removed.
+    """
     cues: list[TranscriptSegment] = []
     prev_text: str | None = None
     prev_end = 0.0
@@ -199,7 +279,17 @@ def _prepare_transcript_cues(
 def _split_cues_on_silence(
     cues: list[TranscriptSegment],
 ) -> list[list[TranscriptSegment]]:
-    """Split cues into continuous speech groups using the configured silence gap."""
+    """
+    Split cues into continuous speech groups using the configured silence gap.
+
+    Args:
+        cues (list[TranscriptSegment]): The continuous transcript cues to group or
+            combine.
+
+    Returns:
+        list[list[TranscriptSegment]]: Continuous speech groups separated by gaps
+            exceeding the configured limit.
+    """
     groups: list[list[TranscriptSegment]] = []
     current_group: list[TranscriptSegment] = []
     current_end = 0.0
@@ -221,7 +311,17 @@ def _split_cues_on_silence(
 def _join_cues_with_spans(
     cues: list[TranscriptSegment],
 ) -> tuple[str, list[_CaptionTextSpan]]:
-    """Join cue text while retaining character ranges for timestamp mapping."""
+    """
+    Join cue text while retaining character ranges for timestamp mapping.
+
+    Args:
+        cues (list[TranscriptSegment]): The continuous transcript cues to group or
+            combine.
+
+    Returns:
+        tuple[str, list[_CaptionTextSpan]]: The joined transcript text and the character
+            spans of its source cues.
+    """
     parts: list[str] = []
     spans: list[_CaptionTextSpan] = []
     offset = 0
@@ -239,7 +339,16 @@ def _join_cues_with_spans(
 
 
 def _find_sentence_ranges(text: str) -> list[tuple[int, int]]:
-    """Find English sentence ranges using pySBD."""
+    """
+    Find English sentence ranges using pySBD.
+
+    Args:
+        text (str): The caption or combined transcript text to process.
+
+    Returns:
+        list[tuple[int, int]]: Inclusive start and exclusive end offsets for each
+            nonblank English sentence.
+    """
     ranges: list[tuple[int, int]] = []
 
     for sentence in _SENTENCE_SEGMENTER.segment(text):
@@ -256,7 +365,18 @@ def _text_offset_to_seconds(
     span: _CaptionTextSpan,
     offset: int,
 ) -> float:
-    """Convert a character offset inside one cue to an approximate timestamp."""
+    """
+    Convert a character offset inside one cue to an approximate timestamp.
+
+    Args:
+        span (_CaptionTextSpan): The character span associated with one source caption
+            cue.
+        offset (int): The character offset to map to the cue's approximate playback
+            time.
+
+    Returns:
+        float: The interpolated timestamp, clamped to the source cue's time range.
+    """
     cue_text_length = span.end_offset - span.start_offset
     relative_offset = min(max(offset - span.start_offset, 0), cue_text_length)
     ratio = relative_offset / cue_text_length
@@ -270,7 +390,20 @@ def _map_sentence_to_cues(
     sentence_end: int,
     spans: list[_CaptionTextSpan],
 ) -> list[TranscriptSegment]:
-    """Map one sentence back to the text and timing of its source cues."""
+    """
+    Map one sentence back to the text and timing of its source cues.
+
+    Args:
+        text (str): The caption or combined transcript text to process.
+        sentence_start (int): The inclusive character offset where the sentence begins.
+        sentence_end (int): The exclusive character offset where the sentence ends.
+        spans (list[_CaptionTextSpan]): The source cue character spans used to recover
+            subtitle timestamps.
+
+    Returns:
+        list[TranscriptSegment]: Timed fragments where the sentence overlaps its source
+            caption cues.
+    """
     pieces: list[TranscriptSegment] = []
     for span in spans:
         content_start = max(sentence_start, span.start_offset)
@@ -291,7 +424,16 @@ def _map_sentence_to_cues(
 def _pack_sentence_cues(
     pieces: list[TranscriptSegment],
 ) -> list[TranscriptSegment]:
-    """Merge sentence pieces into short clips without cutting through words."""
+    """
+    Merge sentence pieces into short clips without cutting through words.
+
+    Args:
+        pieces (list[TranscriptSegment]): The timed cue fragments belonging to a single
+            sentence.
+
+    Returns:
+        list[TranscriptSegment]: Short timed clips split only at whole-word boundaries.
+    """
     words = [word for piece in pieces for word in _split_piece_into_timed_words(piece)]
     if not words:
         return []
@@ -313,7 +455,16 @@ def _pack_sentence_cues(
 
 
 def _words_to_segment(words: list[TranscriptSegment]) -> TranscriptSegment:
-    """Build one subtitle segment from consecutive timed words."""
+    """
+    Build one subtitle segment from consecutive timed words.
+
+    Args:
+        words (list[TranscriptSegment]): The consecutive whole-word segments to combine.
+
+    Returns:
+        TranscriptSegment: A subtitle spanning the first word's start through the last
+            word's end.
+    """
     return TranscriptSegment(
         start_seconds=words[0].start_seconds,
         end_seconds=words[-1].end_seconds,
@@ -324,7 +475,16 @@ def _words_to_segment(words: list[TranscriptSegment]) -> TranscriptSegment:
 def _split_piece_into_timed_words(
     piece: TranscriptSegment,
 ) -> list[TranscriptSegment]:
-    """Split one cue piece at whitespace and approximate each whole word's timing."""
+    """
+    Split one cue piece at whitespace and approximate each whole word's timing.
+
+    Args:
+        piece (TranscriptSegment): The timed cue fragment to split into whole words.
+
+    Returns:
+        list[TranscriptSegment]: Whole-word segments with timestamps interpolated from
+            character positions.
+    """
     text = piece.content_en
     if not text:
         return []
@@ -341,7 +501,15 @@ def _split_piece_into_timed_words(
 
 
 def _join_timed_words(words: list[TranscriptSegment]) -> str:
-    """Join timed tokens without introducing spaces around standalone punctuation."""
+    """
+    Join timed tokens without introducing spaces around standalone punctuation.
+
+    Args:
+        words (list[TranscriptSegment]): The consecutive whole-word segments to combine.
+
+    Returns:
+        str: Combined word text with spacing corrected around standalone punctuation.
+    """
     text = " ".join(word.content_en for word in words)
     text = _SPACE_BEFORE_PUNCTUATION_RE.sub(r"\1", text)
     return _SPACE_AFTER_OPENING_PUNCTUATION_RE.sub(r"\1", text)
@@ -350,7 +518,17 @@ def _join_timed_words(words: list[TranscriptSegment]) -> str:
 def _segment_cue_group(
     cues: list[TranscriptSegment],
 ) -> list[TranscriptSegment]:
-    """Split one continuous speech group into timed English sentences."""
+    """
+    Split one continuous speech group into timed English sentences.
+
+    Args:
+        cues (list[TranscriptSegment]): The continuous transcript cues to group or
+            combine.
+
+    Returns:
+        list[TranscriptSegment]: Readable timed sentence clips for the continuous speech
+            group.
+    """
     text, spans = _join_cues_with_spans(cues)
     segments: list[TranscriptSegment] = []
 
@@ -367,7 +545,17 @@ def _segment_cue_group(
 
 
 def _group_transcript(raw_snippets: list[dict[str, Any]]) -> list[TranscriptSegment]:
-    """Convert raw YouTube caption cues into readable timed sentences."""
+    """
+    Convert raw YouTube caption cues into readable timed sentences.
+
+    Args:
+        raw_snippets (list[dict[str, Any]]): The raw YouTube caption dictionaries
+            containing text, start, and duration.
+
+    Returns:
+        list[TranscriptSegment]: Cleaned sentence clips with adjacent overlapping end
+            times trimmed.
+    """
     cues = _prepare_transcript_cues(raw_snippets)
     segments = [
         segment
@@ -378,7 +566,20 @@ def _group_transcript(raw_snippets: list[dict[str, Any]]) -> list[TranscriptSegm
 
 
 def _fetch_transcript(video_id: str) -> list[dict[str, Any]]:
-    """Fetch timestamped English caption chunks for a YouTube video."""
+    """
+    Fetch timestamped English caption chunks for a YouTube video.
+
+    Args:
+        video_id (str): The YouTube video identifier whose English captions are
+            requested.
+
+    Returns:
+        list[dict[str, Any]]: The video's raw English caption chunks with timing data.
+
+    Raises:
+        YouTubeTranscriptApiException: If the video's English captions cannot be
+            retrieved.
+    """
     transcript = YouTubeTranscriptApi().fetch(
         video_id,
         languages=["en", "en-US", "en-GB"],
@@ -387,7 +588,18 @@ def _fetch_transcript(video_id: str) -> list[dict[str, Any]]:
 
 
 async def _fetch_youtube_metadata(video_url: str) -> dict[str, Any]:
-    """Fetch YouTube video metadata using the oEmbed endpoint."""
+    """
+    Fetch YouTube video metadata using the oEmbed endpoint.
+
+    Args:
+        video_url (str): The YouTube video URL to load or validate.
+
+    Returns:
+        dict[str, Any]: The JSON metadata returned by YouTube's oEmbed endpoint.
+
+    Raises:
+        HTTPException: If the metadata request fails or returns invalid JSON.
+    """
     try:
         async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.get(
@@ -405,7 +617,21 @@ async def _fetch_youtube_metadata(video_url: str) -> dict[str, Any]:
 
 
 async def _fetch_youtube_transcript(video_id: str) -> list[dict[str, Any]]:
-    """Fetch the English transcript for a YouTube video in a thread to avoid blocking."""
+    """
+    Fetch the English transcript for a YouTube video in a thread to avoid blocking.
+
+    Args:
+        video_id (str): The YouTube video identifier whose English captions are
+            requested.
+
+    Returns:
+        list[dict[str, Any]]: The video's raw English caption chunks retrieved without
+            blocking the event loop.
+
+    Raises:
+        HTTPException: If English captions are missing or disabled, the video is
+            restricted, requests are blocked, or transcript retrieval fails.
+    """
     try:
         return await asyncio.to_thread(_fetch_transcript, video_id)
     except TranscriptsDisabled as error:
@@ -455,7 +681,22 @@ async def _fetch_youtube_transcript(video_id: str) -> list[dict[str, Any]]:
 
 
 def _parse_ai_translations(content: str, expected_count: int) -> list[str]:
-    """Parse the AI response and validate it as a JSON array of strings."""
+    """
+    Parse the AI response and validate it as a JSON array of strings.
+
+    Args:
+        content (str): The raw AI response to parse.
+        expected_count (int): The number of translations required to match the subtitle
+            batch.
+
+    Returns:
+        list[str]: Trimmed, nonempty Vietnamese translations matching the expected batch
+            size.
+
+    Raises:
+        ValueError: If the response is invalid JSON or does not contain the expected
+            number of nonempty strings.
+    """
     if "```" in content:
         content = content.split("```", 1)[1].split("```", 1)[0]
         content = content.removeprefix("json").strip()
@@ -477,7 +718,21 @@ def _parse_ai_translations(content: str, expected_count: int) -> list[str]:
 async def _translate_segments_to_vi(
     segments: list[TranscriptSegment],
 ) -> list[TranscriptSegment]:
-    """Translate a list of transcript segments to Vietnamese using AI."""
+    """
+    Translate a list of transcript segments to Vietnamese using AI.
+
+    Args:
+        segments (list[TranscriptSegment]): The timed transcript segments in source
+            order.
+
+    Returns:
+        list[TranscriptSegment]: Copies of the source segments with Vietnamese
+            translations added.
+
+    Raises:
+        HTTPException: If the AI service is unavailable or returns invalid translation
+            data.
+    """
     translated_segments: list[TranscriptSegment] = []
     for offset in range(0, len(segments), _TRANSLATION_BATCH_SIZE):
         batch = segments[offset : offset + _TRANSLATION_BATCH_SIZE]
@@ -512,7 +767,22 @@ async def load_youtube_lesson_source(
     video_url: str,
     translate_to_vi: bool,
 ) -> YouTubeLessonSource:
-    """Load a YouTube video and its transcript, optionally translating to Vietnamese."""
+    """
+    Load a YouTube video and its transcript, optionally translating to Vietnamese.
+
+    Args:
+        video_url (str): The YouTube video URL to load or validate.
+        translate_to_vi (bool): Whether the English transcript should also be translated
+            to Vietnamese.
+
+    Returns:
+        YouTubeLessonSource: The video metadata and readable transcript, optionally
+            including translations.
+
+    Raises:
+        HTTPException: If the URL is invalid, the video or transcript cannot be loaded,
+            the transcript has no usable sentences, or translation fails.
+    """
     try:
         video_id = _extract_youtube_video_id(video_url)
     except ValueError as error:

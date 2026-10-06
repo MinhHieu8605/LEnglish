@@ -1,5 +1,7 @@
 # Kiểm tra lại endpoint Parroto và đối chiếu LEnglish
 
+> Bảng này lưu snapshot trước đợt đổi URL. Endpoint LEnglish hiện tại và cách chuyển caller nằm trong [endpoint-renames.md](../endpoint-renames.md).
+
 Ngày: 06/10/2026. Đây là báo cáo khảo sát, chưa thay đổi API runtime hay database.
 
 ## Phạm vi và mức xác minh

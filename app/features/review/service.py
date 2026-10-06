@@ -59,7 +59,12 @@ _CLOZE_CACHE: TTLCache = TTLCache(maxsize=1000, ttl=1800)
 
 
 class ReviewService(object):
-    """Handle vocabulary review queues, attempts, and sessions."""
+    """
+    Handle vocabulary review queues, attempts, and sessions.
+
+    Builds review queues, checks answers, calculates schedules, and tracks review
+    sessions.
+    """
 
     @staticmethod
     async def get_review_summary(
@@ -137,7 +142,17 @@ class ReviewService(object):
 
     @staticmethod
     def _state(progress: Optional[ReviewProgress]) -> ReviewProgressState:
-        """Convert persisted progress into the pure SRS state model."""
+        """
+        Convert persisted progress into the pure SRS state model.
+
+        Args:
+            progress (Optional[ReviewProgress]): The user's existing review state, or
+                None for an unreviewed word.
+
+        Returns:
+            ReviewProgressState: The pure SRS state, using initial defaults when no
+                progress record exists.
+        """
         if not progress:
             return ReviewProgressState()
         return ReviewProgressState(
@@ -150,7 +165,19 @@ class ReviewService(object):
     def _review_options(
         progress: Optional[ReviewProgress], reviewed_at: datetime
     ) -> List[ReviewOptionResponse]:
-        """Build the review options for all supported ratings."""
+        """
+        Build the review options for all supported ratings.
+
+        Args:
+            progress (Optional[ReviewProgress]): The user's existing review state, or
+                None for an unreviewed word.
+            reviewed_at (datetime): The timestamp from which the next review interval is
+                calculated.
+
+        Returns:
+            List[ReviewOptionResponse]: A scheduling preview for every supported review
+                rating.
+        """
         return [
             ReviewOptionResponse(
                 rating=rating,
@@ -170,7 +197,8 @@ class ReviewService(object):
         vocabulary_id: int,
         session: AsyncSession,
     ) -> None:
-        """Ensure a vocabulary entry belongs to the requested active topic.
+        """
+        Ensure a vocabulary entry belongs to the requested active topic.
 
         Args:
             book_slug (str): URL slug of the vocabulary book.
@@ -207,7 +235,8 @@ class ReviewService(object):
         scope: ReviewScope,
         session: AsyncSession,
     ) -> tuple[VocabularyTopic, ReviewQueueResponse]:
-        """Load a review queue together with its vocabulary topic.
+        """
+        Load a review queue together with its vocabulary topic.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -294,7 +323,8 @@ class ReviewService(object):
         scope: ReviewScope,
         session: AsyncSession,
     ) -> ReviewQueueResponse:
-        """Return vocabulary items available for the requested review scope.
+        """
+        Return vocabulary items available for the requested review scope.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -326,7 +356,8 @@ class ReviewService(object):
         vocabulary_id: int,
         session: AsyncSession,
     ) -> tuple[Vocabulary, Optional[ReviewProgress]]:
-        """Load a vocabulary entry and its optional user-specific progress.
+        """
+        Load a vocabulary entry and its optional user-specific progress.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -367,7 +398,8 @@ class ReviewService(object):
         session_id: int,
         session: AsyncSession,
     ) -> ReviewSession:
-        """Load a user's review session with its topic and queued items.
+        """
+        Load a user's review session with its topic and queued items.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -402,7 +434,8 @@ class ReviewService(object):
         data: ReviewCheckRequest,
         session: AsyncSession,
     ) -> ReviewCheckResponse:
-        """Check a typing answer and return the available review options.
+        """
+        Check a typing answer and return the available review options.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -434,6 +467,18 @@ class ReviewService(object):
 
     @staticmethod
     def _prepare_cloze(raw: GeneratedCloze, target: str) -> Optional[GeneratedCloze]:
+        """
+        Replace a single whole-word target occurrence with a cloze blank.
+
+        Args:
+            raw (GeneratedCloze): The generated exercise before the target word is
+                replaced.
+            target (str): The whole word that must occur exactly once in the sentence.
+
+        Returns:
+            Optional[GeneratedCloze]: The cloze sentence, or None unless the target
+                occurs exactly once.
+        """
         pattern = re.compile(rf"(?<!\w){re.escape(target)}(?!\w)", re.IGNORECASE)
         if len(pattern.findall(raw.sentence)) != 1:
             return None
@@ -448,7 +493,8 @@ class ReviewService(object):
         attempt_id: str,
         session: AsyncSession,
     ) -> ReviewClozeResponse:
-        """Generate and cache a cloze exercise for a vocabulary entry.
+        """
+        Generate and cache a cloze exercise for a vocabulary entry.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -535,7 +581,8 @@ class ReviewService(object):
         data: ReviewWordRequest,
         session: AsyncSession,
     ) -> ReviewWordResponse:
-        """Apply one vocabulary review inside the caller's transaction.
+        """
+        Apply one vocabulary review inside the caller's transaction.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -643,7 +690,8 @@ class ReviewService(object):
         data: ReviewWordRequest,
         session: AsyncSession,
     ) -> ReviewWordResponse:
-        """Record a vocabulary review as a single database transaction.
+        """
+        Record a vocabulary review as a single database transaction.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -718,7 +766,8 @@ class ReviewService(object):
         data: ReviewSessionStartRequest,
         session: AsyncSession,
     ) -> ReviewSessionResponse:
-        """Create a fixed review queue from the current topic.
+        """
+        Create a fixed review queue from the current topic.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -779,7 +828,8 @@ class ReviewService(object):
         session_id: int,
         session: AsyncSession,
     ) -> ReviewSessionResponse:
-        """Return one review session owned by the current user.
+        """
+        Return one review session owned by the current user.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -807,7 +857,8 @@ class ReviewService(object):
         session_id: int,
         session: AsyncSession,
     ) -> ReviewSessionResponse:
-        """Mark a user's review session as completed.
+        """
+        Mark a user's review session as completed.
 
         Args:
             user_id (int): Identifier of the authenticated user.
@@ -840,7 +891,8 @@ class ReviewService(object):
         data: ReviewSessionAttemptRequest,
         session: AsyncSession,
     ) -> ReviewSessionResponse:
-        """Record an item attempt and update the session position.
+        """
+        Record an item attempt and update the session position.
 
         Args:
             user_id (int): Identifier of the authenticated user.

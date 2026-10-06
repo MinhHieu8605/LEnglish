@@ -19,7 +19,21 @@ async def get_active_topic(
     topic_slug: str,
     session: AsyncSession,
 ) -> VocabularyTopic:
-    """Load a topic only when it belongs to an active vocabulary book."""
+    """
+    Load a topic only when it belongs to an active vocabulary book.
+
+    Args:
+        book_slug (str): The URL slug identifying the active vocabulary book.
+        topic_slug (str): The URL slug identifying a topic within the selected book.
+        session (AsyncSession): The database session used for record operations.
+
+    Returns:
+        VocabularyTopic: The matching topic belonging to an active vocabulary book.
+
+    Raises:
+        HTTPException: If the topic does not belong to the selected active book or does
+            not exist.
+    """
     return await async_get_one_record_by(
         VocabularyTopic,
         [

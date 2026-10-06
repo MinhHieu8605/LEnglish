@@ -16,7 +16,16 @@ _HARD_DELAY = timedelta(hours=12)
 
 @dataclass(frozen=True)
 class ReviewProgressState:
-    """The SRS fields required to calculate a review schedule."""
+    """
+    The SRS fields required to calculate a review schedule.
+
+    Attributes:
+        repetition_count (int): The number of successful repetitions in the current
+            review state.
+        interval_days (int): The scheduled review interval in whole days.
+        ease_factor (float): The multiplier used to calculate future successful-review
+            intervals.
+    """
 
     repetition_count: int = 0
     interval_days: int = 0
@@ -25,7 +34,20 @@ class ReviewProgressState:
 
 @dataclass(frozen=True)
 class ReviewSchedule:
-    """The next SRS state for one rating."""
+    """
+    The next SRS state for one rating.
+
+    Attributes:
+        repetition_count (int): The number of successful repetitions in the current
+            review state.
+        interval_days (int): The scheduled review interval in whole days.
+        ease_factor (float): The multiplier used to calculate future successful-review
+            intervals.
+        next_review_at (datetime): The timestamp when the next review becomes due.
+        status (str): The current learning or session state.
+        _reviewed_at (datetime): The reference timestamp used to calculate sub-day
+            review intervals.
+    """
 
     repetition_count: int
     interval_days: int
@@ -36,7 +58,13 @@ class ReviewSchedule:
 
     @property
     def interval_seconds(self) -> int:
-        """Return the scheduled delay from the review timestamp in seconds."""
+        """
+        Return the scheduled delay from the review timestamp in seconds.
+
+        Returns:
+            int: The scheduled delay in seconds, including intervals shorter than one
+                day.
+        """
         if self.interval_days:
             return int(self.interval_days * 86400)
         return int((self.next_review_at - self._reviewed_at).total_seconds())
@@ -45,7 +73,19 @@ class ReviewSchedule:
 def _next_good_interval(
     repetition_count: int, current_interval: int, ease_factor: float
 ) -> int:
-    """Calculate the next interval for a successful review."""
+    """
+    Calculate the next interval for a successful review.
+
+    Args:
+        repetition_count (int): The updated successful-review count, starting at one.
+        current_interval (int): The previous successful-review interval in days.
+        ease_factor (float): The multiplier used to extend the successful-review
+            interval.
+
+    Returns:
+        int: The next successful-review interval in days, capped at the configured
+            maximum.
+    """
     if repetition_count <= len(_SRS_INTERVAL_STEPS):
         return _SRS_INTERVAL_STEPS[repetition_count - 1]
     interval = ceil(max(current_interval, _SRS_INTERVAL_STEPS[-1]) * ease_factor)
@@ -53,7 +93,15 @@ def _next_good_interval(
 
 
 def _status_for_interval(interval_days: int) -> str:
-    """Map an interval length to the corresponding vocabulary status."""
+    """
+    Map an interval length to the corresponding vocabulary status.
+
+    Args:
+        interval_days (int): The scheduled review interval in whole days.
+
+    Returns:
+        str: The learning, review, or mastered status corresponding to the interval.
+    """
     if interval_days >= _SRS_INTERVAL_STEPS[-1]:
         return WordStatus.MASTERED.value
     if interval_days >= 1:
@@ -66,7 +114,8 @@ def calculate_review_schedule(
     rating: ReviewRating,
     reviewed_at: datetime,
 ) -> ReviewSchedule:
-    """Calculate the next SRS schedule without truncating the review time.
+    """
+    Calculate the next SRS schedule without truncating the review time.
 
     Args:
         progress (ReviewProgressState): Current SRS state.
@@ -131,7 +180,8 @@ def calculate_review_schedule(
 def build_review_options(
     progress: ReviewProgressState, reviewed_at: datetime
 ) -> Dict[ReviewRating, ReviewSchedule]:
-    """Calculate the schedule for every supported review rating.
+    """
+    Calculate the schedule for every supported review rating.
 
     Args:
         progress (ReviewProgressState): Current SRS state.
@@ -151,7 +201,19 @@ def classify_progress(
     next_review_at: datetime | None,
     now: datetime,
 ) -> str:
-    """Classify persisted progress for review-queue filtering and ordering."""
+    """
+    Classify persisted progress for review-queue filtering and ordering.
+
+    Args:
+        status (str | None): The persisted vocabulary learning status, if available.
+        next_review_at (datetime | None): The scheduled next review timestamp, if
+            available.
+        now (datetime): The current timestamp used to exclude future activity or
+            classify review progress.
+
+    Returns:
+        str: One of new, ignored, due, overdue, or future for queue filtering.
+    """
     if not status or status == WordStatus.NEW.value:
         return "new"
     if status == WordStatus.IGNORED.value:

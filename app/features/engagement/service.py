@@ -26,7 +26,17 @@ from app.features.preferences.service import UserPreferencesService
 
 
 def _streaks(active_dates: list[date], today: date) -> tuple[int, int]:
-    """Calculate the current and longest learning streak."""
+    """
+    Calculate the current and longest learning streak.
+
+    Args:
+        active_dates (list[date]): The local dates with positive study activity.
+        today (date): The local calendar date used to determine the current streak.
+
+    Returns:
+        tuple[int, int]: The current streak and the longest streak, measured in
+            consecutive days.
+    """
     current = 0
     longest = 0
     run = 0
@@ -54,7 +64,21 @@ async def _get_daily_activity(
     now: datetime,
     session: AsyncSession,
 ) -> dict[date, tuple[int, int]]:
-    """Load daily listening and vocabulary totals for one user."""
+    """
+    Load daily listening and vocabulary totals for one user.
+
+    Args:
+        user_id (int): The identifier of the user whose records are requested.
+        user_timezone (str): The IANA timezone used to group activity into local
+            calendar days.
+        now (datetime): The current timestamp used to exclude future activity or
+            classify review progress.
+        session (AsyncSession): The database session used for record operations.
+
+    Returns:
+        dict[date, tuple[int, int]]: Local dates mapped to listening and vocabulary
+            totals in seconds.
+    """
     local_date = func.date(
         func.timezone(user_timezone, ActivityEvent.created_time),
         type_=Date,
@@ -92,7 +116,12 @@ async def _get_daily_activity(
 
 
 class EngagementService(object):
-    """Record active-time batches and aggregate them in the user's timezone."""
+    """
+    Record active-time batches and aggregate them in the user's timezone.
+
+    Stores study batches, summarizes learning goals and streaks, and builds complete
+    activity histories.
+    """
 
     @staticmethod
     @transactional()

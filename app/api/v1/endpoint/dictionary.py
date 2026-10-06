@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database.async_db import get_session
@@ -9,12 +9,12 @@ router = APIRouter()
 
 
 @router.get(
-    "/lookup",
+    "/word/{word}",
     response_model=DictionaryLookupResponse,
     summary="Look up a word in the dictionary",
 )
 async def lookup(
-    word: str = Query(..., min_length=1, max_length=100),
+    word: str = Path(..., min_length=1, max_length=100),
     session: AsyncSession = Depends(get_session),
 ):
     """

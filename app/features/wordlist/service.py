@@ -188,7 +188,12 @@ def _build_saved_word_review_response(
 
 
 class WordListService(object):
-    """Manage words explicitly saved by a user and their review schedule."""
+    """
+    Manage words explicitly saved by a user and their review schedule.
+
+    Creates personal collections, saves dictionary words, and exposes saved-word review
+    queues.
+    """
 
     @staticmethod
     @transactional()
@@ -197,7 +202,22 @@ class WordListService(object):
         data: CreateWordListRequest,
         session: AsyncSession,
     ) -> WordListResponse:
-        """Create an empty personal word list."""
+        """
+        Create an empty personal word list.
+
+        Args:
+            user_id (int): The identifier of the user whose records are requested.
+            data (CreateWordListRequest): The name and optional description of the new
+                personal word list.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            WordListResponse: The created word list with an initial saved-word count of
+                zero.
+
+        Raises:
+            HTTPException: If the user already has a word list with the same name.
+        """
         duplicate = await async_get_one_record_by(
             WordList,
             [WordList.user_id == user_id, WordList.name == data.name],
@@ -232,7 +252,17 @@ class WordListService(object):
         user_id: int,
         session: AsyncSession,
     ) -> List[WordListResponse]:
-        """List a user's word lists with their saved-word counts."""
+        """
+        List a user's word lists with their saved-word counts.
+
+        Args:
+            user_id (int): The identifier of the user whose records are requested.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            List[WordListResponse]: The user's word lists and saved-word counts, ordered
+                newest first.
+        """
         word_count = (
             select(func.count(WordListItem.id))
             .where(WordListItem.word_list_id == WordList.id)

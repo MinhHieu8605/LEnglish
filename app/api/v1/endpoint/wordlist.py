@@ -6,14 +6,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.database.async_db import get_session
 from app.features.wordlist.schemas import (
     CreateWordListRequest,
-    ReviewSavedWordRequest,
     SavedWordFilter,
     SavedWordListMeta,
     SavedWordListResponse,
     SavedWordResponse,
-    SavedWordReviewResponse,
-    SavedWordsDueFilter,
-    SavedWordsDueResponse,
     SaveWordRequest,
     WordListResponse,
 )
@@ -107,73 +103,6 @@ async def list_saved_words(
         user_id, word_list_id, filters, session
     )
     return SavedWordListResponse(
-        data=items,
-        metadata=SavedWordListMeta(
-            total=total,
-            page=filters.page,
-            page_size=filters.page_size,
-            pages=pages,
-        ),
-    )
-
-
-@router.post(
-    "/{word_list_id}/words/{vocabulary_id}/review",
-    response_model=SavedWordReviewResponse,
-    summary="Review a word saved in a word list",
-)
-async def record_review(
-    request: Request,
-    word_list_id: int,
-    vocabulary_id: int,
-    data: ReviewSavedWordRequest,
-    session: AsyncSession = Depends(get_session),
-):
-    """Submit an SRS rating for a saved word.
-
-    Args:
-        request (Request): Authenticated HTTP request.
-        word_list_id (int): Identifier of the selected word list.
-        vocabulary_id (int): Identifier of the reviewed vocabulary entry.
-        data (ReviewSavedWordRequest): Selected SRS rating.
-        session (AsyncSession): Active database session.
-
-    Returns:
-        SavedWordReviewResponse: Saved word with updated SRS progress.
-    """
-    user_id = get_user_id_from_request(request)
-    return await WordListService.record_review(
-        user_id, word_list_id, vocabulary_id, data.rating, session, data.attempt_id
-    )
-
-
-@router.get(
-    "/{word_list_id}/review/due",
-    response_model=SavedWordsDueResponse,
-    summary="Get saved words due for review",
-)
-async def list_due_words(
-    request: Request,
-    word_list_id: int,
-    filters: SavedWordsDueFilter = Depends(),
-    session: AsyncSession = Depends(get_session),
-):
-    """Get words currently due in a selected word list.
-
-    Args:
-        request (Request): Authenticated HTTP request.
-        word_list_id (int): Identifier of the selected word list.
-        filters (SavedWordsDueFilter): Pagination parameters.
-        session (AsyncSession): Active database session.
-
-    Returns:
-        SavedWordsDueResponse: Due words and their total count.
-    """
-    user_id = get_user_id_from_request(request)
-    items, total, pages = await WordListService.list_due_words(
-        user_id, word_list_id, filters, session
-    )
-    return SavedWordsDueResponse(
         data=items,
         metadata=SavedWordListMeta(
             total=total,

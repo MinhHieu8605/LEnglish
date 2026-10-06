@@ -49,6 +49,15 @@ from app.utils.constants import ContentStatus, LessonSessionStatus, SortOrder
 
 
 def _slugify(value: str) -> str:
+    """
+    Convert text to a lowercase ASCII slug with hyphen-separated words.
+
+    Args:
+        value (str): The text to convert to a URL slug.
+
+    Returns:
+        str: The URL-safe slug with no leading or trailing hyphens.
+    """
     normalized = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", normalized.lower())).strip("-")
 
@@ -57,7 +66,18 @@ def _build_lesson_detail_response(
     lesson: Lesson,
     subtitles: list[Subtitle],
 ) -> LessonDetailResponse:
-    """Build lesson details with every subtitle in timeline order."""
+    """
+    Build lesson details with every subtitle in timeline order.
+
+    Args:
+        lesson (Lesson): The lesson record used to build the response.
+        subtitles (list[Subtitle]): The lesson's subtitle records to order by sequence
+            and start time.
+
+    Returns:
+        LessonDetailResponse: The lesson details with every subtitle in transcript
+            order.
+    """
     ordered_subtitles = sorted(
         subtitles, key=lambda item: (item.sequence, item.start_ms)
     )
@@ -93,6 +113,17 @@ def _build_lesson_summary_response(
     subtitle_count: int,
     topic: Optional[str] = None,
 ) -> LessonSummaryResponse:
+    """
+    Build a lesson catalog card with its subtitle count and optional topic.
+
+    Args:
+        lesson (Lesson): The associated lesson.
+        subtitle_count (int): The number of subtitles associated with the lesson.
+        topic (Optional[str]): The optional category name displayed on the lesson card.
+
+    Returns:
+        LessonSummaryResponse: The lesson's catalog summary.
+    """
     return LessonSummaryResponse(
         id=lesson.id,
         title=lesson.title,
@@ -110,10 +141,28 @@ def _build_lesson_summary_response(
 
 
 class LessonService(object):
-    """Import and read video lessons with complete timed transcripts."""
+    """
+    Import and read video lessons with complete timed transcripts.
+
+    Imports YouTube sources, tracks playback progress, and manages lesson sessions and
+    subtitle answers.
+    """
 
     @staticmethod
     async def _get_published_lesson(lesson_slug: str, session: AsyncSession) -> Lesson:
+        """
+        Look up a published lesson by its slug.
+
+        Args:
+            lesson_slug (str): The URL slug identifying the lesson.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            Lesson: The matching published lesson.
+
+        Raises:
+            HTTPException: If no published lesson matches the slug.
+        """
         return await async_get_one_record_by(
             Lesson,
             [
@@ -129,6 +178,22 @@ class LessonService(object):
     async def _get_user_session(
         user_id: int, lesson_id: int, session_id: int, session: AsyncSession
     ) -> LessonSession:
+        """
+        Look up a lesson session belonging to the specified user and lesson.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            lesson_id (int): The identifier of the associated lesson.
+            session_id (int): The identifier of the lesson practice session.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonSession: The matching practice session.
+
+        Raises:
+            HTTPException: If the session does not belong to the user and lesson or does
+                not exist.
+        """
         return await async_get_one_record_by(
             LessonSession,
             [
@@ -146,6 +211,19 @@ class LessonService(object):
         lesson_slug: str,
         session: AsyncSession,
     ) -> LessonDetailResponse:
+        """
+        Retrieve a published lesson and build its ordered transcript response.
+
+        Args:
+            lesson_slug (str): The URL slug identifying the lesson.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonDetailResponse: Lesson metadata and ordered subtitles.
+
+        Raises:
+            HTTPException: If no published lesson matches the slug.
+        """
         lesson = await LessonService._get_published_lesson(lesson_slug, session)
         subtitles = await async_get_many_records_by(
             Subtitle,
@@ -161,6 +239,19 @@ class LessonService(object):
         progress: Optional[LessonProgress],
         session: AsyncSession,
     ) -> LessonProgressResponse:
+        """
+        Build saved or default progress and find the next eligible subtitle.
+
+        Args:
+            lesson (Lesson): The associated lesson.
+            progress (Optional[LessonProgress]): The user's saved playback progress, if
+                available.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonProgressResponse: Progress enriched with subtitle count and current
+                subtitle.
+        """
         response = (
             LessonProgressResponse.model_validate(progress)
             if progress
@@ -203,6 +294,17 @@ class LessonService(object):
     async def get_resume(
         user_id: int, session: AsyncSession
     ) -> Optional[LessonResumeResponse]:
+        """
+        Find the user's latest unfinished progress for a published lesson.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            Optional[LessonResumeResponse]: Lesson and progress details, or None if no
+                eligible record exists.
+        """
         latest_progress_id = (
             select(LessonProgress.id)
             .where(
@@ -240,6 +342,20 @@ class LessonService(object):
         lesson_slug: str, 
         session: AsyncSession
     ) -> LessonProgressResponse:
+        """
+        Retrieve a user's progress or defaults without creating a progress record.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            lesson_slug (str): The URL slug identifying the lesson.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonProgressResponse: Saved or default progress and subtitle context.
+
+        Raises:
+            HTTPException: If no published lesson matches the slug.
+        """
         lesson = await cls._get_published_lesson(lesson_slug, session)
         progress = await async_get_one_record_by(
             LessonProgress,
@@ -258,6 +374,22 @@ class LessonService(object):
         data: LessonProgressRequest,
         session: AsyncSession,
     ) -> LessonProgressResponse:
+        """
+        Persist playback position, completion percentage, and viewing timestamps.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            lesson_slug (str): The URL slug identifying the lesson.
+            data (LessonProgressRequest): The playback position to persist.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonProgressResponse: The saved progress with subtitle context.
+
+        Raises:
+            HTTPException: If the published lesson is missing or the position exceeds
+                its duration.
+        """
         lesson = await cls._get_published_lesson(lesson_slug, session)
         if (
             lesson.duration_seconds
@@ -307,6 +439,21 @@ class LessonService(object):
         data: LessonSessionRequest,
         session: AsyncSession,
     ) -> LessonSessionResponse:
+        """
+        Create a practice session with its mode and total subtitle count.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            lesson_slug (str): The URL slug identifying the lesson.
+            data (LessonSessionRequest): The practice mode for the new lesson session.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonSessionResponse: The newly created lesson session.
+
+        Raises:
+            HTTPException: If no published lesson matches the slug.
+        """
         lesson = await cls._get_published_lesson(lesson_slug, session)
         total_count = (
             await session.exec(
@@ -337,6 +484,24 @@ class LessonService(object):
         data: LessonAnswerRequest,
         session: AsyncSession,
     ) -> LessonAnswerResponse:
+        """
+        Grade a subtitle answer, count attempts, and update the session's scores.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            lesson_slug (str): The URL slug identifying the lesson.
+            session_id (int): The identifier of the lesson practice session.
+            data (LessonAnswerRequest): The subtitle identifier and submitted answer
+                text.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonAnswerResponse: The saved answer and grading details.
+
+        Raises:
+            HTTPException: If the lesson, owned session, or subtitle is missing, or the
+                session is inactive.
+        """
         lesson = await cls._get_published_lesson(lesson_slug, session)
         lesson_session = await cls._get_user_session(
             user_id, lesson.id, session_id, session
@@ -403,6 +568,22 @@ class LessonService(object):
         session_id: int,
         session: AsyncSession,
     ) -> LessonSessionResponse:
+        """
+        Mark an owned lesson session complete and record its elapsed duration.
+
+        Args:
+            user_id (int): The identifier of the user who owns the record.
+            lesson_slug (str): The URL slug identifying the lesson.
+            session_id (int): The identifier of the lesson practice session.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonSessionResponse: The completed session; repeated completion preserves
+                its timestamps.
+
+        Raises:
+            HTTPException: If the published lesson or the user's session is not found.
+        """
         lesson = await cls._get_published_lesson(lesson_slug, session)
         lesson_session = await cls._get_user_session(
             user_id, lesson.id, session_id, session
@@ -421,7 +602,17 @@ class LessonService(object):
 
     @staticmethod
     def _build_where_clause(filters: LessonPaginationFilter) -> list:
-        """Build lesson search conditions for both listing and counting."""
+        """
+        Build lesson search conditions for both listing and counting.
+
+        Args:
+            filters (LessonPaginationFilter): The lesson catalog's search, sorting, and
+                pagination criteria.
+
+        Returns:
+            list: SQL conditions restricting results to published lessons and the search
+                keyword.
+        """
         where_clause = [Lesson.status == ContentStatus.PUBLISHED.value]
         if filters.keyword:
             where_clause.append(
@@ -493,7 +684,23 @@ class LessonService(object):
         data: YouTubeLessonImportRequest,
         session: AsyncSession,
     ) -> LessonDetailResponse:
-        """Import one YouTube video and persist its complete English transcript."""
+        """
+        Import one YouTube video and persist its complete English transcript.
+
+        Args:
+            user_id (int): The identifier of the user whose records are requested.
+            data (YouTubeLessonImportRequest): The video URL, lesson metadata, and
+                translation settings.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            LessonDetailResponse: The imported lesson and its complete timed transcript.
+
+        Raises:
+            HTTPException: If the source video or transcript is unavailable, translation
+                fails, the category is missing, the title is blank, or the imported
+                lesson conflicts with an existing record.
+        """
         source = await load_youtube_lesson_source(
             data.video_url,
             data.translate_to_vi,
@@ -594,7 +801,16 @@ class LessonService(object):
         lesson_slug: str,
         session: AsyncSession,
     ) -> None:
-        """Delete an imported lesson and its dependent records."""
+        """
+        Delete an imported lesson and its dependent records.
+
+        Args:
+            lesson_slug (str): The URL slug identifying the lesson to delete.
+            session (AsyncSession): The database session used for record operations.
+
+        Raises:
+            HTTPException: If no lesson matches the supplied slug.
+        """
         await async_delete_one_record_by(
             Lesson,
             session,

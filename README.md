@@ -73,6 +73,10 @@ Backend API cho ứng dụng LearnEnglish. Dự án cung cấp các API cho xác
 - Swagger UI: `http://localhost:8000/api/v1/docs`
 - OpenAPI JSON: `http://localhost:8000/api/v1/openapi.json`
 
+## Endpoint đã đổi
+
+Đã chuyển API nộp câu sang `/api/v1/sentences/submit`, hoàn thành session sang `/api/v1/lessons/complete`, import YouTube sang `/api/v1/lessons/from-youtube`, rút gọn nhóm `/review` và đổi từ điển sang `/api/v1/dictionary/word/{word}`. Các route cũ đã được gỡ; ID và slug chuyển vào body/query theo [bảng chuyển đổi, request mẫu và danh sách endpoint hiện tại](docs/endpoint-renames.md).
+
 ## API danh sách bài học
 
 `GET /api/v1/lessons` yêu cầu access token qua `Authorization: Bearer <token>`.

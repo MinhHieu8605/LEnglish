@@ -41,6 +41,14 @@ from app.utils.constants import Message, Role, UserStatus
 async def _build_user_response(user: User, session: AsyncSession) -> UserResponse:
     """
     Build a UserResponse object from a User model instance.
+
+    Args:
+        user (User): The user account for which the response is prepared.
+        session (AsyncSession): The database session used for record operations.
+
+    Returns:
+        UserResponse: The user account fields with the assigned role or the default user
+            role.
     """
     # Query UserRole to get the user's role
     user_role = await async_get_one_record_by(
@@ -70,6 +78,14 @@ async def _build_user_response(user: User, session: AsyncSession) -> UserRespons
 
 
 async def _sync_user_role(user: User, role_value: str, session: AsyncSession) -> None:
+    """
+    Create or update the role record associated with the user's email.
+
+    Args:
+        user (User): The user account associated with the record.
+        role_value (str): The role name to assign to the user's role record.
+        session (AsyncSession): The database session used for record operations.
+    """
     existing = await async_get_one_record_by(
         UserRole,
         [UserRole.email == user.email],
@@ -108,6 +124,13 @@ def _active_user_threshold() -> datetime:
 
 
 class UserService(object):
+    """
+    Handles user authentication, account management, roles, and request activity.
+
+    Coordinates account registration, credential and Google login, role assignments, and
+    management queries.
+    """
+
     @classmethod
     @transactional()
     async def create_new_user_info(
@@ -182,6 +205,19 @@ class UserService(object):
     ) -> List[UserResponse]:
         """
         Create one or more users accounts with the specified details.
+
+        Args:
+            data (UserCreate): The email addresses, full names, password, and role for
+                the new accounts.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            List[UserResponse]: The newly created user accounts with their assigned
+                roles.
+
+        Raises:
+            HTTPException: If the email and name counts differ or any requested email
+                already exists.
         """
 
         # Validate the number of emails / full names
@@ -239,6 +275,17 @@ class UserService(object):
     async def _handle_credentials_login(user_in: Login, session: AsyncSession) -> User:
         """
         Process email and password login credentials.
+
+        Args:
+            user_in (Login): The email and password credentials submitted for login.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            User: The active user whose email and password have been verified.
+
+        Raises:
+            HTTPException: If the active user is missing or the supplied password is
+                invalid.
         """
         user: User = await async_get_one_record_by(
             User,
@@ -399,7 +446,16 @@ class UserService(object):
 
     @staticmethod
     async def _prepare_login_response(user, session: AsyncSession):
-        """Prepare login response with token."""
+        """
+        Prepare login response with token.
+
+        Args:
+            user (User): The user account for which the response is prepared.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            dict: The profile fields, assigned role, access token, and refresh token.
+        """
         access_token, refresh_token, role = await generate_tokens(
             session=session, uid=user.id, email=user.email
         )

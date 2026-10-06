@@ -66,6 +66,9 @@ r2_service = R2StorageService()
 class FeedbackService(object):
     """
     FeedbackService class is responsible for handling feedback-related operations.
+
+    Validates and stores attachments, manages feedback records, and supports
+    administrator responses.
     """
 
     @staticmethod
@@ -177,7 +180,16 @@ class FeedbackService(object):
 
     @classmethod
     def check_file_size(cls, upload_files: List[UploadFile]) -> None:
-        """Validate feedback attachment sizes by file extension."""
+        """
+        Validate feedback attachment sizes by file extension.
+
+        Args:
+            upload_files (List[UploadFile]): The feedback files whose sizes must be
+                checked.
+
+        Raises:
+            HTTPException: If an attachment exceeds its extension-specific size limit.
+        """
         file_size_limits = {
             FileType.PNG: FileSizeLimit.SIZE_5MB,
             FileType.JPG: FileSizeLimit.SIZE_5MB,
@@ -218,7 +230,24 @@ class FeedbackService(object):
         attachment_type: FeedbackAttachmentType,
         request: Request,
     ) -> FeedbackAttachmentUploadResponse:
-        """Save a feedback file locally and return its relative path."""
+        """
+        Save a feedback file locally and return its relative path.
+
+        Args:
+            upload_file (UploadFile): The feedback attachment uploaded by the user.
+            attachment_type (FeedbackAttachmentType): Whether the file belongs to user
+                feedback or an administrator response.
+            request (Request): The HTTP request containing the authenticated user's
+                state.
+
+        Returns:
+            FeedbackAttachmentUploadResponse: The original filename and relative path of
+                the saved attachment.
+
+        Raises:
+            HTTPException: If the file is missing, its type or size is invalid, or a
+                non-administrator uploads a response attachment.
+        """
         if not upload_file or not upload_file.filename:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -251,7 +280,22 @@ class FeedbackService(object):
 
     @classmethod
     def _validate_feedback_file_path(cls, file_path: str) -> str:
-        """Validate and resolve a path previously returned by local upload."""
+        """
+        Validate and resolve a path previously returned by local upload.
+
+        Args:
+            file_path (str): The relative path returned by the local feedback upload.
+
+        Returns:
+            str: The absolute path of an existing file inside the local upload
+                directory.
+
+        Raises:
+            HTTPException: If the path leaves the local upload directory or does not
+                name an existing file.
+            ValueError: If the resolved path and upload directory are on different
+                drives.
+        """
         base_path = os.path.abspath("local_files")
         resolved_path = os.path.abspath(os.path.join("local_files", file_path))
 
@@ -272,7 +316,25 @@ class FeedbackService(object):
         attachment_type: FeedbackAttachmentType,
         session: AsyncSession,
     ) -> tuple[list[str], list[str]]:
-        """Upload local feedback files, persist metadata, and return email paths."""
+        """
+        Upload local feedback files, persist metadata, and return email paths.
+
+        Args:
+            feedback_id (int): The identifier of the feedback to associate with the
+                attachments.
+            file_paths (list[str]): The relative paths of feedback attachments
+                previously uploaded locally.
+            attachment_type (FeedbackAttachmentType): Whether the file belongs to user
+                feedback or an administrator response.
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            tuple[list[str], list[str]]: The attachment storage URIs and local paths
+                available for email attachments.
+
+        Raises:
+            HTTPException: If the feedback is missing or an attachment path is invalid.
+        """
 
         feedback = await async_get_one_record_by_id(Feedback, feedback_id, session)
 

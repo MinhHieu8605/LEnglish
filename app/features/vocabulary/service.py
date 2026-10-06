@@ -27,7 +27,21 @@ def _build_topic_response(
     learning_count: int,
     new_count: int,
 ) -> VocabularyTopicResponse:
-    """Build a topic response with the user's aggregated progress."""
+    """
+    Build a topic response with the user's aggregated progress.
+
+    Args:
+        topic (VocabularyTopic): The vocabulary topic to include in the response.
+        word_count (int): The total number of words in the topic.
+        mastered_count (int): The number of topic words mastered by the user.
+        learning_count (int): The number of topic words currently being learned by the
+            user.
+        new_count (int): The number of topic words not yet reviewed by the user.
+
+    Returns:
+        VocabularyTopicResponse: The topic details with aggregated counts for the user's
+            learning states.
+    """
     return VocabularyTopicResponse(
         id=topic.id,
         book_id=topic.book_id,
@@ -46,7 +60,20 @@ def _build_topic_word_response(
     order_num: int,
     progress: Optional[ReviewProgress] = None,
 ) -> TopicWordResponse:
-    """Build a curated-topic word with optional user progress."""
+    """
+    Build a curated-topic word with optional user progress.
+
+    Args:
+        vocab (Vocabulary): The vocabulary record to combine with user-specific
+            progress.
+        order_num (int): The word's ordering position within its topic.
+        progress (Optional[ReviewProgress]): The user's existing review state, or None
+            for an unreviewed word.
+
+    Returns:
+        TopicWordResponse: The topic word enriched with saved review progress or initial
+            defaults.
+    """
     return TopicWordResponse(
         id=vocab.id,
         word=vocab.word,
@@ -66,11 +93,25 @@ def _build_topic_word_response(
 
 
 class VocabularyService(object):
-    """Read curated vocabulary collections and user progress within them."""
+    """
+    Read curated vocabulary collections and user progress within them.
+
+    Loads active books, topic summaries, and topic words with the current user's review
+    state.
+    """
 
     @staticmethod
     async def list_books(session: AsyncSession) -> List[VocabularyBook]:
-        """Fetch all active vocabulary books sorted by creation date."""
+        """
+        Fetch all active vocabulary books sorted by creation date.
+
+        Args:
+            session (AsyncSession): The database session used for record operations.
+
+        Returns:
+            List[VocabularyBook]: The active vocabulary books ordered from oldest to
+                newest creation time.
+        """
         return await async_get_many_records_by(
             VocabularyBook,
             [VocabularyBook.deleted.is_(False)],

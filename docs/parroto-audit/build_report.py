@@ -3,6 +3,7 @@ import ast
 import csv
 import json
 import re
+import sys
 from collections import Counter
 from pathlib import Path
 
@@ -279,13 +280,17 @@ for module, prefix in prefixes.items():
                 if isinstance(deco, ast.Call) and isinstance(deco.func, ast.Attribute) and deco.func.attr in ['get', 'post', 'put', 'patch', 'delete'] and deco.args and isinstance(deco.args[0], ast.Constant):
                     actual.add(deco.func.attr.upper() + ' ' + prefix + deco.args[0].value)
 expected = {r['current'] for r in comparisons}
-assert actual == expected, {'missing': sorted(actual - expected), 'extra': sorted(expected - actual)}
+if '--verify-workspace' in sys.argv:
+    # Opt-in: this comparison records the pre-rename audit snapshot.
+    assert actual == expected, {'missing': sorted(actual - expected), 'extra': sorted(expected - actual)}
 assert len(comparisons) == 35
 
 def safe(s):
     return s.replace('|', '\\|').replace('\n', ' ')
 
 head = f'''# Kiểm tra lại endpoint Parroto và đối chiếu LEnglish
+
+> Bảng này lưu snapshot trước đợt đổi URL. Endpoint LEnglish hiện tại và cách chuyển caller nằm trong [endpoint-renames.md](../endpoint-renames.md).
 
 Ngày: 06/10/2026. Đây là báo cáo khảo sát, chưa thay đổi API runtime hay database.
 
